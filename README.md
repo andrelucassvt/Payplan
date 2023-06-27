@@ -20,4 +20,4 @@ Atualizações da Política de Privacidade:
 Podemos atualizar esta Política de Privacidade periodicamente. Quaisquer alterações serão publicadas no aplicativo, e a versão atualizada da política será indicada com uma nova data de revisão. Recomendamos que você reveja esta política regularmente para se manter informado sobre nossas práticas de privacidade.
 
 Contato:
-Se você tiver alguma dúvida ou preocupação sobre nossa política de privacidade ou o uso de suas informações pessoais, entre em contato conosco através do seguinte endereço de e-mail: [inserir endereço de e-mail de contato].
+Se você tiver alguma dúvida ou preocupação sobre nossa política de privacidade ou o uso de suas informações pessoais, entre em contato conosco através do seguinte endereço de e-mail: andrelucassvt99@gmail.com
