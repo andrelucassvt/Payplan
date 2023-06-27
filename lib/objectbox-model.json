@@ -1,0 +1,57 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:6510738784732589809",
+      "lastPropertyId": "6:6460311152393685434",
+      "name": "CartaoEntity",
+      "properties": [
+        {
+          "id": "1:5917627309512211503",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2482797222423868217",
+          "name": "nome",
+          "type": 9
+        },
+        {
+          "id": "3:5306279123584429853",
+          "name": "ano",
+          "type": 9
+        },
+        {
+          "id": "4:2779226252828508486",
+          "name": "mes",
+          "type": 9
+        },
+        {
+          "id": "5:3493934381306079326",
+          "name": "valorFatura",
+          "type": 8
+        },
+        {
+          "id": "6:6460311152393685434",
+          "name": "cor",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:6510738784732589809",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
