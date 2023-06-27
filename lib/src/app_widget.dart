@@ -11,6 +11,7 @@ class AppWidget extends StatelessWidget {
     return MaterialApp(
       navigatorKey: NavigationService.navigatorKey,
       title: AppStrings.nameApp,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
