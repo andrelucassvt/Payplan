@@ -51,6 +51,9 @@ class _HomeViewState extends State<HomeView> {
         },
         onAdFailedToLoad: (ad, err) {
           debugPrint('BannerAd failed to load: $err');
+          setState(() {
+            _isLoaded = false;
+          });
           ad.dispose();
         },
       ),
@@ -106,179 +109,189 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
       body: SafeArea(
-        child: BlocConsumer<HomeCubit, HomeState>(
-          bloc: _cubit,
-          listener: (context, state) {},
-          builder: (context, state) {
-            if (state is HomeLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (state is HomeSucess) {
-              final meses = state.meses;
-              final indexMesSelecionado = meses.indexWhere(
-                  (element) => element == state.mesSelecionado.first);
-              _goToElement(indexMesSelecionado);
-              return Column(
-                children: [
-                  SizedBox(
-                    height: 90,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: meses.length,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            _cubit.mudarMesSelecionado(meses[index]);
-                          },
-                          child: Container(
-                            key: GlobalObjectKey(meses[index]),
-                            width: 100,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 15,
-                            ),
-                            decoration: BoxDecoration(
-                              color: state.mesSelecionado.contains(meses[index])
-                                  ? Colors.lightBlue.withOpacity(.5)
-                                  : Colors.green.withOpacity(.5),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${meses[index]}/${state.anoAtual.substring(state.anoAtual.length - 2)}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+        child: Column(
+          children: [
+            if (_isLoaded)
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 5,
+                  bottom: 5,
+                ),
+                child: SizedBox(
+                  height: 50, // Altura do banner do AdMob
+                  child: AdWidget(ad: _bannerAd),
+                ),
+              ),
+            Expanded(
+              child: BlocConsumer<HomeCubit, HomeState>(
+                bloc: _cubit,
+                listener: (context, state) {},
+                builder: (context, state) {
+                  if (state is HomeLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (state is HomeSucess) {
+                    final meses = state.meses;
+                    final indexMesSelecionado = meses.indexWhere(
+                        (element) => element == state.mesSelecionado.first);
+                    _goToElement(indexMesSelecionado);
+                    return Column(
+                      children: [
+                        SizedBox(
+                          height: 90,
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: meses.length,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  _cubit.mudarMesSelecionado(meses[index]);
+                                },
+                                child: Container(
+                                  key: GlobalObjectKey(meses[index]),
+                                  width: 100,
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 15,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: state.mesSelecionado
+                                            .contains(meses[index])
+                                        ? Colors.lightBlue.withOpacity(.5)
+                                        : Colors.green.withOpacity(.5),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${meses[index]}/${state.anoAtual.substring(state.anoAtual.length - 2)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        if (state.cartoes.isEmpty) ...[
+                          const Spacer(),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () async {
+                                _appCoordinator
+                                    .navegarNovoCartaoView()
+                                    .then((value) {
+                                  _cubit.inicializar();
+                                });
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                ),
+                                child: Text(
+                                  AppStrings.voceAindaNaoTemCartoesAdicionados,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.lightBlue,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  if (state.cartoes.isEmpty) ...[
-                    const Spacer(),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () async {
-                          _appCoordinator.navegarNovoCartaoView().then((value) {
-                            _cubit.inicializar();
-                          });
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 15,
+                          const Spacer(),
+                        ],
+                        if (state.cartoes.isNotEmpty) ...[
+                          TextButton.icon(
+                            onPressed: () {
+                              _appCoordinator
+                                  .navegarNovoCartaoView(
+                                isDivida: true,
+                              )
+                                  .then((value) {
+                                _cubit.inicializar();
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text(AppStrings.addDividaExterna),
                           ),
-                          child: Text(
-                            AppStrings.voceAindaNaoTemCartoesAdicionados,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.lightBlue,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: RefreshIndicator(
+                              onRefresh: () => _cubit.inicializar(),
+                              child: ListView.builder(
+                                itemCount: state.cartoes.length,
+                                itemBuilder: (context, index) {
+                                  final cartao = state.cartoes[index];
+                                  final valorFaturaCartao = cartao.dividas
+                                      .where(
+                                        (element) =>
+                                            element.mes ==
+                                            state.mesSelecionado.first,
+                                      )
+                                      .toList();
+                                  if (cartao.isMensal == false &&
+                                      cartao.mes !=
+                                          state.mesSelecionado.first
+                                              .getMonthNumber()) {
+                                    return Container();
+                                  } else {
+                                    return CardDividasCartaoWidget(
+                                      cartao: cartao,
+                                      valorFaturaCartao: valorFaturaCartao,
+                                      deletarCartao: () {
+                                        _cubit.deleterCartao(
+                                          cartao,
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                      atualizarCartao: () {
+                                        Future.delayed(
+                                            const Duration(seconds: 0), () {
+                                          _appCoordinator
+                                              .navegarNovoCartaoView(
+                                            cartaoEntity: cartao,
+                                            isDivida: cartao.isDivida,
+                                          )
+                                              .then((value) {
+                                            _cubit.inicializar();
+                                          });
+                                        });
+                                      },
+                                      showAdicionarAtualizarValorFatura: () {
+                                        Future.delayed(
+                                            const Duration(seconds: 0), () {
+                                          showAdicionarAtualizarValorFatura(
+                                            cartao: cartao,
+                                            mesSelecionado:
+                                                state.mesSelecionado.first,
+                                            anoAtual: state.anoAtual,
+                                          );
+                                        });
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                  ],
-                  if (state.cartoes.isNotEmpty) ...[
-                    if (_isLoaded)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 5,
-                          bottom: 5,
-                        ),
-                        child: SizedBox(
-                          height: 50, // Altura do banner do AdMob
-                          child: AdWidget(ad: _bannerAd),
-                        ),
-                      ),
-                    TextButton.icon(
-                      onPressed: () {
-                        _appCoordinator
-                            .navegarNovoCartaoView(
-                          isDivida: true,
-                        )
-                            .then((value) {
-                          _cubit.inicializar();
-                        });
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text(AppStrings.addDividaExterna),
-                    ),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () => _cubit.inicializar(),
-                        child: ListView.builder(
-                          itemCount: state.cartoes.length,
-                          itemBuilder: (context, index) {
-                            final cartao = state.cartoes[index];
-                            final valorFaturaCartao = cartao.dividas
-                                .where(
-                                  (element) =>
-                                      element.mes == state.mesSelecionado.first,
-                                )
-                                .toList();
-                            if (cartao.isMensal == false &&
-                                cartao.mes !=
-                                    state.mesSelecionado.first
-                                        .getMonthNumber()) {
-                              return Container();
-                            } else {
-                              return CardDividasCartaoWidget(
-                                cartao: cartao,
-                                valorFaturaCartao: valorFaturaCartao,
-                                deletarCartao: () {
-                                  _cubit.deleterCartao(
-                                    cartao,
-                                  );
-                                  Navigator.of(context).pop();
-                                },
-                                atualizarCartao: () {
-                                  Future.delayed(const Duration(seconds: 0),
-                                      () {
-                                    _appCoordinator
-                                        .navegarNovoCartaoView(
-                                      cartaoEntity: cartao,
-                                      isDivida: cartao.isDivida,
-                                    )
-                                        .then((value) {
-                                      _cubit.inicializar();
-                                    });
-                                  });
-                                },
-                                showAdicionarAtualizarValorFatura: () {
-                                  Future.delayed(const Duration(seconds: 0),
-                                      () {
-                                    showAdicionarAtualizarValorFatura(
-                                      cartao: cartao,
-                                      mesSelecionado:
-                                          state.mesSelecionado.first,
-                                      anoAtual: state.anoAtual,
-                                    );
-                                  });
-                                },
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    BottomBarValorTotalWidget(
-                      valorFaturaCartao: state.valorTotalDaFatura,
-                    ),
-                  ]
-                ],
-              );
-            }
-            return Container();
-          },
+                          BottomBarValorTotalWidget(
+                            valorFaturaCartao: state.valorTotalDaFatura,
+                          ),
+                        ]
+                      ],
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -343,8 +356,8 @@ class _HomeViewState extends State<HomeView> {
                     idCartao: cartao.id,
                     ano: anoAtual,
                     mes: mesSelecionado,
-                    valorFatura:
-                        _textControllerEditarFatura.text.replaceAll(',', '.'),
+                    valorFatura: _textControllerEditarFatura.text
+                        .replaceAll(',', ''.replaceAll('.', '')),
                   );
 
                   final dividasAtualizadas =

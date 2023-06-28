@@ -11,6 +11,7 @@ class AppStrings {
   static const digiteONomeEmpresa = 'Digite o nome do cartão...';
   static const digiteONomeDivida = 'Digite o nome da dívida...';
   static const digiteOValorDaFatura = 'Digite o valor da fatura';
+  static const digiteOValorDoSaldo = 'Digite o valor do saldo';
   static const limparTudo = 'Limpar tudo';
   static const corDoCartao = 'Cor do cartão';
   static const corDaDivida = 'Cor da dívida';
