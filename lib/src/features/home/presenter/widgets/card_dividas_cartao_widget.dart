@@ -58,39 +58,41 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
             const SizedBox(
               width: 20,
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  isDividaTitulo(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (widget.valorFaturaCartao.isNotEmpty)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Text(
-                    'R\$${widget.valorFaturaCartao.first.valorFatura}',
+                    isDividaTitulo(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                      fontSize: 20,
                     ),
                   ),
-                if (widget.valorFaturaCartao.isEmpty) ...[
-                  ElevatedButton(
-                    onPressed: widget.showAdicionarAtualizarValorFatura,
-                    child: const Text(
-                      AppStrings.addValor,
-                      style: TextStyle(
-                        color: Colors.redAccent,
+                  if (widget.valorFaturaCartao.isNotEmpty)
+                    Text(
+                      'R\$${widget.valorFaturaCartao.first.valorFatura}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        fontSize: 20,
                       ),
                     ),
-                  ),
+                  if (widget.valorFaturaCartao.isEmpty) ...[
+                    ElevatedButton(
+                      onPressed: widget.showAdicionarAtualizarValorFatura,
+                      child: const Text(
+                        AppStrings.addValor,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-            const Spacer(),
             PopupMenuButton(
               icon: const Icon(Icons.more_vert),
               itemBuilder: (context) {
