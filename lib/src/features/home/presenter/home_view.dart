@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/presenter/cubit/home_cubit.dart';
+import 'package:notes_app/src/features/home/presenter/widgets/bottom_bar_valor_total_widget.dart';
 import 'package:notes_app/src/features/home/presenter/widgets/card_dividas_cartao_widget.dart';
 import 'package:notes_app/src/util/coordinator/app_coordinator.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
@@ -269,39 +270,8 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                     ),
-                    Container(
-                      width: double.infinity,
-                      height: 70,
-                      decoration: const BoxDecoration(
-                        color: Colors.lightBlueAccent,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32),
-                          topRight: Radius.circular(32),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            AppStrings.total,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Text(
-                            'R\$${state.valorTotalDaFatura.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+                    BottomBarValorTotalWidget(
+                      valorFaturaCartao: state.valorTotalDaFatura,
                     ),
                   ]
                 ],
@@ -373,9 +343,8 @@ class _HomeViewState extends State<HomeView> {
                     idCartao: cartao.id,
                     ano: anoAtual,
                     mes: mesSelecionado,
-                    valorFatura: _textControllerEditarFatura.text
-                        .replaceAll(',', '')
-                        .replaceAll('.', ''),
+                    valorFatura:
+                        _textControllerEditarFatura.text.replaceAll(',', '.'),
                   );
 
                   final dividasAtualizadas =

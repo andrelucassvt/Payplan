@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
@@ -31,6 +32,9 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
     }
     return widget.cartao.nome;
   }
+
+  NumberFormat formatador =
+      NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +75,8 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   ),
                   if (widget.valorFaturaCartao.isNotEmpty)
                     Text(
-                      'R\$${formatNumber(widget.valorFaturaCartao.first.valorFatura, 2)}',
+                      formatador.format(double.parse(
+                          widget.valorFaturaCartao.first.valorFatura)),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
