@@ -10,6 +10,7 @@ import 'package:notes_app/src/util/coordinator/app_coordinator.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:pattern_formatter/pattern_formatter.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -243,7 +244,9 @@ class _HomeViewState extends State<HomeView> {
                                       () {
                                     _appCoordinator
                                         .navegarNovoCartaoView(
-                                            cartaoEntity: cartao)
+                                      cartaoEntity: cartao,
+                                      isDivida: cartao.isDivida,
+                                    )
                                         .then((value) {
                                       _cubit.inicializar();
                                     });
@@ -311,6 +314,11 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  bool containsOnlyDotsAndCommas(String input) {
+    final regex = RegExp(r'^[.,]+$');
+    return regex.hasMatch(input);
+  }
+
   void showAdicionarAtualizarValorFatura({
     required CartaoEntity cartao,
     required String mesSelecionado,
@@ -336,7 +344,7 @@ class _HomeViewState extends State<HomeView> {
               });
             },
             keyboardType: TextInputType.number,
-            //inputFormatters: const [],
+            inputFormatters: [ThousandsFormatter(allowFraction: true)],
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
@@ -358,13 +366,16 @@ class _HomeViewState extends State<HomeView> {
             ),
             TextButton(
               onPressed: () {
-                if (_textControllerEditarFatura.text.isNotEmpty) {
+                final result =
+                    containsOnlyDotsAndCommas(_textControllerEditarFatura.text);
+                if (_textControllerEditarFatura.text.isNotEmpty && !result) {
                   final novaDivida = FaturaEntity(
                     idCartao: cartao.id,
                     ano: anoAtual,
                     mes: mesSelecionado,
-                    valorFatura:
-                        _textControllerEditarFatura.text.replaceAll(',', '.'),
+                    valorFatura: _textControllerEditarFatura.text
+                        .replaceAll(',', '')
+                        .replaceAll('.', ''),
                   );
 
                   final dividasAtualizadas =

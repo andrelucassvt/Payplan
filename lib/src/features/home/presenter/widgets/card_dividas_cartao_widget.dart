@@ -71,7 +71,7 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   ),
                   if (widget.valorFaturaCartao.isNotEmpty)
                     Text(
-                      'R\$${widget.valorFaturaCartao.first.valorFatura}',
+                      'R\$${formatNumber(widget.valorFaturaCartao.first.valorFatura, 2)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
@@ -105,8 +105,10 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   ),
                   PopupMenuItem(
                     onTap: widget.atualizarCartao,
-                    child: const Text(
-                      AppStrings.editarCartao,
+                    child: Text(
+                      widget.cartao.isDivida
+                          ? AppStrings.editarDivida
+                          : AppStrings.editarCartao,
                     ),
                   ),
                   PopupMenuItem(
@@ -135,5 +137,26 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
         ),
       ),
     );
+  }
+
+  String formatNumber(String value, int decimalPlaces) {
+    const separator = ",";
+    const decimalSeparator = ".";
+    final length = value.length;
+
+    if (length <= decimalPlaces) {
+      return "0$decimalSeparator${value.padLeft(decimalPlaces, '0')}";
+    }
+
+    final decimalIndex = length - decimalPlaces;
+    final wholePart = value.substring(0, decimalIndex);
+    final decimalPart = value.substring(decimalIndex);
+
+    final formattedWholePart = wholePart.replaceAllMapped(
+      RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"),
+      (Match match) => "${match.group(1)}$separator",
+    );
+
+    return "$formattedWholePart$decimalSeparator$decimalPart";
   }
 }

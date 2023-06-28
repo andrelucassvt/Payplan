@@ -18,8 +18,10 @@ class AppStrings {
   static const deletar = 'Deletar';
   static const editar = 'Editar';
   static const editarCartao = 'Editar cartão';
+  static const editarDivida = 'Editar dívida';
   static const editarFatura = 'Editar fatura';
   static const atualizarCartao = 'Atualizar cartão';
+  static const atualizarDivida = 'Atualizar dívida';
   static const addValor = 'R\$ Adicionar valor da fatura';
   static const total = 'Total:';
   static const mensal = 'Mensal';

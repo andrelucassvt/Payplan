@@ -73,10 +73,6 @@ class HomeCubit extends Cubit<HomeState> {
           ? state.mesSelecionado.first
           : _getMonthName(now.month);
 
-      // // Filtrar cartões com divida true
-      // final cartoesComDivida =
-      //     cartoes.where((cartao) => cartao.isDivida).toList();
-
       final valorTotalFatura =
           cartoes.fold(0.0, (double valorAcumulado, cartao) {
         final dividasDoMes = cartao.dividas.where((divida) {

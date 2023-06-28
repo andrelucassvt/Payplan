@@ -38,8 +38,11 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
   }
 
   String _tituloDaAppBar() {
-    if (widget.isDivida) {
+    if (widget.isDivida && widget.cartaoEntity == null) {
       return AppStrings.novaDivida;
+    }
+    if (widget.isDivida && widget.cartaoEntity != null) {
+      return AppStrings.atualizarDivida;
     }
     if (widget.cartaoEntity != null) {
       return AppStrings.atualizarCartao;
