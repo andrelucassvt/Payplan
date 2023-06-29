@@ -161,18 +161,11 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                                   if (_textControllerEditarFatura
                                           .text.isNotEmpty &&
                                       !result) {
-                                    final valorFatura = formatador
-                                        .format(widget.valorFaturaCartao);
-                                    final valorSaldo = formatador.format(
-                                        double.parse(_textControllerEditarFatura
-                                            .text
-                                            .replaceAll(',', '.')));
-                                    final resultValorFatura =
-                                        formatador.parse(valorFatura);
-                                    final resultValorSaldo =
-                                        formatador.parse(valorSaldo);
+                                    final valorSaldo = double.parse(
+                                        _textControllerEditarFatura.text
+                                            .replaceAll(',', ''));
                                     final resultadoSubtracao =
-                                        resultValorSaldo - resultValorFatura;
+                                        valorSaldo - widget.valorFaturaCartao;
 
                                     showDialog(
                                       context: context,
