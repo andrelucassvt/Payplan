@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -64,7 +65,8 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.inicializar();
-    loadAd();
+    WidgetsFlutterBinding.ensureInitialized()
+        .addPostFrameCallback((_) => initPlugin());
   }
 
   void _goToElement(int index) {
@@ -81,6 +83,24 @@ class _HomeViewState extends State<HomeView> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlugin() async {
+    if (Platform.isAndroid) {
+      loadAd();
+    } else {
+      final TrackingStatus status =
+          await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        // Wait for dialog popping animation
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+      loadAd();
+      await AppTrackingTransparency.getAdvertisingIdentifier();
+    }
   }
 
   @override
