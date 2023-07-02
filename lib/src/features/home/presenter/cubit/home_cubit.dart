@@ -76,7 +76,9 @@ class HomeCubit extends Cubit<HomeState> {
       final valorTotalFatura =
           cartoes.fold(0.0, (double valorAcumulado, cartao) {
         final dividasDoMes = cartao.dividas.where((divida) {
-          return divida.ano == now.year.toString() && divida.mes == mesAtual;
+          return divida.ano == now.year.toString() &&
+              divida.mes == mesAtual &&
+              !divida.isPago;
         }).toList();
 
         final valorFaturasDoMes =
@@ -114,14 +116,6 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> atualizarCartao(CartaoEntity cartaoEntity) async {
-    emit(HomeLoading(
-      mesSelecionado: state.mesSelecionado,
-      meses: state.meses,
-      cartoes: state.cartoes,
-      dividas: state.dividas,
-      anoAtual: state.anoAtual,
-      valorTotalDaFatura: state.valorTotalDaFatura,
-    ));
     final result = await atualizarCartaoUsecase(
       cartaoEntity: cartaoEntity,
     );

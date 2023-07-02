@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
@@ -12,6 +13,8 @@ class CardDividasCartaoWidget extends StatefulWidget {
     required this.showAdicionarAtualizarValorFatura,
     required this.deletarCartao,
     required this.atualizarCartao,
+    required this.mudarInformacaoCartao,
+    required this.mesSelecionado,
     super.key,
   });
   final CartaoEntity cartao;
@@ -19,6 +22,8 @@ class CardDividasCartaoWidget extends StatefulWidget {
   final VoidCallback showAdicionarAtualizarValorFatura;
   final VoidCallback deletarCartao;
   final VoidCallback atualizarCartao;
+  final Function(CartaoEntity cartaoEntity) mudarInformacaoCartao;
+  final String mesSelecionado;
 
   @override
   State<CardDividasCartaoWidget> createState() =>
@@ -36,6 +41,8 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
   NumberFormat formatador =
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
+  FaturaEntity get _faturaAtual => widget.valorFaturaCartao.first;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -51,7 +58,7 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
           children: [
             Container(
               height: 70,
-              width: 90,
+              width: 70,
               decoration: BoxDecoration(
                 color: Color(
                   widget.cartao.cor,
@@ -75,11 +82,12 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   ),
                   if (widget.valorFaturaCartao.isNotEmpty)
                     Text(
-                      formatador.format(double.parse(
-                          widget.valorFaturaCartao.first.valorFatura)),
-                      style: const TextStyle(
+                      formatador.format(double.parse(_faturaAtual.valorFatura)),
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.red,
+                        color: widget.valorFaturaCartao.first.isPago
+                            ? Colors.blue
+                            : Colors.red,
                         fontSize: 20,
                       ),
                     ),
@@ -98,6 +106,27 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                 ],
               ),
             ),
+            if (widget.valorFaturaCartao.isNotEmpty)
+              FlutterSwitch(
+                valueFontSize: 10.0,
+                width: 100,
+                borderRadius: 30.0,
+                value: _faturaAtual.isPago,
+                showOnOff: true,
+                activeText: 'Paga',
+                inactiveText: 'Não paga',
+                onToggle: (val) {
+                  final dividasAtualizadas =
+                      List<FaturaEntity>.from(widget.cartao.dividas)
+                        ..removeWhere(
+                            (divida) => divida.mes == widget.mesSelecionado)
+                        ..add(_faturaAtual.copyWith(
+                          isPago: val,
+                        ));
+                  widget.mudarInformacaoCartao(
+                      widget.cartao.copyWith(dividas: dividasAtualizadas));
+                },
+              ),
             PopupMenuButton(
               icon: const Icon(Icons.more_vert),
               itemBuilder: (context) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:pattern_formatter/pattern_formatter.dart';
 
 class BottomBarValorTotalWidget extends StatefulWidget {
   const BottomBarValorTotalWidget({
@@ -21,8 +21,8 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
   NumberFormat formatadorCalculo = NumberFormat.currency(locale: 'pt_BR');
 
   final _focusNodeEditarFatura = FocusNode();
-  final TextEditingController _textControllerEditarFatura =
-      TextEditingController();
+  final _textControllerEditarFatura =
+      MoneyMaskedTextController(initialValue: 0.00);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -125,21 +125,7 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                                 child: TextFormField(
                                   controller: _textControllerEditarFatura,
                                   focusNode: _focusNodeEditarFatura,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _textControllerEditarFatura.text = value;
-                                      _textControllerEditarFatura.selection =
-                                          TextSelection.fromPosition(
-                                        TextPosition(
-                                            offset: _textControllerEditarFatura
-                                                .text.length),
-                                      );
-                                    });
-                                  },
                                   keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    ThousandsFormatter(allowFraction: true)
-                                  ],
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(
@@ -161,11 +147,10 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                                   if (_textControllerEditarFatura
                                           .text.isNotEmpty &&
                                       !result) {
-                                    final valorSaldo = double.parse(
-                                        _textControllerEditarFatura.text
-                                            .replaceAll(',', ''));
                                     final resultadoSubtracao =
-                                        valorSaldo - widget.valorFaturaCartao;
+                                        _textControllerEditarFatura
+                                                .numberValue -
+                                            widget.valorFaturaCartao;
 
                                     showDialog(
                                       context: context,

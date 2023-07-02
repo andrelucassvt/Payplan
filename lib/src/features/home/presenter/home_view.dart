@@ -131,17 +131,17 @@ class _HomeViewState extends State<HomeView> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_isLoaded)
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 5,
-                  bottom: 5,
-                ),
-                child: SizedBox(
-                  height: 50, // Altura do banner do AdMob
-                  child: AdWidget(ad: _bannerAd),
-                ),
-              ),
+            // if (_isLoaded)
+            //   Padding(
+            //     padding: const EdgeInsets.only(
+            //       top: 5,
+            //       bottom: 5,
+            //     ),
+            //     child: SizedBox(
+            //       height: 50, // Altura do banner do AdMob
+            //       child: AdWidget(ad: _bannerAd),
+            //     ),
+            //   ),
             Expanded(
               child: BlocConsumer<HomeCubit, HomeState>(
                 bloc: _cubit,
@@ -264,6 +264,11 @@ class _HomeViewState extends State<HomeView> {
                                     return CardDividasCartaoWidget(
                                       cartao: cartao,
                                       valorFaturaCartao: valorFaturaCartao,
+                                      mesSelecionado:
+                                          state.mesSelecionado.first,
+                                      mudarInformacaoCartao: (cartaoEntity) {
+                                        _cubit.atualizarCartao(cartaoEntity);
+                                      },
                                       deletarCartao: () {
                                         _cubit.deleterCartao(
                                           cartao,
@@ -374,6 +379,7 @@ class _HomeViewState extends State<HomeView> {
                     mes: mesSelecionado,
                     valorFatura:
                         _textControllerEditarFatura.numberValue.toString(),
+                    isPago: false,
                   );
 
                   final dividasAtualizadas =
