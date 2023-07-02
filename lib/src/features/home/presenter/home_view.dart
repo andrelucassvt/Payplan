@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/presenter/cubit/home_cubit.dart';
@@ -12,7 +13,6 @@ import 'package:notes_app/src/util/coordinator/app_coordinator.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:pattern_formatter/pattern_formatter.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -26,8 +26,8 @@ class _HomeViewState extends State<HomeView> {
   final _appCoordinator = AppCoordinator();
 
   final _focusNodeEditarFatura = FocusNode();
-  final TextEditingController _textControllerEditarFatura =
-      TextEditingController();
+  final _textControllerEditarFatura =
+      MoneyMaskedTextController(initialValue: 0.00);
 
   final ScrollController _scrollController = ScrollController();
 
@@ -291,6 +291,7 @@ class _HomeViewState extends State<HomeView> {
                                             mesSelecionado:
                                                 state.mesSelecionado.first,
                                             anoAtual: state.anoAtual,
+                                            faturaEntity: valorFaturaCartao,
                                           );
                                         });
                                       },
@@ -326,7 +327,12 @@ class _HomeViewState extends State<HomeView> {
     required CartaoEntity cartao,
     required String mesSelecionado,
     required String anoAtual,
+    required List<FaturaEntity> faturaEntity,
   }) {
+    if (faturaEntity.isNotEmpty) {
+      _textControllerEditarFatura
+          .updateValue(double.parse(faturaEntity.first.valorFatura));
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -337,17 +343,7 @@ class _HomeViewState extends State<HomeView> {
           content: TextFormField(
             controller: _textControllerEditarFatura,
             focusNode: _focusNodeEditarFatura,
-            onChanged: (value) {
-              setState(() {
-                _textControllerEditarFatura.text = value;
-                _textControllerEditarFatura.selection =
-                    TextSelection.fromPosition(
-                  TextPosition(offset: _textControllerEditarFatura.text.length),
-                );
-              });
-            },
             keyboardType: TextInputType.number,
-            inputFormatters: [ThousandsFormatter(allowFraction: true)],
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
@@ -363,7 +359,7 @@ class _HomeViewState extends State<HomeView> {
                 AppStrings.cancelar,
               ),
               onPressed: () {
-                _textControllerEditarFatura.clear();
+                _textControllerEditarFatura.clearComposing();
                 Navigator.of(context).pop();
               },
             ),
@@ -376,8 +372,8 @@ class _HomeViewState extends State<HomeView> {
                     idCartao: cartao.id,
                     ano: anoAtual,
                     mes: mesSelecionado,
-                    valorFatura: _textControllerEditarFatura.text
-                        .replaceAll(',', ''.replaceAll('.', '')),
+                    valorFatura:
+                        _textControllerEditarFatura.numberValue.toString(),
                   );
 
                   final dividasAtualizadas =
@@ -389,7 +385,7 @@ class _HomeViewState extends State<HomeView> {
                     cartao.copyWith(dividas: dividasAtualizadas),
                   );
                   _focusNodeEditarFatura.unfocus();
-                  _textControllerEditarFatura.clear();
+                  _textControllerEditarFatura.clearComposing();
                   Navigator.of(context).pop();
                 }
               },
