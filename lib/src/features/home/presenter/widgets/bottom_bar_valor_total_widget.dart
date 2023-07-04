@@ -41,9 +41,9 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             AppStrings.total,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
@@ -76,21 +76,21 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 20,
                             ),
                             child: Text(
-                              'Adicione o valor total que será descontado',
-                              style: TextStyle(
+                              AppStrings.adicioneOValorTotalDescontado,
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          const Text(
-                            'Valor desse mês:',
-                            style: TextStyle(
+                          Text(
+                            AppStrings.valorDesseMes,
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -109,9 +109,9 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                           const SizedBox(
                             height: 20,
                           ),
-                          const Text(
-                            'Digite o saldo em que será descontado o valor desse mês:',
-                            style: TextStyle(
+                          Text(
+                            AppStrings.digiteOSaldoQueSeraDescontado,
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -155,7 +155,7 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                                     showDialog(
                                       context: context,
                                       builder: (_) => AlertDialog(
-                                        title: const Text('Saldo restante'),
+                                        title: Text(AppStrings.saldoRestante),
                                         content: Text(
                                           'R\$ ${resultadoSubtracao < 0 ? (resultadoSubtracao * -1).toStringAsFixed(2) : resultadoSubtracao.toStringAsFixed(2)}',
                                           style: const TextStyle(

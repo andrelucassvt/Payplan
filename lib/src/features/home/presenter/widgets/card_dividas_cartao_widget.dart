@@ -33,7 +33,7 @@ class CardDividasCartaoWidget extends StatefulWidget {
 class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
   String isDividaTitulo() {
     if (widget.cartao.isDivida) {
-      return '${widget.cartao.nome} (Dívida externa)';
+      return '${widget.cartao.nome} ${AppStrings.dividaExterna}';
     }
     return widget.cartao.nome;
   }
@@ -94,10 +94,10 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   if (widget.valorFaturaCartao.isEmpty) ...[
                     ElevatedButton(
                       onPressed: widget.showAdicionarAtualizarValorFatura,
-                      child: const Text(
+                      child: Text(
                         AppStrings.addValor,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.redAccent,
                         ),
                       ),
@@ -113,8 +113,8 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                 borderRadius: 30.0,
                 value: _faturaAtual.isPago,
                 showOnOff: true,
-                activeText: 'Paga',
-                inactiveText: 'Não paga',
+                activeText: AppStrings.paga,
+                inactiveText: AppStrings.naoPaga,
                 onToggle: (val) {
                   final dividasAtualizadas =
                       List<FaturaEntity>.from(widget.cartao.dividas)
@@ -133,7 +133,7 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                 return [
                   PopupMenuItem(
                     onTap: widget.showAdicionarAtualizarValorFatura,
-                    child: const Text(
+                    child: Text(
                       AppStrings.editarFatura,
                     ),
                   ),
@@ -157,9 +157,9 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                         );
                       });
                     },
-                    child: const Text(
+                    child: Text(
                       AppStrings.deletar,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.red,
                       ),
                     ),

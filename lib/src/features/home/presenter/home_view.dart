@@ -121,7 +121,7 @@ class _HomeViewState extends State<HomeView> {
                 _cubit.inicializar();
               });
             },
-            child: const Text(AppStrings.adicionarCartao),
+            child: Text(AppStrings.adicionarCartao),
           ),
           const SizedBox(
             width: 10,
@@ -131,17 +131,17 @@ class _HomeViewState extends State<HomeView> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_isLoaded)
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 5,
-                  bottom: 5,
-                ),
-                child: SizedBox(
-                  height: 50, // Altura do banner do AdMob
-                  child: AdWidget(ad: _bannerAd),
-                ),
-              ),
+            // if (_isLoaded)
+            //   Padding(
+            //     padding: const EdgeInsets.only(
+            //       top: 5,
+            //       bottom: 5,
+            //     ),
+            //     child: SizedBox(
+            //       height: 50, // Altura do banner do AdMob
+            //       child: AdWidget(ad: _bannerAd),
+            //     ),
+            //   ),
             Expanded(
               child: BlocConsumer<HomeCubit, HomeState>(
                 bloc: _cubit,
@@ -209,14 +209,14 @@ class _HomeViewState extends State<HomeView> {
                                   _cubit.inicializar();
                                 });
                               },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 15,
                                 ),
                                 child: Text(
                                   AppStrings.voceAindaNaoTemCartoesAdicionados,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.lightBlue,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
@@ -239,7 +239,7 @@ class _HomeViewState extends State<HomeView> {
                               });
                             },
                             icon: const Icon(Icons.add),
-                            label: const Text(AppStrings.addDividaExterna),
+                            label: Text(AppStrings.addDividaExterna),
                           ),
                           Expanded(
                             child: RefreshIndicator(
@@ -343,7 +343,7 @@ class _HomeViewState extends State<HomeView> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Fatura de: ${cartao.nome}',
+            '${AppStrings.faturaDe} ${cartao.nome}',
           ),
           content: TextFormField(
             controller: _textControllerEditarFatura,
@@ -360,7 +360,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           actions: [
             TextButton(
-              child: const Text(
+              child: Text(
                 AppStrings.cancelar,
               ),
               onPressed: () {
@@ -395,7 +395,7 @@ class _HomeViewState extends State<HomeView> {
                   Navigator.of(context).pop();
                 }
               },
-              child: const Text(
+              child: Text(
                 AppStrings.salvar,
               ),
             ),

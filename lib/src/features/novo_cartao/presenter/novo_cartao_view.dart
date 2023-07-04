@@ -54,7 +54,7 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
     if (widget.isDivida) {
       return AppStrings.digiteONomeDivida;
     }
-    return AppStrings.digiteONomeEmpresa;
+    return AppStrings.digiteONomeCartao;
   }
 
   void acaoSalvar(NovoCartaoState state) {
@@ -167,7 +167,7 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
               _textController.clear();
               _cubit.iniciar();
             },
-            child: const Text(AppStrings.limparTudo),
+            child: Text(AppStrings.limparTudo),
           )
         ],
       ),
@@ -182,7 +182,7 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
                     content: Text(
                       widget.isDivida
                           ? AppStrings.digiteONomeDivida
-                          : AppStrings.digiteONomeEmpresa,
+                          : AppStrings.digiteONomeCartao,
                     ),
                   ),
                 );
@@ -190,7 +190,7 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
                 acaoSalvar(state);
               }
             },
-            label: const Text(AppStrings.salvar),
+            label: Text(AppStrings.salvar),
           );
         },
       ),

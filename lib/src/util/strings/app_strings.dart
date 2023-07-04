@@ -1,41 +1,51 @@
+import 'package:localization/localization.dart';
+
 class AppStrings {
   static const nameApp = 'PayPlan';
-  static const adicionarCartao = 'Adicionar cartão';
-  static const novoCartao = 'Novo cartão';
-  static const novaDivida = 'Nova dívida';
-  static const adicioneUmCartao = 'Você não tem cartão cadastrados';
-  static const nomeDaEmpresaDoCartao = 'Nome do cartão:';
-  static const nomeDaDivida = 'Nome da dívida:';
-  static const salvar = 'Salvar';
-  static const cancelar = 'Cancelar';
-  static const digiteONomeEmpresa = 'Digite o nome do cartão...';
-  static const digiteONomeDivida = 'Digite o nome da dívida...';
-  static const digiteOValorDaFatura = 'Digite o valor da fatura';
-  static const digiteOValorDoSaldo = 'Digite o valor do saldo';
-  static const limparTudo = 'Limpar tudo';
-  static const corDoCartao = 'Cor do cartão';
-  static const corDaDivida = 'Cor da dívida';
-  static const atencao = 'Atenção';
-  static const deletar = 'Deletar';
-  static const editar = 'Editar';
-  static const editarCartao = 'Editar cartão';
-  static const editarDivida = 'Editar dívida';
-  static const editarFatura = 'Editar fatura';
-  static const atualizarCartao = 'Atualizar cartão';
-  static const atualizarDivida = 'Atualizar dívida';
-  static const addValor = 'R\$ Adicionar valor da fatura';
-  static const total = 'Total:';
-  static const mensal = 'Mensal';
-  static const unica = 'Única';
-  static const esseNovoCartao =
-      'O cartão será salvo para todos os meses subsequentes';
-  static const essaNovaDivida =
-      'O clique na opção que atenda seu tipo de dívida para salvar';
-  static const esseCartaoSeraRemovido =
-      'O cartão será deletado de todos os meses subsequentes';
-  static const addDividaExterna = 'Adicionar divida externa';
-  static const voceAindaNaoTemCartoesAdicionados =
-      'Você ainda não tem cartões ou dividas adicionados!!\nClique aqui e adicione';
+
+  static var adicionarCartao = 'add-cartao'.i18n();
+  static var novoCartao = 'novo-cartao'.i18n();
+  static var novaDivida = 'nova-divida'.i18n();
+  static var adicioneUmCartao = 'add-novo-cartao'.i18n();
+  static var nomeDaEmpresaDoCartao = 'nome-cartao'.i18n();
+  static var nomeDaDivida = 'nome-divida'.i18n();
+  static var salvar = 'salvar'.i18n();
+  static var cancelar = 'cancelar'.i18n();
+  static var digiteONomeCartao = 'digite-o-nome-carto'.i18n();
+  static var digiteONomeDivida = 'digite-o-nome-divida'.i18n();
+  static var digiteOValorDaFatura = 'digite-o-valor-fatura'.i18n();
+  static var digiteOValorDoSaldo = 'digite-o-valor-do-saldo'.i18n();
+  static var limparTudo = 'limpar-tudo'.i18n();
+  static var corDoCartao = 'cor-do-cartao'.i18n();
+  static var corDaDivida = 'cor-da-divida'.i18n();
+  static var atencao = 'atencao'.i18n();
+  static var deletar = 'deletar'.i18n();
+  static var editar = 'editar'.i18n();
+  static var editarCartao = 'editar-cartao'.i18n();
+  static var editarDivida = 'editar-divida'.i18n();
+  static var editarFatura = 'editar-fatura'.i18n();
+  static var atualizarCartao = 'atualizar-cartao'.i18n();
+  static var atualizarDivida = 'atualizar-divida'.i18n();
+  static var addValor = 'add-valor-fatura'.i18n();
+  static var total = 'total'.i18n();
+  static var mensal = 'mensal'.i18n();
+  static var unica = 'unica'.i18n();
+  static var esseNovoCartao = 'esse-novo-cartao'.i18n();
+  static var essaNovaDivida = 'essa-nova-divida'.i18n();
+  static var esseCartaoSeraRemovido = 'esse-cartao-sera-removido'.i18n();
+  static var addDividaExterna = 'add-divida-externa'.i18n();
+  static var voceAindaNaoTemCartoesAdicionados =
+      'voce-ainda-nao-tem-catoes-adicionados'.i18n();
+  static var faturaDe = 'fatura-de'.i18n();
+  static var paga = 'paga'.i18n();
+  static var naoPaga = 'nao-paga'.i18n();
+  static var dividaExterna = 'divida-externa'.i18n();
+  static var saldoRestante = 'saldo-restante'.i18n();
+  static var valorDesseMes = 'valor-desse-mes'.i18n();
+  static var adicioneOValorTotalDescontado =
+      'adicione-valor-total-descontado'.i18n();
+  static var digiteOSaldoQueSeraDescontado =
+      'digite-saldo-que-sera-descontado'.i18n();
 }
 
 extension MonthsNames on String {
