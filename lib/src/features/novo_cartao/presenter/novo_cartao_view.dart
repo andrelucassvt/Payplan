@@ -26,6 +26,8 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
   final _focusNode = FocusNode();
   final _textController = TextEditingController();
 
+  bool _tecladoAtivo = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +37,23 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
       _cubit.mudarNomeEmpresa(widget.cartaoEntity!.nome);
       _cubit.mudarCorSelecionada(Color(widget.cartaoEntity!.cor));
     }
+
+    _focusNode.addListener(() {
+      setState(() {
+        if (_focusNode.hasFocus) {
+          _tecladoAtivo = true;
+        } else {
+          _tecladoAtivo = false;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _textController.dispose();
+    super.dispose();
   }
 
   String _tituloDaAppBar() {
@@ -171,6 +190,9 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
           )
         ],
       ),
+      floatingActionButtonLocation: _tecladoAtivo
+          ? FloatingActionButtonLocation.startFloat
+          : FloatingActionButtonLocation.endFloat,
       floatingActionButton: BlocBuilder<NovoCartaoCubit, NovoCartaoState>(
         bloc: _cubit,
         builder: (context, state) {
@@ -273,17 +295,20 @@ class _NovoCartaoViewState extends State<NovoCartaoView> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
-                            controller: _textController,
-                            focusNode: _focusNode,
-                            onChanged: (value) {
-                              _cubit.mudarNomeEmpresa(value);
-                            },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                          child: FocusScope(
+                            node: FocusScopeNode(),
+                            child: TextField(
+                              controller: _textController,
+                              focusNode: _focusNode,
+                              onChanged: (value) {
+                                _cubit.mudarNomeEmpresa(value);
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                hintText: _digiteONome(),
                               ),
-                              hintText: _digiteONome(),
                             ),
                           ),
                         ),
