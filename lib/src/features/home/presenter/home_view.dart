@@ -364,7 +364,7 @@ class _HomeViewState extends State<HomeView> {
                 AppStrings.cancelar,
               ),
               onPressed: () {
-                _textControllerEditarFatura.clearComposing();
+                _textControllerEditarFatura.updateValue(0);
                 Navigator.of(context).pop();
               },
             ),
@@ -391,7 +391,7 @@ class _HomeViewState extends State<HomeView> {
                     cartao.copyWith(dividas: dividasAtualizadas),
                   );
                   _focusNodeEditarFatura.unfocus();
-                  _textControllerEditarFatura.clearComposing();
+                  _textControllerEditarFatura.updateValue(0);
                   Navigator.of(context).pop();
                 }
               },
