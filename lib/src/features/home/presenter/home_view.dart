@@ -38,10 +38,15 @@ class _HomeViewState extends State<HomeView> {
 
   //Admob
   late BannerAd _bannerAd;
-  bool _isLoaded = false;
+  late BannerAd _bannerAd2;
+  bool _isLoadedBanner1 = false;
+  bool _isLoadedBanner2 = false;
   final adUnitId = Platform.isAndroid
       ? 'ca-app-pub-3652623512305285/5889977427'
       : 'ca-app-pub-3652623512305285/9198667043';
+  final adUnitIdBanner2 = Platform.isAndroid
+      ? 'ca-app-pub-3652623512305285/7988227382'
+      : 'ca-app-pub-3652623512305285/8865877557';
 
   void loadAd() {
     _bannerAd = BannerAd(
@@ -52,13 +57,33 @@ class _HomeViewState extends State<HomeView> {
         onAdLoaded: (ad) {
           debugPrint('$ad loaded.');
           setState(() {
-            _isLoaded = true;
+            _isLoadedBanner1 = true;
           });
         },
         onAdFailedToLoad: (ad, err) {
           debugPrint('BannerAd failed to load: $err');
           setState(() {
-            _isLoaded = false;
+            _isLoadedBanner1 = false;
+          });
+          ad.dispose();
+        },
+      ),
+    )..load();
+    _bannerAd2 = BannerAd(
+      adUnitId: adUnitIdBanner2,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          setState(() {
+            _isLoadedBanner2 = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('BannerAd failed to load: $err');
+          setState(() {
+            _isLoadedBanner2 = false;
           });
           ad.dispose();
         },
@@ -179,7 +204,7 @@ class _HomeViewState extends State<HomeView> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_isLoaded)
+            if (_isLoadedBanner1)
               Padding(
                 padding: const EdgeInsets.only(
                   top: 5,
@@ -309,45 +334,64 @@ class _HomeViewState extends State<HomeView> {
                                               .getMonthNumber()) {
                                     return Container();
                                   } else {
-                                    return CardDividasCartaoWidget(
-                                      cartao: cartao,
-                                      valorFaturaCartao: valorFaturaCartao,
-                                      mesSelecionado:
-                                          state.mesSelecionado.first,
-                                      mudarInformacaoCartao: (cartaoEntity) {
-                                        _cubit.atualizarCartao(cartaoEntity);
-                                      },
-                                      deletarCartao: () {
-                                        _cubit.deleterCartao(
-                                          cartao,
-                                        );
-                                        Navigator.of(context).pop();
-                                      },
-                                      atualizarCartao: () {
-                                        Future.delayed(
-                                            const Duration(seconds: 0), () {
-                                          _appCoordinator
-                                              .navegarNovoCartaoView(
-                                            cartaoEntity: cartao,
-                                            isDivida: cartao.isDivida,
-                                          )
-                                              .then((value) {
-                                            _cubit.inicializar();
-                                          });
-                                        });
-                                      },
-                                      showAdicionarAtualizarValorFatura: () {
-                                        Future.delayed(
-                                            const Duration(seconds: 0), () {
-                                          showAdicionarAtualizarValorFatura(
-                                            cartao: cartao,
-                                            mesSelecionado:
-                                                state.mesSelecionado.first,
-                                            anoAtual: state.anoAtual,
-                                            faturaEntity: valorFaturaCartao,
-                                          );
-                                        });
-                                      },
+                                    return Column(
+                                      children: [
+                                        CardDividasCartaoWidget(
+                                          cartao: cartao,
+                                          valorFaturaCartao: valorFaturaCartao,
+                                          mesSelecionado:
+                                              state.mesSelecionado.first,
+                                          mudarInformacaoCartao:
+                                              (cartaoEntity) {
+                                            _cubit
+                                                .atualizarCartao(cartaoEntity);
+                                          },
+                                          deletarCartao: () {
+                                            _cubit.deleterCartao(
+                                              cartao,
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                          atualizarCartao: () {
+                                            Future.delayed(
+                                                const Duration(seconds: 0), () {
+                                              _appCoordinator
+                                                  .navegarNovoCartaoView(
+                                                cartaoEntity: cartao,
+                                                isDivida: cartao.isDivida,
+                                              )
+                                                  .then((value) {
+                                                _cubit.inicializar();
+                                              });
+                                            });
+                                          },
+                                          showAdicionarAtualizarValorFatura:
+                                              () {
+                                            Future.delayed(
+                                                const Duration(seconds: 0), () {
+                                              showAdicionarAtualizarValorFatura(
+                                                cartao: cartao,
+                                                mesSelecionado:
+                                                    state.mesSelecionado.first,
+                                                anoAtual: state.anoAtual,
+                                                faturaEntity: valorFaturaCartao,
+                                              );
+                                            });
+                                          },
+                                        ),
+                                        if (index == 1 && _isLoadedBanner2)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 5,
+                                              bottom: 5,
+                                            ),
+                                            child: SizedBox(
+                                              height:
+                                                  50, // Altura do banner do AdMob
+                                              child: AdWidget(ad: _bannerAd2),
+                                            ),
+                                          ),
+                                      ],
                                     );
                                   }
                                 },
