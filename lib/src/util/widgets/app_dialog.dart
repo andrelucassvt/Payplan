@@ -4,6 +4,33 @@ import 'package:notes_app/src/util/strings/app_strings.dart';
 
 class AppDialog {
   var currentContext = NavigationService.navigatorKey.currentContext!;
+
+  Future<void> showDialogSimple({
+    required String title,
+    required String subTitle,
+    BuildContext? contextCustom,
+  }) {
+    return showDialog<void>(
+      context: contextCustom ?? currentContext,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(subTitle),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppStrings.cancelar,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> showDialogApp({
     required String title,
     required String subTitle,
@@ -15,9 +42,11 @@ class AppDialog {
     String? textoButton1,
     String? textoButton2,
     bool isDivida = false,
+    bool barrierDismissible = true,
   }) {
     return showDialog<void>(
       context: contextCustom ?? currentContext,
+      barrierDismissible: barrierDismissible,
       builder: (context) {
         return AlertDialog(
           title: Text(title),

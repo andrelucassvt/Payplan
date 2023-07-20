@@ -38,5 +38,8 @@
     "saldo-restante": "Saldo restante",
     "valor-desse-mes": "Valor desse mês:",
     "adicione-valor-total-descontado": "Adicione o valor total que será descontado",
-    "digite-saldo-que-sera-descontado": "Digite o saldo em que será descontado o valor desse mês:"
+    "digite-saldo-que-sera-descontado": "Digite o saldo em que será descontado o valor desse mês:",
+    "para-permitir-que-o-payplan": "Para permitir que o Payplan consiga entregar notificações personalizadas, é preciso pemitir as notificações nas configurações",
+    "abrir-configuracoes": "Abrir configurações",
+    "nao-perca-data-pagamento": "Não perca a data de pagamento das suas faturas"
 }

@@ -12,7 +12,10 @@ import 'package:notes_app/src/features/home/presenter/widgets/card_dividas_carta
 import 'package:notes_app/src/util/coordinator/app_coordinator.dart';
 import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/app_dialog.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -30,6 +33,8 @@ class _HomeViewState extends State<HomeView> {
       MoneyMaskedTextController(initialValue: 0.00);
 
   final ScrollController _scrollController = ScrollController();
+
+  bool mostrarIconePermitirNotificacao = false;
 
   //Admob
   late BannerAd _bannerAd;
@@ -65,8 +70,25 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.inicializar();
-    WidgetsFlutterBinding.ensureInitialized()
-        .addPostFrameCallback((_) => initPlugin());
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
+      NotificationService().showLocalNotification(
+        title: AppStrings.atencao,
+        body: AppStrings.naoPercaADataPagamento,
+      );
+      initPlugin();
+    });
+    verificarPermissaoNotificacao();
+  }
+
+  Future<void> verificarPermissaoNotificacao() async {
+    final result = await NotificationService().verificarPermissaoNotificacao();
+    setState(() {
+      if (result) {
+        mostrarIconePermitirNotificacao = true;
+      } else {
+        mostrarIconePermitirNotificacao = false;
+      }
+    });
   }
 
   void _goToElement(int index) {
@@ -115,6 +137,32 @@ class _HomeViewState extends State<HomeView> {
           const SizedBox(
             width: 10,
           ),
+          if (mostrarIconePermitirNotificacao)
+            IconButton(
+              onPressed: () {
+                AppDialog().showDialogApp(
+                  barrierDismissible: false,
+                  title: AppStrings.atencao,
+                  subTitle: AppStrings.paraPermitirQueOPayplan,
+                  onTapButton1: () async {
+                    await verificarPermissaoNotificacao();
+                    if (!mostrarIconePermitirNotificacao) {
+                      Navigator.of(context).pop();
+                    } else {
+                      openAppSettings();
+                    }
+                  },
+                  onTapButton2: () async {
+                    Navigator.of(context).pop();
+                  },
+                  textoButton1: AppStrings.abrirConfiguracoes,
+                );
+              },
+              icon: const Icon(
+                Icons.notification_important,
+                color: Colors.red,
+              ),
+            ),
           ElevatedButton(
             onPressed: () {
               _appCoordinator.navegarNovoCartaoView().then((value) {
