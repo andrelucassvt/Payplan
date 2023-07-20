@@ -48,6 +48,8 @@ class AppStrings {
       'digite-saldo-que-sera-descontado'.i18n();
 
   static var paraPermitirQueOPayplan = 'para-permitir-que-o-payplan'.i18n();
+  static var paraPermitirQueOPayplanAdmob =
+      'para-permitir-que-o-payplan-admob'.i18n();
   static var abrirConfiguracoes = 'abrir-configuracoes'.i18n();
   static var naoPercaADataPagamento = 'nao-perca-data-pagamento'.i18n();
 }

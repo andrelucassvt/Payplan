@@ -40,6 +40,7 @@
     "adicione-valor-total-descontado": "Add the total value to be deducted",
     "digite-saldo-que-sera-descontado": "Enter the balance to which the value of this month will be deducted:",
     "para-permitir-que-o-payplan": "To enable Payplan to deliver personalized notifications, it is necessary to allow notifications in the settings.",
+    "para-permitir-que-o-payplan-admob": "To enable Payplan to deliver personalized ads, it is necessary to allow Tracking in the settings.",
     "abrir-configuracoes": "Open settings",
     "nao-perca-data-pagamento": "Don't miss the payment due date of your invoice."
 }
