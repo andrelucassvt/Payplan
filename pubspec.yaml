@@ -49,6 +49,8 @@ dependencies:
   app_tracking_transparency: ^2.0.4
   flutter_masked_text2: ^0.9.1
   flutter_switch: ^0.3.2
+  flutter_local_notifications: ^15.1.0+1
+  permission_handler: ^10.4.3
 
 
   localization: ^2.1.0
