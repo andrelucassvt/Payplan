@@ -40,6 +40,7 @@
     "adicione-valor-total-descontado": "Agregue el valor total a ser descontado",
     "digite-saldo-que-sera-descontado": "Ingrese el saldo al cual se descontará el valor de este mes:",
     "para-permitir-que-o-payplan": "Para permitir que Payplan pueda enviar notificaciones personalizadas, es necesario permitir las notificaciones en la configuración.",
+    "para-permitir-que-o-payplan-admob": "Para permitir que Payplan entregue anuncios personalizados, es necesario permitir el Rastreo en la configuración.",
     "abrir-configuracoes": "Abrir configuraciones",
     "nao-perca-data-pagamento": "No pierda la fecha de pago de su factura."
 }

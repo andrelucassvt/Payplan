@@ -35,6 +35,7 @@ class _HomeViewState extends State<HomeView> {
   final ScrollController _scrollController = ScrollController();
 
   bool mostrarIconePermitirNotificacao = false;
+  bool mostrarIconePermitirAdmobIOS = false;
 
   //Admob
   late BannerAd _bannerAd;
@@ -139,14 +140,31 @@ class _HomeViewState extends State<HomeView> {
     } else {
       final TrackingStatus status =
           await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.denied) {
+        setState(() {
+          mostrarIconePermitirAdmobIOS = true;
+        });
+      }
       if (status == TrackingStatus.notDetermined) {
         // Wait for dialog popping animation
         await Future.delayed(const Duration(milliseconds: 200));
 
-        await AppTrackingTransparency.requestTrackingAuthorization();
+        final result =
+            await AppTrackingTransparency.requestTrackingAuthorization();
+        if (result == TrackingStatus.denied) {
+          setState(() {
+            mostrarIconePermitirAdmobIOS = true;
+          });
+        }
       }
-      loadAd();
-      await AppTrackingTransparency.getAdvertisingIdentifier();
+
+      if (status == TrackingStatus.authorized) {
+        setState(() {
+          mostrarIconePermitirAdmobIOS = false;
+        });
+        loadAd();
+        await AppTrackingTransparency.getAdvertisingIdentifier();
+      }
     }
   }
 
@@ -162,6 +180,32 @@ class _HomeViewState extends State<HomeView> {
           const SizedBox(
             width: 10,
           ),
+          if (mostrarIconePermitirAdmobIOS)
+            IconButton(
+              onPressed: () {
+                AppDialog().showDialogApp(
+                  barrierDismissible: false,
+                  title: AppStrings.atencao,
+                  subTitle: AppStrings.paraPermitirQueOPayplanAdmob,
+                  onTapButton1: () async {
+                    await initPlugin();
+                    if (!mostrarIconePermitirAdmobIOS) {
+                      Navigator.of(context).pop();
+                    } else {
+                      openAppSettings();
+                    }
+                  },
+                  onTapButton2: () async {
+                    Navigator.of(context).pop();
+                  },
+                  textoButton1: AppStrings.abrirConfiguracoes,
+                );
+              },
+              icon: const Icon(
+                Icons.phonelink_erase_sharp,
+                color: Colors.red,
+              ),
+            ),
           if (mostrarIconePermitirNotificacao)
             IconButton(
               onPressed: () {
