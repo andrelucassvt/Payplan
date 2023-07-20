@@ -317,30 +317,31 @@ class _HomeViewState extends State<HomeView> {
                         ),
                         if (state.cartoes.isEmpty) ...[
                           const Spacer(),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () async {
-                                _appCoordinator
-                                    .navegarNovoCartaoView()
-                                    .then((value) {
-                                  _cubit.inicializar();
-                                });
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 15,
-                                ),
-                                child: Text(
-                                  AppStrings.voceAindaNaoTemCartoesAdicionados,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.lightBlue,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
+                          TextButton.icon(
+                            onPressed: () {
+                              _appCoordinator
+                                  .navegarNovoCartaoView(
+                                isDivida: true,
+                              )
+                                  .then((value) {
+                                _cubit.inicializar();
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                            label: Text(AppStrings.addDividaExterna),
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              _appCoordinator
+                                  .navegarNovoCartaoView(
+                                isDivida: false,
+                              )
+                                  .then((value) {
+                                _cubit.inicializar();
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                            label: Text(AppStrings.adicionarCartao),
                           ),
                           const Spacer(),
                         ],
