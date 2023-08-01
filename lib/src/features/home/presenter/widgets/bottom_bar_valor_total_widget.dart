@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/src/util/coordinator/app_coordinator.dart';
+import 'package:notes_app/src/util/dto/graphic_dto.dart';
+import 'package:notes_app/src/util/entity/cartao_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 class BottomBarValorTotalWidget extends StatefulWidget {
   const BottomBarValorTotalWidget({
     required this.valorFaturaCartao,
+    required this.cartoes,
+    required this.mesSelecionado,
     super.key,
   });
   final double valorFaturaCartao;
+  final List<CartaoEntity> cartoes;
+  final String mesSelecionado;
 
   @override
   State<BottomBarValorTotalWidget> createState() =>
@@ -23,6 +30,8 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
   final _focusNodeEditarFatura = FocusNode();
   final _textControllerEditarFatura =
       MoneyMaskedTextController(initialValue: 0.00);
+
+  final _appCoordinator = AppCoordinator();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -51,15 +60,18 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
           const SizedBox(
             width: 15,
           ),
-          Text(
-            formatador.format(widget.valorFaturaCartao),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          Expanded(
+            child: Text(
+              formatador.format(widget.valorFaturaCartao),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          const Spacer(),
           IconButton(
             onPressed: () {
               showModalBottomSheet(
@@ -182,7 +194,17 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
                 },
               );
             },
-            icon: const Icon(Icons.calculate_rounded),
+            icon: const Icon(Icons.monetization_on_rounded),
+            color: Colors.white,
+          ),
+          IconButton(
+            onPressed: () => _appCoordinator.navegarGraphicView(
+              params: GraphicDto(
+                cartoes: widget.cartoes,
+                mesSelecionado: widget.mesSelecionado,
+              ),
+            ),
+            icon: const Icon(Icons.donut_large),
             color: Colors.white,
           ),
         ],

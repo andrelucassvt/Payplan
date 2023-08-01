@@ -52,6 +52,8 @@ class AppStrings {
       'para-permitir-que-o-payplan-admob'.i18n();
   static var abrirConfiguracoes = 'abrir-configuracoes'.i18n();
   static var naoPercaADataPagamento = 'nao-perca-data-pagamento'.i18n();
+  static var graficoGastos = 'grafico-gastos'.i18n();
+  static var voltar = 'voltar'.i18n();
 }
 
 extension MonthsNames on String {

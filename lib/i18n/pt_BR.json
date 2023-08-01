@@ -42,5 +42,7 @@
     "para-permitir-que-o-payplan": "Para permitir que o Payplan consiga entregar notificações personalizadas, é preciso pemitir as notificações nas configurações",
     "para-permitir-que-o-payplan-admob": "Para permitir que o Payplan consiga entregar anúncios personalizados, é preciso pemitir o rastreamento nas configurações",
     "abrir-configuracoes": "Abrir configurações",
-    "nao-perca-data-pagamento": "Não perca a data de pagamento das suas faturas"
+    "nao-perca-data-pagamento": "Não perca a data de pagamento das suas faturas",
+    "grafico-gastos": "Gráficos de gastos",
+    "voltar": "Voltar"
 }
