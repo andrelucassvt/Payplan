@@ -50,7 +50,6 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
         horizontal: 15,
       ),
       child: Container(
-        height: 80,
         margin: const EdgeInsets.only(
           bottom: 10,
         ),
@@ -83,6 +82,8 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                   if (widget.valorFaturaCartao.isNotEmpty)
                     Text(
                       formatador.format(double.parse(_faturaAtual.valorFatura)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: widget.valorFaturaCartao.first.isPago

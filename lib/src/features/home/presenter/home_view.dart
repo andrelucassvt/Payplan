@@ -445,6 +445,8 @@ class _HomeViewState extends State<HomeView> {
                           ),
                           BottomBarValorTotalWidget(
                             valorFaturaCartao: state.valorTotalDaFatura,
+                            cartoes: state.cartoes,
+                            mesSelecionado: state.mesSelecionado.first,
                           ),
                         ]
                       ],

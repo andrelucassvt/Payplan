@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest_all.dart' as tzz;
@@ -44,8 +43,6 @@ class NotificationService {
   Future<bool> verificarPermissaoNotificacao() async {
     final result = await Permission.notification.isPermanentlyDenied;
     final resultDanied = await Permission.notification.isDenied;
-    debugPrint(result.toString());
-    debugPrint(resultDanied.toString());
 
     if (result == resultDanied) {
       return false;
