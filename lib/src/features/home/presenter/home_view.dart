@@ -140,6 +140,12 @@ class _HomeViewState extends State<HomeView> {
     } else {
       final TrackingStatus status =
           await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notSupported ||
+          status == TrackingStatus.restricted) {
+        setState(() {
+          mostrarIconePermitirAdmobIOS = false;
+        });
+      }
       if (status == TrackingStatus.denied) {
         setState(() {
           mostrarIconePermitirAdmobIOS = true;
