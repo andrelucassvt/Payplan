@@ -147,9 +147,14 @@ class _HomeViewState extends State<HomeView> {
         });
       }
       if (status == TrackingStatus.denied) {
-        setState(() {
-          mostrarIconePermitirAdmobIOS = true;
-        });
+        if (!mostrarIconePermitirAdmobIOS) {
+          await Future.delayed(const Duration(milliseconds: 200));
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        } else {
+          setState(() {
+            mostrarIconePermitirAdmobIOS = true;
+          });
+        }
       }
       if (status == TrackingStatus.notDetermined) {
         // Wait for dialog popping animation
