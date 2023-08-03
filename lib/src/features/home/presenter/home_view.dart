@@ -140,21 +140,10 @@ class _HomeViewState extends State<HomeView> {
     } else {
       final TrackingStatus status =
           await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.notSupported ||
-          status == TrackingStatus.restricted) {
-        setState(() {
-          mostrarIconePermitirAdmobIOS = false;
-        });
-      }
       if (status == TrackingStatus.denied) {
-        if (!mostrarIconePermitirAdmobIOS) {
-          await Future.delayed(const Duration(milliseconds: 200));
-          await AppTrackingTransparency.requestTrackingAuthorization();
-        } else {
-          setState(() {
-            mostrarIconePermitirAdmobIOS = true;
-          });
-        }
+        setState(() {
+          mostrarIconePermitirAdmobIOS = true;
+        });
       }
       if (status == TrackingStatus.notDetermined) {
         // Wait for dialog popping animation
