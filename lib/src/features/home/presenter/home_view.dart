@@ -97,10 +97,12 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
     _cubit.inicializar();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
-      NotificationService().showLocalNotification(
-        title: AppStrings.atencao,
-        body: AppStrings.naoPercaADataPagamento,
-      );
+      Future.delayed(const Duration(milliseconds: 200), () {
+        NotificationService().showLocalNotification(
+          title: AppStrings.atencao,
+          body: AppStrings.naoPercaADataPagamento,
+        );
+      });
       initPlugin();
     });
     verificarPermissaoNotificacao();

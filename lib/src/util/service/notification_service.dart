@@ -29,15 +29,20 @@ class NotificationService {
       iOS: iosNotificatonDetail,
       android: androidNotificationDetail,
     );
-    _flutterLocalNotificationsPlugin.zonedSchedule(
-      0,
-      title,
-      body,
-      tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
-      notificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+    final listNotification =
+        await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+
+    if (listNotification.isEmpty) {
+      _flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
+        notificationDetails,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   Future<bool> verificarPermissaoNotificacao() async {
