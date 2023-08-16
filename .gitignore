@@ -31,7 +31,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-
+/ios/fastlane/api_key.json
+/android/fastlane/key.json
 # Symbolication related
 app.*.symbols
 
