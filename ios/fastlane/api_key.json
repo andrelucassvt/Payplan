@@ -1,0 +1,8 @@
+{
+    "key_id": "AB483SC484",
+    "issuer_id": "ed91d643-bec4-4821-9a7a-3cc9d63ba124",
+    "key_filepath": "ios/fastlane/AuthKey_AB483SC484.p8",
+    "duration": 1200,
+    "in_house": false,
+    "is_key_content_base64": true
+}
