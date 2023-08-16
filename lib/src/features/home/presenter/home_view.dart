@@ -106,7 +106,7 @@ class _HomeViewState extends State<HomeView> {
       initPlugin();
     });
     verificarPermissaoNotificacao();
-  }
+  } //
 
   Future<void> verificarPermissaoNotificacao() async {
     final result = await NotificationService().verificarPermissaoNotificacao();
