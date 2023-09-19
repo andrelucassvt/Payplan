@@ -53,121 +53,162 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
         margin: const EdgeInsets.only(
           bottom: 10,
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              height: 70,
-              width: 70,
-              decoration: BoxDecoration(
-                color: Color(
-                  widget.cartao.cor,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    isDividaTitulo(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    color: Color(
+                      widget.cartao.cor,
                     ),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  if (widget.valorFaturaCartao.isNotEmpty)
-                    Text(
-                      formatador.format(double.parse(_faturaAtual.valorFatura)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: widget.valorFaturaCartao.first.isPago
-                            ? Colors.blue
-                            : Colors.red,
-                        fontSize: 20,
-                      ),
-                    ),
-                  if (widget.valorFaturaCartao.isEmpty) ...[
-                    ElevatedButton(
-                      onPressed: widget.showAdicionarAtualizarValorFatura,
-                      child: Text(
-                        AppStrings.addValor,
-                        textAlign: TextAlign.center,
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        isDividaTitulo(),
                         style: const TextStyle(
-                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (widget.valorFaturaCartao.isNotEmpty)
+                        Text(
+                          formatador
+                              .format(double.parse(_faturaAtual.valorFatura)),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: widget.valorFaturaCartao.first.isPago
+                                ? Colors.green
+                                : Colors.red,
+                            fontSize: 20,
+                          ),
+                        ),
+                      if (widget.valorFaturaCartao.isEmpty) ...[
+                        ElevatedButton(
+                          onPressed: widget.showAdicionarAtualizarValorFatura,
+                          child: Text(
+                            AppStrings.addValor,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                PopupMenuButton(
+                  icon: const Icon(Icons.more_vert),
+                  itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        onTap: widget.showAdicionarAtualizarValorFatura,
+                        child: Text(
+                          AppStrings.editarFatura,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        onTap: widget.atualizarCartao,
+                        child: Text(
+                          widget.cartao.isDivida
+                              ? AppStrings.editarDivida
+                              : AppStrings.editarCartao,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        onTap: () async {
+                          Future.delayed(const Duration(seconds: 0), () {
+                            AppDialog().showDialogApp(
+                              title: AppStrings.atencao,
+                              subTitle: AppStrings.esseCartaoSeraRemovido,
+                              textoButton1: AppStrings.deletar,
+                              corTextoOnTap: Colors.red,
+                              onTapButton1: widget.deletarCartao,
+                            );
+                          });
+                        },
+                        child: Text(
+                          AppStrings.deletar,
+                          style: const TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+            if (widget.valorFaturaCartao.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 10,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: widget.showAdicionarAtualizarValorFatura,
+                        child: Container(
+                          margin: const EdgeInsets.only(
+                            right: 60,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(32),
+                          ),
+                          height: 45,
+                          child: Center(
+                            child: Text(
+                              AppStrings.editarFatura,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
+                    FlutterSwitch(
+                      valueFontSize: 10.0,
+                      width: 100,
+                      height: 45,
+                      borderRadius: 30.0,
+                      value: _faturaAtual.isPago,
+                      showOnOff: true,
+                      activeColor: Colors.green,
+                      activeText: AppStrings.paga,
+                      inactiveText: AppStrings.naoPaga,
+                      onToggle: (val) {
+                        final dividasAtualizadas =
+                            List<FaturaEntity>.from(widget.cartao.dividas)
+                              ..removeWhere((divida) =>
+                                  divida.mes == widget.mesSelecionado)
+                              ..add(_faturaAtual.copyWith(
+                                isPago: val,
+                              ));
+                        widget.mudarInformacaoCartao(widget.cartao
+                            .copyWith(dividas: dividasAtualizadas));
+                      },
+                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-            if (widget.valorFaturaCartao.isNotEmpty)
-              FlutterSwitch(
-                valueFontSize: 10.0,
-                width: 100,
-                borderRadius: 30.0,
-                value: _faturaAtual.isPago,
-                showOnOff: true,
-                activeText: AppStrings.paga,
-                inactiveText: AppStrings.naoPaga,
-                onToggle: (val) {
-                  final dividasAtualizadas =
-                      List<FaturaEntity>.from(widget.cartao.dividas)
-                        ..removeWhere(
-                            (divida) => divida.mes == widget.mesSelecionado)
-                        ..add(_faturaAtual.copyWith(
-                          isPago: val,
-                        ));
-                  widget.mudarInformacaoCartao(
-                      widget.cartao.copyWith(dividas: dividasAtualizadas));
-                },
-              ),
-            PopupMenuButton(
-              icon: const Icon(Icons.more_vert),
-              itemBuilder: (context) {
-                return [
-                  PopupMenuItem(
-                    onTap: widget.showAdicionarAtualizarValorFatura,
-                    child: Text(
-                      AppStrings.editarFatura,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    onTap: widget.atualizarCartao,
-                    child: Text(
-                      widget.cartao.isDivida
-                          ? AppStrings.editarDivida
-                          : AppStrings.editarCartao,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    onTap: () async {
-                      Future.delayed(const Duration(seconds: 0), () {
-                        AppDialog().showDialogApp(
-                          title: AppStrings.atencao,
-                          subTitle: AppStrings.esseCartaoSeraRemovido,
-                          textoButton1: AppStrings.deletar,
-                          corTextoOnTap: Colors.red,
-                          onTapButton1: widget.deletarCartao,
-                        );
-                      });
-                    },
-                    child: Text(
-                      AppStrings.deletar,
-                      style: const TextStyle(
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ];
-              },
-            ),
           ],
         ),
       ),
