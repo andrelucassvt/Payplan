@@ -40,6 +40,7 @@ class _HomeViewState extends State<HomeView> {
   //Admob
   late BannerAd _bannerAd;
   late BannerAd _bannerAd2;
+
   bool _isLoadedBanner1 = false;
   bool _isLoadedBanner2 = false;
   final adUnitId = Platform.isAndroid
@@ -48,6 +49,10 @@ class _HomeViewState extends State<HomeView> {
   final adUnitIdBanner2 = Platform.isAndroid
       ? 'ca-app-pub-3652623512305285/7988227382'
       : 'ca-app-pub-3652623512305285/8865877557';
+
+  final adUnitIdInter = Platform.isAndroid
+      ? 'ca-app-pub-3652623512305285/2612926407'
+      : 'ca-app-pub-3652623512305285/3055208717';
 
   void loadAd() {
     _bannerAd = BannerAd(
@@ -90,6 +95,26 @@ class _HomeViewState extends State<HomeView> {
         },
       ),
     )..load();
+
+    AdManagerInterstitialAd.load(
+        adUnitId: adUnitIdInter,
+        request: const AdManagerAdRequest(),
+        adLoadCallback: AdManagerInterstitialAdLoadCallback(
+          // Called when an ad is successfully received.
+          onAdLoaded: (ad) {
+            debugPrint('$ad loaded.');
+            Future.delayed(
+                const Duration(
+                  seconds: 10,
+                ), () {
+              ad.show();
+            });
+          },
+          // Called when an ad request failed.
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('AdManagerInterstitialAd failed to load: $error');
+          },
+        ));
   }
 
   @override

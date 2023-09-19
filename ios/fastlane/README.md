@@ -23,10 +23,10 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Push a new release build to the App Store
 
-### ios beta
+### ios deploy
 
 ```sh
-[bundle exec] fastlane ios beta
+[bundle exec] fastlane ios deploy
 ```
 
 Upload a new build to TestFlight
