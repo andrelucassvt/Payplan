@@ -93,6 +93,9 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                                 ? Colors.green
                                 : Colors.red,
                             fontSize: 20,
+                            decoration: widget.valorFaturaCartao.first.isPago
+                                ? TextDecoration.lineThrough
+                                : null,
                           ),
                         ),
                       if (widget.valorFaturaCartao.isEmpty) ...[
@@ -169,7 +172,7 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                           ),
                           decoration: BoxDecoration(
                             color: Colors.blue,
-                            borderRadius: BorderRadius.circular(32),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           height: 45,
                           child: Center(
@@ -187,7 +190,7 @@ class _CardDividasCartaoWidgetState extends State<CardDividasCartaoWidget> {
                     FlutterSwitch(
                       valueFontSize: 10.0,
                       width: 100,
-                      height: 45,
+                      height: 35,
                       borderRadius: 30.0,
                       value: _faturaAtual.isPago,
                       showOnOff: true,
