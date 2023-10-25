@@ -105,7 +105,7 @@ class _HomeViewState extends State<HomeView> {
             debugPrint('$ad loaded.');
             Future.delayed(
                 const Duration(
-                  seconds: 13,
+                  seconds: 60,
                 ), () {
               ad.show();
             });
