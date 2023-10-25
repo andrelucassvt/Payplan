@@ -197,16 +197,17 @@ class _BottomBarValorTotalWidgetState extends State<BottomBarValorTotalWidget> {
             icon: const Icon(Icons.monetization_on_rounded),
             color: Colors.white,
           ),
-          IconButton(
-            onPressed: () => _appCoordinator.navegarGraphicView(
-              params: GraphicDto(
-                cartoes: widget.cartoes,
-                mesSelecionado: widget.mesSelecionado,
+          if (widget.valorFaturaCartao != 0)
+            IconButton(
+              onPressed: () => _appCoordinator.navegarGraphicView(
+                params: GraphicDto(
+                  cartoes: widget.cartoes,
+                  mesSelecionado: widget.mesSelecionado,
+                ),
               ),
+              icon: const Icon(Icons.donut_large),
+              color: Colors.white,
             ),
-            icon: const Icon(Icons.donut_large),
-            color: Colors.white,
-          ),
         ],
       ),
     );

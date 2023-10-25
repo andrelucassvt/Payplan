@@ -95,26 +95,6 @@ class _HomeViewState extends State<HomeView> {
         },
       ),
     )..load();
-
-    AdManagerInterstitialAd.load(
-        adUnitId: adUnitIdInter,
-        request: const AdManagerAdRequest(),
-        adLoadCallback: AdManagerInterstitialAdLoadCallback(
-          // Called when an ad is successfully received.
-          onAdLoaded: (ad) {
-            debugPrint('$ad loaded.');
-            Future.delayed(
-                const Duration(
-                  seconds: 60,
-                ), () {
-              ad.show();
-            });
-          },
-          // Called when an ad request failed.
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('AdManagerInterstitialAd failed to load: $error');
-          },
-        ));
   }
 
   @override
