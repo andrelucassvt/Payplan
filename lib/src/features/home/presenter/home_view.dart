@@ -1,11 +1,7 @@
-import 'dart:io';
-
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/presenter/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/presenter/widgets/bottom_bar_valor_total_widget.dart';
 import 'package:notes_app/src/features/home/presenter/widgets/card_dividas_cartao_widget.dart';
@@ -35,67 +31,6 @@ class _HomeViewState extends State<HomeView> {
   final ScrollController _scrollController = ScrollController();
 
   bool mostrarIconePermitirNotificacao = false;
-  bool mostrarIconePermitirAdmobIOS = false;
-
-  //Admob
-  late BannerAd _bannerAd;
-  late BannerAd _bannerAd2;
-
-  bool _isLoadedBanner1 = false;
-  bool _isLoadedBanner2 = false;
-  final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3652623512305285/5889977427'
-      : 'ca-app-pub-3652623512305285/9198667043';
-  final adUnitIdBanner2 = Platform.isAndroid
-      ? 'ca-app-pub-3652623512305285/7988227382'
-      : 'ca-app-pub-3652623512305285/8865877557';
-
-  final adUnitIdInter = Platform.isAndroid
-      ? 'ca-app-pub-3652623512305285/2612926407'
-      : 'ca-app-pub-3652623512305285/3055208717';
-
-  void loadAd() {
-    _bannerAd = BannerAd(
-      adUnitId: adUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
-          setState(() {
-            _isLoadedBanner1 = true;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: $err');
-          setState(() {
-            _isLoadedBanner1 = false;
-          });
-          ad.dispose();
-        },
-      ),
-    )..load();
-    _bannerAd2 = BannerAd(
-      adUnitId: adUnitIdBanner2,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
-          setState(() {
-            _isLoadedBanner2 = true;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: $err');
-          setState(() {
-            _isLoadedBanner2 = false;
-          });
-          ad.dispose();
-        },
-      ),
-    )..load();
-  }
 
   @override
   void initState() {
@@ -108,7 +43,6 @@ class _HomeViewState extends State<HomeView> {
           body: AppStrings.naoPercaADataPagamento,
         );
       });
-      initPlugin();
     });
     verificarPermissaoNotificacao();
   } //
@@ -140,41 +74,6 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlugin() async {
-    if (Platform.isAndroid) {
-      loadAd();
-    } else {
-      final TrackingStatus status =
-          await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.denied) {
-        setState(() {
-          mostrarIconePermitirAdmobIOS = true;
-        });
-      }
-      if (status == TrackingStatus.notDetermined) {
-        // Wait for dialog popping animation
-        await Future.delayed(const Duration(milliseconds: 200));
-
-        final result =
-            await AppTrackingTransparency.requestTrackingAuthorization();
-        if (result == TrackingStatus.denied) {
-          setState(() {
-            mostrarIconePermitirAdmobIOS = true;
-          });
-        }
-      }
-
-      if (status == TrackingStatus.authorized) {
-        setState(() {
-          mostrarIconePermitirAdmobIOS = false;
-        });
-        loadAd();
-        await AppTrackingTransparency.getAdvertisingIdentifier();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,32 +86,6 @@ class _HomeViewState extends State<HomeView> {
           const SizedBox(
             width: 10,
           ),
-          if (mostrarIconePermitirAdmobIOS)
-            IconButton(
-              onPressed: () {
-                AppDialog().showDialogApp(
-                  barrierDismissible: false,
-                  title: AppStrings.atencao,
-                  subTitle: AppStrings.paraPermitirQueOPayplanAdmob,
-                  onTapButton1: () async {
-                    await initPlugin();
-                    if (!mostrarIconePermitirAdmobIOS) {
-                      Navigator.of(context).pop();
-                    } else {
-                      openAppSettings();
-                    }
-                  },
-                  onTapButton2: () async {
-                    Navigator.of(context).pop();
-                  },
-                  textoButton1: AppStrings.abrirConfiguracoes,
-                );
-              },
-              icon: const Icon(
-                Icons.phonelink_erase_sharp,
-                color: Colors.red,
-              ),
-            ),
           if (mostrarIconePermitirNotificacao)
             IconButton(
               onPressed: () {
@@ -255,17 +128,6 @@ class _HomeViewState extends State<HomeView> {
       body: SafeArea(
         child: Column(
           children: [
-            if (_isLoadedBanner1)
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 5,
-                  bottom: 5,
-                ),
-                child: SizedBox(
-                  height: 50, // Altura do banner do AdMob
-                  child: AdWidget(ad: _bannerAd),
-                ),
-              ),
             Expanded(
               child: BlocConsumer<HomeCubit, HomeState>(
                 bloc: _cubit,
@@ -431,18 +293,6 @@ class _HomeViewState extends State<HomeView> {
                                             });
                                           },
                                         ),
-                                        if (index == 1 && _isLoadedBanner2)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 5,
-                                              bottom: 5,
-                                            ),
-                                            child: SizedBox(
-                                              height:
-                                                  50, // Altura do banner do AdMob
-                                              child: AdWidget(ad: _bannerAd2),
-                                            ),
-                                          ),
                                       ],
                                     );
                                   }
