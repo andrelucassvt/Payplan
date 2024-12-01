@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/src/util/service/navigation_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 class AppDialog {
-  var currentContext = NavigationService.navigatorKey.currentContext!;
-
   Future<void> showDialogSimple({
     required String title,
     required String subTitle,
-    BuildContext? contextCustom,
+    required BuildContext contextCustom,
   }) {
     return showDialog<void>(
-      context: contextCustom ?? currentContext,
+      context: contextCustom,
       builder: (context) {
         return AlertDialog(
           title: Text(title),
@@ -35,8 +32,8 @@ class AppDialog {
     required String title,
     required String subTitle,
     required VoidCallback onTapButton1,
+    required BuildContext contextCustom,
     VoidCallback? onTapButton2,
-    BuildContext? contextCustom,
     Color? corTextoOnTap,
     Color? corButtonCancelOnTap,
     String? textoButton1,
@@ -45,7 +42,7 @@ class AppDialog {
     bool barrierDismissible = true,
   }) {
     return showDialog<void>(
-      context: contextCustom ?? currentContext,
+      context: contextCustom,
       barrierDismissible: barrierDismissible,
       builder: (context) {
         return AlertDialog(
