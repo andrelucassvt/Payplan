@@ -18,10 +18,11 @@ class NotificationService {
   Future<void> showLocalNotification({
     required String title,
     required String body,
+    tz.TZDateTime? dateTime,
   }) async {
     tzz.initializeTimeZones();
     const androidNotificationDetail = AndroidNotificationDetails(
-      '0', // channel Id
+      '0',
       'general',
     );
     const iosNotificatonDetail = DarwinNotificationDetails();
@@ -37,7 +38,7 @@ class NotificationService {
         0,
         title,
         body,
-        tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
+        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
         notificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,

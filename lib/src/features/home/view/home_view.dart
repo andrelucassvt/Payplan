@@ -34,6 +34,7 @@ class _HomeViewState extends State<HomeView> {
       });
     });
     verificarPermissaoNotificacao();
+    _cubit.buscarDividas();
   }
 
   Future<void> verificarPermissaoNotificacao() async {
@@ -416,17 +417,57 @@ class _HomeViewState extends State<HomeView> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12.0),
                               child: state.isDividas
-                                  ? ListView.builder(
-                                      itemCount: 10,
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                            bottom: 10,
+                                  ? state.dividas.isEmpty
+                                      ? Center(
+                                          child: InkWell(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      NovaDividaView(
+                                                    homeCubit: _cubit,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Container(
+                                              height: 50,
+                                              margin: EdgeInsets.symmetric(
+                                                horizontal: 50,
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 10,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.whiteOpacity,
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  AppStrings.novaDivida,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                          child: HomeCardDivida(),
-                                        );
-                                      },
-                                    )
+                                        )
+                                      : ListView.builder(
+                                          itemCount: state.dividas.length,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding: EdgeInsets.only(
+                                                bottom: 10,
+                                              ),
+                                              child: HomeCardDivida(),
+                                            );
+                                          },
+                                        )
                                   : mostrarIconePermitirNotificacao
                                       ? Center(
                                           child: _permitirNotificao(),
