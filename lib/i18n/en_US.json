@@ -1,5 +1,8 @@
 {
     "add-cartao": "Add card",
+    "add-divida": "New debt",
+    "desconto": "discount",
+    "minhas-dividas": "My debt",
     "novo-cartao": "New card",
     "nova-divida": "New debt",
     "add-novo-cartao": "You don't have any registered cards",

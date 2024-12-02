@@ -4,6 +4,9 @@ class AppStrings {
   static const nameApp = 'PayPlan';
 
   static var adicionarCartao = 'add-cartao'.i18n();
+  static var adicionarDivida = 'add-divida'.i18n();
+  static var desconto = 'desconto'.i18n();
+  static var minhasDividas = 'minhas-dividas'.i18n();
   static var novoCartao = 'novo-cartao'.i18n();
   static var novaDivida = 'nova-divida'.i18n();
   static var adicioneUmCartao = 'add-novo-cartao'.i18n();

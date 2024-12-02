@@ -1,5 +1,8 @@
 {
     "add-cartao": "Agregar tarjeta",
+    "add-divida": "Agregar deuda",
+    "desconto": "descuento",
+    "minhas-dividas": "Mi deuda",
     "novo-cartao": "Nueva tarjeta",
     "nova-divida": "Nueva deuda",
     "add-novo-cartao": "No tienes tarjetas registradas",

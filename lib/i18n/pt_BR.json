@@ -1,5 +1,8 @@
 {
     "add-cartao": "Adicionar cartão",
+    "add-divida": "Adicionar dívida",
+    "desconto": "Desconto",
+    "minhas-dividas": "Minhas dívidas",
     "novo-cartao": "Novo cartão",
     "nova-divida": "Nova dívida",
     "add-novo-cartao": "Você não tem cartão cadastrados",
@@ -23,7 +26,7 @@
     "atualizar-cartao": "Atualizar cartão",
     "atualizar-divida": "Atualizar dívida",
     "add-valor-fatura": "R$ Adicionar valor da fatura",
-    "total": "Total:",
+    "total": "Total de gastos",
     "mensal": "Mensal",
     "unica": "Única",
     "esse-novo-cartao": "O cartão será salvo para todos os meses subsequentes",
