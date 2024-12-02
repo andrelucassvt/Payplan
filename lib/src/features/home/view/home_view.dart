@@ -21,7 +21,6 @@ class _HomeViewState extends State<HomeView> {
   final _cubit = HomeCubit();
   bool mostrarIconePermitirNotificacao = false;
   double interpolacao = 0.0;
-  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -46,6 +45,38 @@ class _HomeViewState extends State<HomeView> {
         mostrarIconePermitirNotificacao = false;
       }
     });
+  }
+
+  Widget _permitirNotificao() {
+    return InkWell(
+      onTap: () {
+        AppDialog().showDialogApp(
+          contextCustom: context,
+          barrierDismissible: false,
+          title: AppStrings.atencao,
+          subTitle: AppStrings.paraPermitirQueOPayplan,
+          onTapButton1: () async {
+            await verificarPermissaoNotificacao();
+            if (!mostrarIconePermitirNotificacao) {
+              Navigator.of(context).pop();
+            } else {
+              openAppSettings();
+            }
+          },
+          onTapButton2: () async {
+            Navigator.of(context).pop();
+          },
+          textoButton1: AppStrings.abrirConfiguracoes,
+        );
+      },
+      child: CircleAvatar(
+        backgroundColor: AppColors.whiteOpacity,
+        child: const Icon(
+          Icons.notification_important,
+          color: Colors.yellow,
+        ),
+      ),
+    );
   }
 
   @override
@@ -139,37 +170,7 @@ class _HomeViewState extends State<HomeView> {
                             Row(
                               children: [
                                 if (mostrarIconePermitirNotificacao)
-                                  InkWell(
-                                    onTap: () {
-                                      AppDialog().showDialogApp(
-                                        contextCustom: context,
-                                        barrierDismissible: false,
-                                        title: AppStrings.atencao,
-                                        subTitle:
-                                            AppStrings.paraPermitirQueOPayplan,
-                                        onTapButton1: () async {
-                                          await verificarPermissaoNotificacao();
-                                          if (!mostrarIconePermitirNotificacao) {
-                                            Navigator.of(context).pop();
-                                          } else {
-                                            openAppSettings();
-                                          }
-                                        },
-                                        onTapButton2: () async {
-                                          Navigator.of(context).pop();
-                                        },
-                                        textoButton1:
-                                            AppStrings.abrirConfiguracoes,
-                                      );
-                                    },
-                                    child: CircleAvatar(
-                                      backgroundColor: AppColors.whiteOpacity,
-                                      child: const Icon(
-                                        Icons.notification_important,
-                                        color: Colors.yellow,
-                                      ),
-                                    ),
-                                  ),
+                                  _permitirNotificao(),
                                 SizedBox(
                                   width: 10,
                                 ),
@@ -331,10 +332,8 @@ class _HomeViewState extends State<HomeView> {
                       margin: EdgeInsets.only(
                         bottom: 20,
                       ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 10,
-                      ),
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 10, bottom: 5),
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(.3),
                         borderRadius: BorderRadius.circular(
@@ -344,43 +343,105 @@ class _HomeViewState extends State<HomeView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            AppStrings.minhasDividas,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  onTap: () {
+                                    _cubit.mudarListagem();
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        AppStrings.minhasDividas,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Container(
+                                        height: 2,
+                                        width: 60,
+                                        decoration: BoxDecoration(
+                                          color: state.isDividas
+                                              ? Colors.white
+                                              : Colors.grey.withOpacity(.5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  onTap: () {
+                                    _cubit.mudarListagem();
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        AppStrings.devedores,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Container(
+                                        height: 2,
+                                        width: 60,
+                                        decoration: BoxDecoration(
+                                          color: state.isDividas
+                                              ? Colors.grey.withOpacity(.5)
+                                              : Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(
                             height: 10,
                           ),
                           Expanded(
-                            child: AnimatedList(
-                              controller: _scrollController,
-                              initialItemCount: 8,
-                              itemBuilder: (context, index, animation) {
-                                return AnimatedBuilder(
-                                    animation: _scrollController,
-                                    builder: (context, child) {
-                                      double scale = 1.0;
-                                      if (_scrollController.hasClients) {
-                                        double offset =
-                                            _scrollController.offset / 100;
-                                        scale = (1.0 - (offset - index * 0.9))
-                                            .clamp(.9, 1);
-                                      }
-                                      return Transform.scale(
-                                        scale: scale,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 20,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.0),
+                              child: state.isDividas
+                                  ? ListView.builder(
+                                      itemCount: 10,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            bottom: 10,
                                           ),
                                           child: HomeCardDivida(),
+                                        );
+                                      },
+                                    )
+                                  : mostrarIconePermitirNotificacao
+                                      ? Center(
+                                          child: _permitirNotificao(),
+                                        )
+                                      : ListView.builder(
+                                          itemCount: 0,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding: EdgeInsets.only(
+                                                bottom: 10,
+                                              ),
+                                              child: HomeCardDivida(),
+                                            );
+                                          },
                                         ),
-                                      );
-                                    });
-                              },
                             ),
                           ),
                         ],

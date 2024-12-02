@@ -294,9 +294,11 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                     style: TextStyle(
                       color: Colors.white,
                     ),
-                    decoration: InputDecoration.collapsed(
-                      hintText: AppStrings.valorParcela,
-                    ),
+                    decoration: InputDecoration(
+                        labelText: AppStrings.valorParcela,
+                        labelStyle: TextStyle(
+                          color: Colors.white,
+                        )),
                     onChanged: (value) {
                       setState(() {
                         if (value.isNotEmpty) {

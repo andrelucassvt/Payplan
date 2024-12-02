@@ -11,14 +11,26 @@ class HomeCubit extends Cubit<HomeState> {
               (element) => element.id == DateTime.now().month,
             ),
             anoAtual: DateTime.now().year,
+            isDividas: true,
           ),
         );
+
+  void mudarListagem() {
+    emit(
+      HomeMudarMesAtual(
+        mesAtual: state.mesAtual,
+        anoAtual: state.anoAtual,
+        isDividas: !state.isDividas,
+      ),
+    );
+  }
 
   void mudarMesAtual(MesesEnum mes) {
     emit(
       HomeMudarMesAtual(
         mesAtual: mes,
         anoAtual: state.anoAtual,
+        isDividas: state.isDividas,
       ),
     );
   }
@@ -28,6 +40,7 @@ class HomeCubit extends Cubit<HomeState> {
       HomeMudarMesAtual(
         mesAtual: state.mesAtual,
         anoAtual: ano,
+        isDividas: state.isDividas,
       ),
     );
   }

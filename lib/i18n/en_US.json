@@ -9,6 +9,7 @@
     "nome-cartao": "Card name:",
     "nome-divida": "Debt name:",
     "parcelada": "Installment",
+    "devedores" : "Debtors",
     "quantidade-parcelas": "Number of installments",
     "valor-parcela": "Installment value",
     "nao-pode-modificar": "*Cannot be modified later",

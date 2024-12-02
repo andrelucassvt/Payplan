@@ -12,14 +12,19 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10,
+      ),
       decoration: BoxDecoration(
         color: Colors.red,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(
+            height: 20,
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -30,19 +35,26 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                   color: Colors.white,
                 ),
               ),
-              Text(
-                '\$ 480,00',
-                style: TextStyle(
-                  //decoration: TextDecoration.lineThrough,
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: Text(
+                  '\$ 20.502,34',
+                  maxLines: 2,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    //decoration: TextDecoration.lineThrough,
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(
-            height: 20,
+            height: 40,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,6 +96,9 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                 ],
               ),
             ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
         ],
       ),
