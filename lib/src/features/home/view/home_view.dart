@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
+import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
@@ -85,21 +86,55 @@ class _HomeViewState extends State<HomeView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '2024',
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                            PopupMenuButton<int>(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    state.anoAtual.toString(),
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Icon(
-                                  Icons.touch_app,
-                                  color: Colors.white,
-                                ),
-                              ],
+                                  Icon(
+                                    Icons.touch_app,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                              itemBuilder: (context) {
+                                return List.generate(
+                                  15,
+                                  (index) {
+                                    int anoBase = 2024;
+                                    if (index == 0) {
+                                      return PopupMenuItem<int>(
+                                        value: 2024,
+                                        child: Text(
+                                          2024.toString(),
+                                        ),
+                                        onTap: () {
+                                          _cubit.mudarAnoAtual(
+                                            anoBase,
+                                          );
+                                        },
+                                      );
+                                    }
+                                    return PopupMenuItem<int>(
+                                      value: anoBase + index,
+                                      child: Text(
+                                        (anoBase + index).toString(),
+                                      ),
+                                      onTap: () {
+                                        _cubit.mudarAnoAtual(
+                                          anoBase + index,
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
                             ),
                             Row(
                               children: [
@@ -212,7 +247,16 @@ class _HomeViewState extends State<HomeView> {
                           children: [
                             Expanded(
                               child: InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => NovaDividaView(
+                                        homeCubit: _cubit,
+                                      ),
+                                    ),
+                                  );
+                                },
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 10,

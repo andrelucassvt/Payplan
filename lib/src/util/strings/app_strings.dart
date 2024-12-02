@@ -6,6 +6,10 @@ class AppStrings {
   static var adicionarCartao = 'add-cartao'.i18n();
   static var adicionarDivida = 'add-divida'.i18n();
   static var desconto = 'desconto'.i18n();
+  static var parcelada = 'parcelada'.i18n();
+  static var valorParcela = 'valor-parcela'.i18n();
+  static var naoPodeModificar = 'nao-pode-modificar'.i18n();
+  static var quantidadeParcelas = 'quantidade-parcelas'.i18n();
   static var minhasDividas = 'minhas-dividas'.i18n();
   static var novoCartao = 'novo-cartao'.i18n();
   static var novaDivida = 'nova-divida'.i18n();
