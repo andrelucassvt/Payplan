@@ -47,7 +47,6 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
     if (_bannerAd != null && _isLoaded) {
       return Padding(
         padding: const EdgeInsets.only(
