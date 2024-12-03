@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
+import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
@@ -19,8 +21,10 @@ class HomeCardDivida extends StatefulWidget {
 
 class _HomeCardDividaState extends State<HomeCardDivida> {
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
-
   HomeState get homeState => widget.homeCubit.state;
+
+  double valorFatura = 0.0;
+  late final MoneyMaskedTextController _faturaTextController;
 
   FaturaMensalEntity? get faturaAtual {
     final result = widget.dividaEntity.faturas
@@ -31,11 +35,10 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
         )
         .toList();
 
-    if (result.isEmpty) {
+    if (result.isEmpty && !widget.dividaEntity.mensal) {
       return null;
     }
-
-    if (widget.dividaEntity.faturas.isEmpty) {
+    if (widget.dividaEntity.faturas.isEmpty || result.isEmpty) {
       return FaturaMensalEntity(
         ano: widget.homeCubit.state.anoAtual,
         mes: widget.homeCubit.state.mesAtual.id,
@@ -44,7 +47,23 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
       );
     }
 
+    valorFatura = result[0].valor;
+    setState(() {});
+
     return result[0];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        _faturaTextController = MoneyMaskedTextController(
+          initialValue: valorFatura,
+        );
+      },
+    );
   }
 
   @override
@@ -105,7 +124,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
-                onTap: () {},
+                onTap: _editarFaturaBottomSheet,
                 child: Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -165,6 +184,139 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
           ),
         ],
       ),
+    );
+  }
+
+  void _editarFaturaBottomSheet() {
+    double valorModificado = 0;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          margin:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.symmetric(
+            horizontal: 20,
+          ),
+          color: Colors.black,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Text(
+                AppStrings.editarFatura,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 20,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.whiteOpacity,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    10,
+                  ),
+                ),
+                child: TextFormField(
+                  controller: _faturaTextController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  decoration: InputDecoration(
+                      labelText: AppStrings.valorParcela,
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                      )),
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      final filtro1 = value.replaceAll('.', '');
+                      valorModificado =
+                          double.parse(filtro1.replaceAll(',', '.'));
+
+                      setState(() {});
+                    }
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final tratamentoFaturaListaFatura =
+                      widget.dividaEntity.faturas.map(
+                    (e) {
+                      if (e.ano == faturaAtual!.ano &&
+                          e.mes == faturaAtual!.mes) {
+                        return faturaAtual!.copyWith(
+                          valor: valorModificado,
+                        );
+                      }
+                      return e;
+                    },
+                  ).toList();
+                  if (tratamentoFaturaListaFatura.isEmpty) {
+                    widget.homeCubit.atualizarDivida(
+                      widget.dividaEntity.copyWith(
+                        faturas: [
+                          faturaAtual!.copyWith(
+                            valor: valorModificado,
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    final resultVerificacaoFatura = tratamentoFaturaListaFatura
+                        .where(
+                          (e) =>
+                              e.ano == faturaAtual!.ano &&
+                              e.mes == faturaAtual!.mes,
+                        )
+                        .toList();
+
+                    widget.homeCubit.atualizarDivida(
+                      widget.dividaEntity.copyWith(
+                        faturas: [
+                          ...tratamentoFaturaListaFatura,
+                          if (resultVerificacaoFatura.isEmpty)
+                            faturaAtual!.copyWith(
+                              valor: valorModificado,
+                            ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  AppStrings.salvar,
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+            ],
+          ),
+        );
+      },
+    ).whenComplete(
+      () {
+        _faturaTextController.updateValue(faturaAtual!.valor);
+      },
     );
   }
 }

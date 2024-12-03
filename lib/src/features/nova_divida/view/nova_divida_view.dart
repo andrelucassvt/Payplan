@@ -37,6 +37,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
     Colors.amber,
     Colors.brown,
     Colors.cyan,
+    Colors.pink,
   ];
 
   int calculoMes = 1;
