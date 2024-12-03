@@ -39,7 +39,7 @@ class NotificationService {
         0,
         title,
         body,
-        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(days: 2)),
         notificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
