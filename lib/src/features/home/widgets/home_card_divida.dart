@@ -176,7 +176,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                     faturaAtual!.pago ? AppStrings.paga : AppStrings.naoPaga,
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w100,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                   const SizedBox(

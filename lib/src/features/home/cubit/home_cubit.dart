@@ -23,6 +23,45 @@ class HomeCubit extends Cubit<HomeState> {
 
   String dividaCampoShared = 'dividas';
 
+  Future<void> removerDivida(DividaEntity dividaEntity) async {
+    emit(
+      HomeDividasLoading(
+        mesAtual: state.mesAtual,
+        anoAtual: state.anoAtual,
+        isDividas: state.isDividas,
+        dividas: state.dividas,
+        totalGastos: state.totalGastos,
+      ),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final resultDividas = prefs.getStringList(
+          dividaCampoShared,
+        ) ??
+        [];
+    List<DividaEntity> dividas = [];
+
+    dividas = resultDividas.map(
+      (e) {
+        return DividaEntity.fromJson(json.decode(e));
+      },
+    ).toList();
+
+    dividas.removeWhere(
+      (element) => element.id == dividaEntity.id,
+    );
+
+    final dividasEncode = dividas
+        .map(
+          (e) => json.encode(e.toMap()),
+        )
+        .toList();
+    prefs.setStringList(
+      dividaCampoShared,
+      dividasEncode,
+    );
+    buscarDividas();
+  }
+
   Future<void> atualizarDivida(DividaEntity dividaEntity) async {
     emit(
       HomeDividasLoading(

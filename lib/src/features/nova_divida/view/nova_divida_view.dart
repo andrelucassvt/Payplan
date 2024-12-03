@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
@@ -5,6 +7,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class NovaDividaView extends StatefulWidget {
@@ -93,6 +96,28 @@ class _NovaDividaViewState extends State<NovaDividaView> {
             color: Colors.white,
           ),
         ),
+        actions: [
+          if (widget.dividaEntity != null)
+            TextButton(
+              onPressed: () {
+                widget.homeCubit
+                    .removerDivida(
+                  widget.dividaEntity!,
+                )
+                    .whenComplete(
+                  () {
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
+                );
+              },
+              child: Text(
+                AppStrings.deletar,
+                style: TextStyle(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+        ],
         backgroundColor: Colors.deepPurple,
         iconTheme: IconThemeData(
           color: Colors.white,
@@ -390,7 +415,15 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                 ],
               ],
               const SizedBox(
-                height: 50,
+                height: 20,
+              ),
+              AdmobBannerWidget(
+                bannerId: Platform.isAndroid
+                    ? 'ca-app-pub-3652623512305285/5263156340'
+                    : 'ca-app-pub-3652623512305285/1323911334',
+              ),
+              const SizedBox(
+                height: 100,
               ),
             ],
           ),
