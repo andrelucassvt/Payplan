@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
@@ -21,6 +22,7 @@ class _HomeViewState extends State<HomeView> {
   final _cubit = HomeCubit();
   bool mostrarIconePermitirNotificacao = false;
   double interpolacao = 0.0;
+  final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
 
   @override
   void initState() {
@@ -234,7 +236,7 @@ class _HomeViewState extends State<HomeView> {
                           ),
                         ),
                         Text(
-                          '\$ 10,200.00',
+                          '\$${format.format(state.totalGastos)}',
                           maxLines: 2,
                           style: TextStyle(
                             fontSize: 40,

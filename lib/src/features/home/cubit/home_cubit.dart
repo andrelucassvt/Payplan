@@ -17,6 +17,7 @@ class HomeCubit extends Cubit<HomeState> {
             anoAtual: DateTime.now().year,
             isDividas: true,
             dividas: [],
+            totalGastos: 0,
           ),
         );
 
@@ -29,6 +30,7 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: state.anoAtual,
         isDividas: state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -72,6 +74,7 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: state.anoAtual,
         isDividas: state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -96,6 +99,7 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: state.anoAtual,
         isDividas: state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -112,12 +116,38 @@ class HomeCubit extends Cubit<HomeState> {
       },
     ).toList();
 
+    final filtroGastos = dividas
+        .map(
+          (e) => e.faturas
+              .where(
+                (element) =>
+                    element.ano == state.anoAtual &&
+                    element.mes == state.mesAtual.id &&
+                    !element.pago,
+              )
+              .toList(),
+        )
+        .toList();
+
+    double somaGastos = 0;
+
+    filtroGastos
+        .map(
+          (e) => e.map(
+            (e) {
+              somaGastos = somaGastos + e.valor;
+            },
+          ).toList(),
+        )
+        .toList();
+
     emit(
       HomeDividasSucesso(
         mesAtual: state.mesAtual,
         anoAtual: state.anoAtual,
         isDividas: state.isDividas,
         dividas: dividas.isEmpty ? state.dividas : dividas,
+        totalGastos: somaGastos,
       ),
     );
   }
@@ -129,6 +159,7 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: state.anoAtual,
         isDividas: !state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
   }
@@ -140,8 +171,10 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: state.anoAtual,
         isDividas: state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
+    buscarDividas();
   }
 
   void mudarAnoAtual(int ano) {
@@ -151,7 +184,9 @@ class HomeCubit extends Cubit<HomeState> {
         anoAtual: ano,
         isDividas: state.isDividas,
         dividas: state.dividas,
+        totalGastos: state.totalGastos,
       ),
     );
+    buscarDividas();
   }
 }
