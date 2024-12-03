@@ -38,7 +38,7 @@ class NotificationService {
         0,
         title,
         body,
-        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
+        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
         notificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
@@ -50,11 +50,6 @@ class NotificationService {
   Future<bool> verificarPermissaoNotificacao() async {
     final result = await Permission.notification.isPermanentlyDenied;
     final resultDanied = await Permission.notification.isDenied;
-
-    if (result == resultDanied) {
-      return false;
-    } else {
-      return true;
-    }
+    return result == resultDanied;
   }
 }

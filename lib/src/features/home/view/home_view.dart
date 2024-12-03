@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
@@ -27,15 +28,6 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        NotificationService().showLocalNotification(
-          title: AppStrings.atencao,
-          body: AppStrings.naoPercaADataPagamento,
-        );
-      });
-    });
-    verificarPermissaoNotificacao();
     _cubit.buscarDividas();
   }
 
@@ -287,7 +279,8 @@ class _HomeViewState extends State<HomeView> {
                             ),
                             Expanded(
                               child: InkWell(
-                                onTap: () {},
+                                onTap: () =>
+                                    showModalDesconto(state.totalGastos),
                                 child: Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 10,
@@ -336,7 +329,11 @@ class _HomeViewState extends State<HomeView> {
                         bottom: 20,
                       ),
                       padding: EdgeInsets.only(
-                          left: 10, right: 10, top: 10, bottom: 5),
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(.3),
                         borderRadius: BorderRadius.circular(
@@ -349,141 +346,75 @@ class _HomeViewState extends State<HomeView> {
                           const SizedBox(
                             height: 10,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  onTap: () {
-                                    _cubit.mudarListagem();
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        AppStrings.minhasDividas,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 2,
-                                        width: 60,
-                                        decoration: BoxDecoration(
-                                          color: state.isDividas
-                                              ? Colors.white
-                                              : Colors.grey.withOpacity(.5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 2,
+                            ),
+                            child: Text(
+                              AppStrings.minhasDividas,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Expanded(
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  onTap: () {
-                                    _cubit.mudarListagem();
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        AppStrings.devedores,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 2,
-                                        width: 60,
-                                        decoration: BoxDecoration(
-                                          color: state.isDividas
-                                              ? Colors.grey.withOpacity(.5)
-                                              : Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                           const SizedBox(
                             height: 10,
                           ),
                           Expanded(
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12.0),
-                              child: state.isDividas
-                                  ? state.dividas.isEmpty
-                                      ? Center(
-                                          child: InkWell(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      NovaDividaView(
-                                                    homeCubit: _cubit,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              height: 50,
-                                              margin: EdgeInsets.symmetric(
-                                                horizontal: 50,
+                              borderRadius: BorderRadius.circular(
+                                12.0,
+                              ),
+                              child: state.dividas.isEmpty
+                                  ? Center(
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => NovaDividaView(
+                                                homeCubit: _cubit,
                                               ),
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 10,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.whiteOpacity,
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  AppStrings.novaDivida,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          height: 50,
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 50,
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 10,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.whiteOpacity,
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              AppStrings.novaDivida,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ),
-                                        )
-                                      : ListView.builder(
-                                          itemCount: state.dividas.length,
-                                          itemBuilder: (context, index) {
-                                            return HomeCardDivida(
-                                              dividaEntity:
-                                                  state.dividas[index],
-                                              homeCubit: _cubit,
-                                            );
-                                          },
-                                        )
-                                  : mostrarIconePermitirNotificacao
-                                      ? Center(
-                                          child: _permitirNotificao(),
-                                        )
-                                      : ListView.builder(
-                                          itemCount: 0,
-                                          itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: EdgeInsets.only(
-                                                bottom: 10,
-                                              ),
-                                              child: Container(),
-                                            );
-                                          },
                                         ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      itemCount: state.dividas.length,
+                                      itemBuilder: (context, index) {
+                                        return HomeCardDivida(
+                                          dividaEntity: state.dividas[index],
+                                          homeCubit: _cubit,
+                                        );
+                                      },
+                                    ),
                             ),
                           ),
                         ],
@@ -496,6 +427,157 @@ class _HomeViewState extends State<HomeView> {
           );
         },
       ),
+    );
+  }
+
+  void showModalDesconto(double valorDesseMes) {
+    final faturaTextController = MoneyMaskedTextController(initialValue: 0.00);
+    double valorDigitado = 0.0;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 20,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(
+              color: Colors.white,
+            ),
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(40.0),
+              topRight: const Radius.circular(40.0),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 10,
+                ),
+                child: Text(
+                  AppStrings.adicioneOValorTotalDescontado,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Divider(),
+              Text(
+                AppStrings.valorDesseMes,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                '\$${format.format(valorDesseMes)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Text(
+                AppStrings.digiteOSaldoQueSeraDescontado,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.whiteOpacity,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ),
+                      ),
+                      child: TextFormField(
+                        controller: faturaTextController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        decoration: InputDecoration(
+                            labelText: AppStrings.valorParcela,
+                            labelStyle: TextStyle(
+                              color: Colors.white,
+                            )),
+                        onChanged: (value) {
+                          if (value.isNotEmpty) {
+                            final filtro1 = value.replaceAll('.', '');
+                            valorDigitado =
+                                double.parse(filtro1.replaceAll(',', '.'));
+
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final resultado = valorDigitado - valorDesseMes;
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: Text(AppStrings.saldoRestante),
+                          content: Text(
+                            '\$${format.format(resultado)}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Icon(Icons.check),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 50,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

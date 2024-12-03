@@ -61,6 +61,24 @@ class _NovaDividaViewState extends State<NovaDividaView> {
     return calculoMes;
   }
 
+  void atualizarCampos() {
+    if (widget.dividaEntity != null) {
+      nomeDivida = widget.dividaEntity!.nome;
+      corSelecionada = widget.dividaEntity!.cor;
+    }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        atualizarCampos();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +86,9 @@ class _NovaDividaViewState extends State<NovaDividaView> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          AppStrings.novaDivida,
+          widget.dividaEntity != null
+              ? AppStrings.atualizarDivida
+              : AppStrings.novaDivida,
           style: TextStyle(
             color: Colors.white,
           ),
@@ -97,32 +117,37 @@ class _NovaDividaViewState extends State<NovaDividaView> {
               ),
             );
           } else {
-            widget.homeCubit
-                .salvarDivida(
-              DividaEntity(
-                id: Uuid().v4(),
-                nome: nomeDivida,
-                mensal: isMensal,
-                cor: corSelecionada,
-                faturas: isMensal
-                    ? []
-                    : List.generate(
-                        quantidadeParcelas,
-                        (index) {
-                          return FaturaMensalEntity(
-                            ano: calculoAno,
-                            mes: calculoMeses(index),
-                            valor: valorParcela,
-                          );
-                        },
-                      ),
-              ),
-            )
-                .whenComplete(
-              () {
-                if (context.mounted) Navigator.of(context).pop();
-              },
-            );
+            if (widget.dividaEntity != null) {
+              widget.homeCubit.atualizarDivida(
+                widget.dividaEntity!.copyWith(
+                  cor: corSelecionada,
+                  nome: nomeDivida,
+                ),
+              );
+            } else {
+              widget.homeCubit.salvarDivida(
+                DividaEntity(
+                  id: Uuid().v4(),
+                  nome: nomeDivida,
+                  mensal: isMensal,
+                  cor: corSelecionada,
+                  faturas: isMensal
+                      ? []
+                      : List.generate(
+                          quantidadeParcelas,
+                          (index) {
+                            return FaturaMensalEntity(
+                              ano: calculoAno,
+                              mes: calculoMeses(index),
+                              valor: valorParcela,
+                            );
+                          },
+                        ),
+                ),
+              );
+            }
+
+            if (context.mounted) Navigator.of(context).pop();
           }
         },
         label: Text(
@@ -248,119 +273,121 @@ class _NovaDividaViewState extends State<NovaDividaView> {
               const SizedBox(
                 height: 20,
               ),
-              Text(
-                AppStrings.naoPodeModificar,
-                style: TextStyle(
-                  color: Colors.red,
+              if (widget.dividaEntity == null) ...[
+                Text(
+                  AppStrings.naoPodeModificar,
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CupertinoSegmentedControl<bool>(
-                    groupValue: isMensal,
-                    padding: EdgeInsets.zero,
-                    children: <bool, Widget>{
-                      true: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CupertinoSegmentedControl<bool>(
+                      groupValue: isMensal,
+                      padding: EdgeInsets.zero,
+                      children: <bool, Widget>{
+                        true: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
+                          child: Text(
+                            AppStrings.mensal,
+                          ),
                         ),
-                        child: Text(
-                          AppStrings.mensal,
+                        false: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          child: Text(
+                            AppStrings.parcelada,
+                          ),
                         ),
-                      ),
-                      false: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        child: Text(
-                          AppStrings.parcelada,
-                        ),
-                      ),
-                    },
-                    onValueChanged: (value) {
-                      setState(() {
-                        isMensal = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  if (!isMensal) ...[
-                    PopupMenuButton<int>(
-                      child: Text(
-                        '${quantidadeParcelas}x',
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.white,
-                        ),
-                      ),
-                      itemBuilder: (context) {
-                        return List.generate(
-                          48,
-                          (index) {
-                            return PopupMenuItem<int>(
-                              value: index + 1,
-                              child: Text(
-                                (index + 1).toString(),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  quantidadeParcelas = index + 1;
-                                });
-                              },
-                            );
-                          },
-                        );
+                      },
+                      onValueChanged: (value) {
+                        setState(() {
+                          isMensal = value;
+                        });
                       },
                     ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    if (!isMensal) ...[
+                      PopupMenuButton<int>(
+                        child: Text(
+                          '${quantidadeParcelas}x',
+                          style: TextStyle(
+                            fontSize: 25,
+                            color: Colors.white,
+                          ),
+                        ),
+                        itemBuilder: (context) {
+                          return List.generate(
+                            48,
+                            (index) {
+                              return PopupMenuItem<int>(
+                                value: index + 1,
+                                child: Text(
+                                  (index + 1).toString(),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    quantidadeParcelas = index + 1;
+                                  });
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ],
+                ),
+                if (!isMensal) ...[
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 20,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.whiteOpacity,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        10,
+                      ),
+                    ),
+                    child: TextFormField(
+                      controller: _faturaTextController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                          labelText: AppStrings.valorParcela,
+                          labelStyle: TextStyle(
+                            color: Colors.white,
+                          )),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value.isNotEmpty) {
+                            final filtro1 = value.replaceAll('.', '');
+                            valorParcela =
+                                double.parse(filtro1.replaceAll(',', '.'));
+                          }
+                        });
+                      },
+                    ),
+                  ),
                 ],
-              ),
-              if (!isMensal) ...[
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 20,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.whiteOpacity,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      10,
-                    ),
-                  ),
-                  child: TextFormField(
-                    controller: _faturaTextController,
-                    keyboardType: TextInputType.number,
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                    decoration: InputDecoration(
-                        labelText: AppStrings.valorParcela,
-                        labelStyle: TextStyle(
-                          color: Colors.white,
-                        )),
-                    onChanged: (value) {
-                      setState(() {
-                        if (value.isNotEmpty) {
-                          final filtro1 = value.replaceAll('.', '');
-                          valorParcela =
-                              double.parse(filtro1.replaceAll(',', '.'));
-                        }
-                      });
-                    },
-                  ),
-                ),
               ],
               const SizedBox(
                 height: 50,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
+import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
@@ -118,36 +119,64 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
             ],
           ),
           const SizedBox(
-            height: 40,
+            height: 50,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              InkWell(
-                onTap: _editarFaturaBottomSheet,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.5),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    AppStrings.editarFatura,
-                    style: TextStyle(
-                      color: Colors.white,
+              Row(
+                children: [
+                  InkWell(
+                    onTap: _editarFaturaBottomSheet,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        AppStrings.editarFatura,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NovaDividaView(
+                            homeCubit: widget.homeCubit,
+                            dividaEntity: widget.dividaEntity,
+                          ),
+                        ),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.whiteOpacity,
+                      child: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Row(
+              Column(
                 children: [
                   Text(
                     faturaAtual!.pago ? AppStrings.paga : AppStrings.naoPaga,
                     style: TextStyle(
                       color: Colors.white,
+                      fontWeight: FontWeight.w100,
                     ),
                   ),
                   const SizedBox(
@@ -192,14 +221,25 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          margin:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           padding: EdgeInsets.symmetric(
             horizontal: 20,
           ),
-          color: Colors.black,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(
+              color: Colors.white,
+            ),
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(40.0),
+              topRight: const Radius.circular(40.0),
+            ),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
