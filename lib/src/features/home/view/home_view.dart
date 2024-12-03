@@ -460,11 +460,10 @@ class _HomeViewState extends State<HomeView> {
                                       : ListView.builder(
                                           itemCount: state.dividas.length,
                                           itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: EdgeInsets.only(
-                                                bottom: 10,
-                                              ),
-                                              child: HomeCardDivida(),
+                                            return HomeCardDivida(
+                                              dividaEntity:
+                                                  state.dividas[index],
+                                              homeCubit: _cubit,
                                             );
                                           },
                                         )
@@ -479,7 +478,7 @@ class _HomeViewState extends State<HomeView> {
                                               padding: EdgeInsets.only(
                                                 bottom: 10,
                                               ),
-                                              child: HomeCardDivida(),
+                                              child: Container(),
                                             );
                                           },
                                         ),

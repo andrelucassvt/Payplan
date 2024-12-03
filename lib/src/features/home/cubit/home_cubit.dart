@@ -22,6 +22,73 @@ class HomeCubit extends Cubit<HomeState> {
 
   String dividaCampoShared = 'dividas';
 
+  Future<void> atualizarDivida(DividaEntity dividaEntity) async {
+    emit(
+      HomeDividasLoading(
+        mesAtual: state.mesAtual,
+        anoAtual: state.anoAtual,
+        isDividas: state.isDividas,
+        dividas: state.dividas,
+      ),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final resultDividas = prefs.getStringList(
+          dividaCampoShared,
+        ) ??
+        [];
+    List<DividaEntity> dividas = [];
+
+    dividas = resultDividas.map(
+      (e) {
+        return DividaEntity.fromJson(json.decode(e));
+      },
+    ).toList();
+
+    dividas = dividas.map(
+      (e) {
+        if (e.id == dividaEntity.id) {
+          return dividaEntity;
+        }
+        return e;
+      },
+    ).toList();
+
+    final dividasEncode = dividas
+        .map(
+          (e) => json.encode(e.toMap()),
+        )
+        .toList();
+    prefs.setStringList(
+      dividaCampoShared,
+      dividasEncode,
+    );
+    buscarDividas();
+  }
+
+  Future<void> salvarDivida(DividaEntity dividaEntity) async {
+    emit(
+      HomeDividasLoading(
+        mesAtual: state.mesAtual,
+        anoAtual: state.anoAtual,
+        isDividas: state.isDividas,
+        dividas: state.dividas,
+      ),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final resultDividas = prefs.getStringList(
+          dividaCampoShared,
+        ) ??
+        [];
+    final dividaConvert = json.encode(dividaEntity.toMap());
+
+    resultDividas.add(dividaConvert);
+    prefs.setStringList(
+      dividaCampoShared,
+      resultDividas,
+    );
+    buscarDividas();
+  }
+
   void buscarDividas() async {
     emit(
       HomeDividasLoading(
@@ -33,18 +100,17 @@ class HomeCubit extends Cubit<HomeState> {
     );
     final prefs = await SharedPreferences.getInstance();
     final result = prefs.getStringList(
-      dividaCampoShared,
-    );
+          dividaCampoShared,
+        ) ??
+        [];
 
     List<DividaEntity> dividas = [];
 
-    if (result != null) {
-      dividas = result.map(
-        (e) {
-          return DividaEntity.fromJson(json.decode(e));
-        },
-      ).toList();
-    }
+    dividas = result.map(
+      (e) {
+        return DividaEntity.fromJson(json.decode(e));
+      },
+    ).toList();
 
     emit(
       HomeDividasSucesso(
@@ -53,22 +119,6 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: dividas.isEmpty ? state.dividas : dividas,
       ),
-    );
-  }
-
-  void salvarDivida(DividaEntity entity) async {
-    emit(
-      HomeDividasLoading(
-        mesAtual: state.mesAtual,
-        anoAtual: state.anoAtual,
-        isDividas: state.isDividas,
-        dividas: state.dividas,
-      ),
-    );
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(
-      dividaCampoShared,
-      [],
     );
   }
 

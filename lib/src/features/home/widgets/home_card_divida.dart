@@ -1,22 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
+import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 class HomeCardDivida extends StatefulWidget {
-  const HomeCardDivida({super.key});
+  const HomeCardDivida({
+    required this.dividaEntity,
+    required this.homeCubit,
+    super.key,
+  });
+  final DividaEntity dividaEntity;
+  final HomeCubit homeCubit;
 
   @override
   State<HomeCardDivida> createState() => _HomeCardDividaState();
 }
 
 class _HomeCardDividaState extends State<HomeCardDivida> {
+  final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
+
+  HomeState get homeState => widget.homeCubit.state;
+
+  FaturaMensalEntity? get faturaAtual {
+    final result = widget.dividaEntity.faturas
+        .where(
+          (element) =>
+              element.ano == widget.homeCubit.state.anoAtual &&
+              element.mes == widget.homeCubit.state.mesAtual.id,
+        )
+        .toList();
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    if (widget.dividaEntity.faturas.isEmpty) {
+      return FaturaMensalEntity(
+        ano: widget.homeCubit.state.anoAtual,
+        mes: widget.homeCubit.state.mesAtual.id,
+        pago: false,
+        valor: 0,
+      );
+    }
+
+    return result[0];
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (faturaAtual == null) {
+      return SizedBox.shrink();
+    }
     return Container(
+      margin: EdgeInsets.only(
+        bottom: 10,
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: 10,
       ),
       decoration: BoxDecoration(
-        color: Colors.red,
+        color: widget.dividaEntity.cor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -30,7 +74,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Nome cartao',
+                widget.dividaEntity.nome,
                 style: TextStyle(
                   color: Colors.white,
                 ),
@@ -40,11 +84,12 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
               ),
               Expanded(
                 child: Text(
-                  '\$ 20.502,34',
+                  '\$${format.format(faturaAtual!.valor)}',
                   maxLines: 2,
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                    //decoration: TextDecoration.lineThrough,
+                    decoration:
+                        faturaAtual!.pago ? TextDecoration.lineThrough : null,
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -81,7 +126,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
               Row(
                 children: [
                   Text(
-                    'Pago',
+                    faturaAtual!.pago ? AppStrings.paga : AppStrings.naoPaga,
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -90,8 +135,26 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                     width: 5,
                   ),
                   Switch(
-                    value: true,
-                    onChanged: (value) {},
+                    value: faturaAtual!.pago,
+                    onChanged: (value) {
+                      final tratamentoFaturaListaFatura =
+                          widget.dividaEntity.faturas.map(
+                        (e) {
+                          if (e.ano == faturaAtual!.ano &&
+                              e.mes == faturaAtual!.mes) {
+                            return faturaAtual!.copyWith(
+                              pago: value,
+                            );
+                          }
+                          return e;
+                        },
+                      ).toList();
+                      widget.homeCubit.atualizarDivida(
+                        widget.dividaEntity.copyWith(
+                          faturas: tratamentoFaturaListaFatura,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

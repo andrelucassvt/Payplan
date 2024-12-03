@@ -32,10 +32,26 @@ class DividaEntity {
       mensal: map['mensal'] as bool,
       cor: Color(map['cor'] as int),
       faturas: List<FaturaMensalEntity>.from(
-        (map['faturas'] as List<int>).map<FaturaMensalEntity>(
+        (map['faturas'] as List<dynamic>).map<FaturaMensalEntity>(
           (x) => FaturaMensalEntity.fromJson(x as Map<String, dynamic>),
         ),
       ),
+    );
+  }
+
+  DividaEntity copyWith({
+    String? id,
+    String? nome,
+    bool? mensal,
+    Color? cor,
+    List<FaturaMensalEntity>? faturas,
+  }) {
+    return DividaEntity(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      mensal: mensal ?? this.mensal,
+      cor: cor ?? this.cor,
+      faturas: faturas ?? this.faturas,
     );
   }
 }
@@ -67,6 +83,20 @@ class FaturaMensalEntity {
       mes: map['mes'] as int,
       pago: map['pago'] as bool,
       valor: map['valor'] as double,
+    );
+  }
+
+  FaturaMensalEntity copyWith({
+    int? ano,
+    int? mes,
+    bool? pago,
+    double? valor,
+  }) {
+    return FaturaMensalEntity(
+      ano: ano ?? this.ano,
+      mes: mes ?? this.mes,
+      pago: pago ?? this.pago,
+      valor: valor ?? this.valor,
     );
   }
 }

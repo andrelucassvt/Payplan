@@ -5,6 +5,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:uuid/uuid.dart';
 
 class NovaDividaView extends StatefulWidget {
   const NovaDividaView({
@@ -26,7 +27,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
   int quantidadeParcelas = 1;
   double valorParcela = 0.0;
   final _faturaTextController = MoneyMaskedTextController(initialValue: 0.00);
-  //final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
+
   final List<Color> _listColors = [
     Colors.red,
     Colors.blue,
@@ -37,6 +38,28 @@ class _NovaDividaViewState extends State<NovaDividaView> {
     Colors.brown,
     Colors.cyan,
   ];
+
+  int calculoMes = 1;
+  int calculoAno = DateTime.now().year;
+
+  int calculoMeses(int index) {
+    if (index == 0) {
+      calculoMes = DateTime.now().month;
+      if (calculoMes == 12) {
+        calculoAno += 1;
+      }
+      return calculoMes;
+    }
+    calculoMes++;
+    if (calculoMes == 12) {
+      calculoAno += 1;
+    }
+    if (calculoMes > 12) {
+      calculoMes = 1;
+    }
+    return calculoMes;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,6 +94,33 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                   AppStrings.valorParcela,
                 ),
               ),
+            );
+          } else {
+            widget.homeCubit
+                .salvarDivida(
+              DividaEntity(
+                id: Uuid().v4(),
+                nome: nomeDivida,
+                mensal: isMensal,
+                cor: corSelecionada,
+                faturas: isMensal
+                    ? []
+                    : List.generate(
+                        quantidadeParcelas,
+                        (index) {
+                          return FaturaMensalEntity(
+                            ano: calculoAno,
+                            mes: calculoMeses(index),
+                            valor: valorParcela,
+                          );
+                        },
+                      ),
+              ),
+            )
+                .whenComplete(
+              () {
+                if (context.mounted) Navigator.of(context).pop();
+              },
             );
           }
         },
