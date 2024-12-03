@@ -33,6 +33,7 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.buscarDividas();
+    verificarPermissaoNotificacao();
   }
 
   Future<void> verificarPermissaoNotificacao() async {
@@ -42,6 +43,10 @@ class _HomeViewState extends State<HomeView> {
         mostrarIconePermitirNotificacao = true;
       } else {
         mostrarIconePermitirNotificacao = false;
+        NotificationService().showLocalNotification(
+          title: AppStrings.atencao,
+          body: AppStrings.naoPercaADataPagamento,
+        );
       }
     });
   }

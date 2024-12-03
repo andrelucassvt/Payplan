@@ -30,6 +30,7 @@ class NotificationService {
       iOS: iosNotificatonDetail,
       android: androidNotificationDetail,
     );
+
     final listNotification =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
@@ -50,6 +51,6 @@ class NotificationService {
   Future<bool> verificarPermissaoNotificacao() async {
     final result = await Permission.notification.isPermanentlyDenied;
     final resultDanied = await Permission.notification.isDenied;
-    return result == resultDanied;
+    return !(result == resultDanied);
   }
 }
