@@ -3,6 +3,7 @@ import 'package:localization/localization.dart';
 class AppStrings {
   static const nameApp = 'PayPlan';
 
+  static var dividas = 'dividas'.i18n();
   static var adicionarCartao = 'add-cartao'.i18n();
   static var adicionarDivida = 'add-divida'.i18n();
   static var desconto = 'desconto'.i18n();
