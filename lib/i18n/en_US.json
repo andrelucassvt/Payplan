@@ -11,6 +11,7 @@
     "parcelada": "Installment",
     "dividas": "Debts",
     "devedores" : "Debtors",
+    "permitirNotificacoes": "Allow notifications",
     "quantidade-parcelas": "Number of installments",
     "valor-parcela": "Installment value",
     "nao-pode-modificar": "*Cannot be modified later",

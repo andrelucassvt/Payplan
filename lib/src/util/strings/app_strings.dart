@@ -7,6 +7,7 @@ class AppStrings {
   static var adicionarCartao = 'add-cartao'.i18n();
   static var adicionarDivida = 'add-divida'.i18n();
   static var desconto = 'desconto'.i18n();
+  static var permitirNotificacoes = 'permitirNotificacoes'.i18n();
   static var parcelada = 'parcelada'.i18n();
   static var devedores = 'devedores'.i18n();
   static var valorParcela = 'valor-parcela'.i18n();

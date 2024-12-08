@@ -181,7 +181,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 20,
+          horizontal: 15,
         ),
         child: SingleChildScrollView(
           child: Column(
