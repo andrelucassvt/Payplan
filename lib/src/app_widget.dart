@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localization/localization.dart';
 import 'package:notes_app/src/features/home/view/home_view.dart';
 
-class AppWidget extends StatelessWidget {
+class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
+
+  @override
+  State<AppWidget> createState() => _AppWidgetState();
+}
+
+class _AppWidgetState extends State<AppWidget> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.portraitUp,
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

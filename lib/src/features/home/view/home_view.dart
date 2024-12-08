@@ -346,7 +346,7 @@ class _HomeViewState extends State<HomeView> {
                   Expanded(
                     child: Container(
                       margin: EdgeInsets.only(
-                        bottom: 20,
+                        bottom: 10,
                       ),
                       padding: EdgeInsets.only(
                         left: 10,
@@ -363,9 +363,6 @@ class _HomeViewState extends State<HomeView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
                           Padding(
                             padding: const EdgeInsets.only(
                               left: 2,
