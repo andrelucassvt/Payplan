@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localization/localization.dart';
 import 'package:notes_app/src/features/home/view/home_view.dart';
+import 'package:notes_app/src/util/service/open_app_admob.dart';
 
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
@@ -12,6 +13,7 @@ class AppWidget extends StatefulWidget {
 }
 
 class _AppWidgetState extends State<AppWidget> {
+  final openAdmobApp = AppOpenAdManager();
   @override
   void initState() {
     super.initState();
@@ -20,6 +22,7 @@ class _AppWidgetState extends State<AppWidget> {
         DeviceOrientation.portraitUp,
       ],
     );
+    openAdmobApp.loadAd();
   }
 
   @override

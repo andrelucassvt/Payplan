@@ -52,6 +52,7 @@ class AppStrings {
   static var dividaExterna = 'divida-externa'.i18n();
   static var saldoRestante = 'saldo-restante'.i18n();
   static var valorDesseMes = 'valor-desse-mes'.i18n();
+  static var salario = 'salario'.i18n();
   static var adicioneOValorTotalDescontado =
       'adicione-valor-total-descontado'.i18n();
   static var digiteOSaldoQueSeraDescontado =

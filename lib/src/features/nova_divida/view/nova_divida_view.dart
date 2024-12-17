@@ -344,6 +344,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                     ),
                     if (!isMensal) ...[
                       PopupMenuButton<int>(
+                        constraints: const BoxConstraints.tightFor(height: 300),
                         child: Text(
                           '${quantidadeParcelas}x',
                           style: TextStyle(

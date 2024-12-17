@@ -51,6 +51,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               PopupMenuButton<int>(
+                constraints: const BoxConstraints.tightFor(height: 300),
                 child: Row(
                   children: [
                     Text(
@@ -368,7 +369,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                           color: Colors.white,
                         ),
                         decoration: InputDecoration(
-                            labelText: AppStrings.valorParcela,
+                            labelText: AppStrings.salario,
                             labelStyle: TextStyle(
                               color: Colors.white,
                             )),
