@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
@@ -50,8 +51,49 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              PopupMenuButton<int>(
-                constraints: const BoxConstraints.tightFor(height: 300),
+              InkWell(
+                onTap: () async {
+                  final scrollController = FixedExtentScrollController(
+                    initialItem: state.anoAtual - 2024,
+                  );
+
+                  showCupertinoModalPopup(
+                    context: context,
+                    builder: (context) {
+                      return Container(
+                        height: 216,
+                        padding: const EdgeInsets.only(top: 6.0),
+                        margin: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        color: Colors.black,
+                        child: CupertinoPicker(
+                          itemExtent: 50,
+                          scrollController: scrollController,
+                          onSelectedItemChanged: (index) {
+                            _cubit.mudarAnoAtual(
+                              2024 + index,
+                            );
+                          },
+                          children: List.generate(
+                            100,
+                            (index) {
+                              return Center(
+                                child: Text(
+                                  (2024 + index).toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
                 child: Row(
                   children: [
                     Text(
@@ -68,38 +110,6 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     ),
                   ],
                 ),
-                itemBuilder: (context) {
-                  return List.generate(
-                    100,
-                    (index) {
-                      int anoBase = 2024;
-                      if (index == 0) {
-                        return PopupMenuItem<int>(
-                          value: 2024,
-                          child: Text(
-                            2024.toString(),
-                          ),
-                          onTap: () {
-                            _cubit.mudarAnoAtual(
-                              anoBase,
-                            );
-                          },
-                        );
-                      }
-                      return PopupMenuItem<int>(
-                        value: anoBase + index,
-                        child: Text(
-                          (anoBase + index).toString(),
-                        ),
-                        onTap: () {
-                          _cubit.mudarAnoAtual(
-                            anoBase + index,
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
               ),
               Row(
                 children: [

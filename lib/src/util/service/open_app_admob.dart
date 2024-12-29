@@ -16,7 +16,9 @@ class AppOpenAdManager {
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
           _appOpenAd = ad;
-          _appOpenAd!.show();
+          Future.delayed(Duration(seconds: 7), () {
+            _appOpenAd!.show();
+          });
         },
         onAdFailedToLoad: (error) {
           _appOpenAd = null;

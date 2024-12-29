@@ -54,7 +54,9 @@ class _GraficoViewState extends State<GraficoView> {
                 onAdClicked: (ad) {});
 
             debugPrint('$ad loaded.');
-            ad.show();
+            Future.delayed(const Duration(seconds: 5), () {
+              ad.show();
+            });
           },
           onAdFailedToLoad: (LoadAdError error) {
             debugPrint('InterstitialAd failed to load: $error');
