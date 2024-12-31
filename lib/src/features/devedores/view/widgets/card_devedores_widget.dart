@@ -4,6 +4,7 @@ import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -121,33 +122,85 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
             ),
           ),
           InkWell(
-            onTap: () {
-              showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime(3101),
-              ).then((pickedDate) {
-                if (pickedDate != null) {
-                  widget.devedoresCubit.editarDevedor(
-                    widget.devedoresEntity.copyWith(
-                      notificar: pickedDate,
+            onTap: () async {
+              final result =
+                  await NotificationService().verificarPermissaoNotificacao();
+
+              if (context.mounted) {
+                if (result) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.blue,
+                      content: InkWell(
+                        onTap: () {
+                          openAppSettings();
+                        },
+                        child: Center(
+                          child: Text(
+                            AppStrings.permitirNotificacoes,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   );
-                  NotificationService().showLocalNotification(
-                    title: AppStrings.dividasPendentes,
-                    body: AppStrings.mensagemDivida(
-                      widget.devedoresEntity.nome,
-                      widget.devedoresEntity.valor.real,
-                    ),
-                    id: widget.index,
-                    scheduledDate: tz.TZDateTime.from(
-                      pickedDate,
-                      tz.local,
-                    ),
-                  );
+                } else {
+                  showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(3101),
+                  ).then((pickedDate) {
+                    if (pickedDate != null) {
+                      try {
+                        widget.devedoresCubit.editarDevedor(
+                          widget.devedoresEntity.copyWith(
+                            notificar: pickedDate,
+                          ),
+                        );
+                        NotificationService().showLocalNotification(
+                          title: AppStrings.dividasPendentes,
+                          body: AppStrings.mensagemDivida(
+                            widget.devedoresEntity.nome,
+                            widget.devedoresEntity.valor.real,
+                          ),
+                          id: widget.index,
+                          scheduledDate: tz.TZDateTime.from(
+                            pickedDate,
+                            tz.local,
+                          ),
+                        );
+                      } catch (e, stackTrace) {
+                        debugPrintStack(
+                          label: e.toString(),
+                          stackTrace: stackTrace,
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: Colors.red,
+                              content: Center(
+                                child: Text(
+                                  'Error',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    }
+                  });
                 }
-              });
+              }
             },
             child: Container(
               padding: EdgeInsets.symmetric(

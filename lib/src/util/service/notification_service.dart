@@ -1,17 +1,30 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timezone/data/latest_all.dart' as tzz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  final _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
+  static final _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   Future<void> setup() async {
+    final status = await Permission.notification.status;
+    if (status.isGranted) {
+      await _initializeNotifications();
+    } else {
+      final result = await Permission.notification.request();
+      if (result.isGranted) {
+        await _initializeNotifications();
+      } else {}
+    }
+  }
+
+  Future<void> _initializeNotifications() async {
     const androidInitializationSetting =
         AndroidInitializationSettings('@mipmap/launcher_icon');
     const iosInitializationSetting = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
-        android: androidInitializationSetting, iOS: iosInitializationSetting);
+      android: androidInitializationSetting,
+      iOS: iosInitializationSetting,
+    );
     await _flutterLocalNotificationsPlugin.initialize(initSettings);
   }
 
@@ -22,7 +35,7 @@ class NotificationService {
     int days = 2,
     int id = 0,
   }) async {
-    tzz.initializeTimeZones();
+    await _initializeNotifications();
     const androidNotificationDetail = AndroidNotificationDetails(
       '0',
       'general',
