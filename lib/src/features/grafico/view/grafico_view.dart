@@ -58,7 +58,7 @@ class _GraficoViewState extends State<GraficoView> {
                 onAdClicked: (ad) {});
 
             debugPrint('$ad loaded.');
-            Future.delayed(const Duration(seconds: 5), () {
+            Future.delayed(const Duration(seconds: 7), () {
               ad.show();
             });
           },

@@ -7,27 +7,24 @@ class AppOpenAdManager {
       ? 'ca-app-pub-3652623512305285/5018170803'
       : 'ca-app-pub-3652623512305285/1467067906';
 
-  AppOpenAd? _appOpenAd;
+  static AppOpenAd? appOpenAd;
 
   void loadAd() {
-    // AppOpenAd.load(
-    //   adUnitId: adUnitId,
-    //   request: AdRequest(),
-    //   adLoadCallback: AppOpenAdLoadCallback(
-    //     onAdLoaded: (ad) {
-    //       _appOpenAd = ad;
-    //       Future.delayed(Duration(seconds: 10), () {
-    //         _appOpenAd!.show();
-    //       });
-    //     },
-    //     onAdFailedToLoad: (error) {
-    //       _appOpenAd = null;
-    //     },
-    //   ),
-    // );
+    AppOpenAd.load(
+      adUnitId: adUnitId,
+      request: AdRequest(),
+      adLoadCallback: AppOpenAdLoadCallback(
+        onAdLoaded: (ad) {
+          appOpenAd = ad;
+        },
+        onAdFailedToLoad: (error) {
+          appOpenAd = null;
+        },
+      ),
+    );
   }
 
   bool get isAdAvailable {
-    return _appOpenAd != null;
+    return appOpenAd != null;
   }
 }
