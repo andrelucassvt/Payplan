@@ -57,5 +57,13 @@
     "grafico-gastos": "Expense charts",
     "voltar": "Go back",
     "compartilhar": "Share",
-    "baixePayplan": "Download Payplan and have full control of your finances\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738"
+    "baixePayplan": "Download Payplan and have full control of your finances\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738",
+    "novo-devedor": "New debtor",
+    "nome-devedor": "Debtor name",
+    "valor": "Value",
+    "cobrar": "Charge",
+    "dividasPendentes": "Pending debts",
+    "voceTemUmaDividaCom": "You have a debt with",
+    "noValorDe": "for a value of",
+    "notificar": "Notify"
 }

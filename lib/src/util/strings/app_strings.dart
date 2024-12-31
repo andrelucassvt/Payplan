@@ -65,8 +65,18 @@ class AppStrings {
   static var naoPercaADataPagamento = 'nao-perca-data-pagamento'.i18n();
   static var graficoGastos = 'grafico-gastos'.i18n();
   static var voltar = 'voltar'.i18n();
+  static var valor = 'valor'.i18n();
   static var compartilhar = 'compartilhar'.i18n();
   static var baixePayplan = 'baixePayplan'.i18n();
+  static var novoDevedor = 'novo-devedor'.i18n();
+  static var nomeDevedor = 'nome-devedor'.i18n();
+  static var cobrar = 'cobrar'.i18n();
+  static var notificar = 'notificar'.i18n();
+  static var dividasPendentes = 'dividasPendentes'.i18n();
+
+  static String mensagemDivida(String nome, String valor) {
+    return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';
+  }
 }
 
 extension MonthsNames on String {

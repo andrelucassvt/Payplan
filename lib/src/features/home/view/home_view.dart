@@ -60,6 +60,7 @@ class _HomeViewState extends State<HomeView> {
       }
     } else {
       NotificationService().showLocalNotification(
+        id: 0,
         title: AppStrings.atencao,
         body: AppStrings.naoPercaADataPagamento,
       );

@@ -357,7 +357,12 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
       },
     ).whenComplete(
       () {
-        AppOpenAdManager.appOpenAd?.show();
+        Future.delayed(
+          Duration(seconds: 5),
+          () {
+            AppOpenAdManager.appOpenAd?.show();
+          },
+        );
       },
     );
   }

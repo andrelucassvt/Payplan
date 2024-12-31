@@ -31,7 +31,7 @@
     "atualizar-cartao": "Atualizar cartão",
     "atualizar-divida": "Atualizar dívida",
     "add-valor-fatura": "R$ Adicionar valor da fatura",
-    "total": "Total de gastos",
+    "total": "Total:",
     "mensal": "Mensal",
     "unica": "Única",
     "parcelada": "Parcelas",
@@ -57,5 +57,13 @@
     "grafico-gastos": "Gráficos de gastos",
     "voltar": "Voltar",
     "compartilhar": "Compartilhar",
-    "baixePayplan": "Baixe o Payplan e tenha controle total das suas finanças\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738"
+    "baixePayplan": "Baixe o Payplan e tenha controle total das suas finanças\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738",
+    "novo-devedor": "Novo devedor",
+    "nome-devedor": "Nome do devedor",
+    "valor": "Valor",
+    "cobrar": "Cobrar",
+    "dividasPendentes": "Dívidas Pendentes",
+    "voceTemUmaDividaCom": "Você tem uma dívida com",
+    "noValorDe": "no valor de",
+    "notificar": "Notificar"
 }

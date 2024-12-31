@@ -57,5 +57,13 @@
     "grafico-gastos": "Gráficos de gastos",
     "voltar": "Volver",
     "compartilhar": "Compartir",
-    "baixePayplan": "Descargue Payplan y tenga control total de sus finanzas\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738"
+    "baixePayplan": "Descargue Payplan y tenga control total de sus finanzas\n\nAndroid: https://play.google.com/store/apps/details?id=com.andre.notes_app\n\nIOS: https://apps.apple.com/br/app/payplan/id6450763738",
+    "novo-devedor": "Nuevo deudor",
+    "nome-devedor": "Nombre del deudor",
+    "valor": "Valor",
+    "cobrar": "Cobrar",
+    "dividasPendentes": "Deudas Pendientes",
+    "voceTemUmaDividaCom": "Tienes una deuda con",
+    "noValorDe": "por un valor de",
+    "notificar": "Notificar"
 }

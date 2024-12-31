@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/src/features/devedores/view/devedores_view.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
@@ -213,6 +214,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     child: Center(
                       child: Text(
                         AppStrings.novaDivida,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -246,6 +248,26 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                         ),
                       ),
                     ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DevedoresView(),
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundColor: AppColors.whiteOpacity,
+                  child: Icon(
+                    Icons.diversity_3_outlined,
+                    color: Colors.white,
                   ),
                 ),
               ),

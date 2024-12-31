@@ -50,8 +50,7 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
     if (_bannerAd != null && _isLoaded) {
       return Padding(
         padding: const EdgeInsets.only(
-          top: 5,
-          bottom: 10,
+          bottom: 5,
         ),
         child: Align(
           alignment: Alignment.bottomCenter,

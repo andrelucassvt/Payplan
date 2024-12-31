@@ -18,7 +18,9 @@ class NotificationService {
   Future<void> showLocalNotification({
     required String title,
     required String body,
-    tz.TZDateTime? dateTime,
+    tz.TZDateTime? scheduledDate,
+    int days = 2,
+    int id = 0,
   }) async {
     tzz.initializeTimeZones();
     const androidNotificationDetail = AndroidNotificationDetails(
@@ -34,12 +36,18 @@ class NotificationService {
     final listNotification =
         await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
-    if (listNotification.isEmpty) {
+    final result = listNotification
+        .where(
+          (element) => element.id == 0,
+        )
+        .toList();
+
+    if (result.isEmpty || id != 0) {
       _flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
+        id,
         title,
         body,
-        dateTime ?? tz.TZDateTime.now(tz.local).add(const Duration(days: 2)),
+        scheduledDate ?? tz.TZDateTime.now(tz.local).add(Duration(days: days)),
         notificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
