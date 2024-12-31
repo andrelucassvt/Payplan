@@ -65,6 +65,8 @@ class AppStrings {
   static var naoPercaADataPagamento = 'nao-perca-data-pagamento'.i18n();
   static var graficoGastos = 'grafico-gastos'.i18n();
   static var voltar = 'voltar'.i18n();
+  static var compartilhar = 'compartilhar'.i18n();
+  static var baixePayplan = 'baixePayplan'.i18n();
 }
 
 extension MonthsNames on String {

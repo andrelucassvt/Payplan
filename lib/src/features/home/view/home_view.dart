@@ -10,7 +10,7 @@ import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
+import 'package:notes_app/src/util/widgets/admob_native_banner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeView extends StatefulWidget {
@@ -77,7 +77,7 @@ class _HomeViewState extends State<HomeView> {
             bottom: _isSafeAreaBottom,
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: 15,
+                horizontal: 10,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,28 +151,28 @@ class _HomeViewState extends State<HomeView> {
                                 itemCount: state.dividas.length,
                                 controller: _scrollViewController,
                                 itemBuilder: (context, index) {
-                                  if (index == 0 || index == 2) {
-                                    return Column(
-                                      children: [
-                                        HomeCardDivida(
-                                          dividaEntity: state.dividas[index],
-                                          homeCubit: _cubit,
-                                        ),
-                                        AdmobBannerWidget(
+                                  return Column(
+                                    children: [
+                                      HomeCardDivida(
+                                        dividaEntity: state.dividas[index],
+                                        homeCubit: _cubit,
+                                      ),
+                                      if (index == 0) ...[
+                                        AdmobNativeBanner(
                                           bannerId: Platform.isAndroid
-                                              ? index == 2
-                                                  ? 'ca-app-pub-3652623512305285/7988227382'
-                                                  : 'ca-app-pub-3652623512305285/5889977427'
-                                              : index == 2
-                                                  ? 'ca-app-pub-3652623512305285/8865877557'
-                                                  : 'ca-app-pub-3652623512305285/9198667043',
+                                              ? 'ca-app-pub-3652623512305285/8596201581'
+                                              : 'ca-app-pub-3652623512305285/8683831496',
                                         ),
                                       ],
-                                    );
-                                  }
-                                  return HomeCardDivida(
-                                    dividaEntity: state.dividas[index],
-                                    homeCubit: _cubit,
+                                      if (index == 2) ...[
+                                        AdmobNativeBanner(
+                                          mainBackgroundColor: Colors.red,
+                                          bannerId: Platform.isAndroid
+                                              ? 'ca-app-pub-3652623512305285/2065348602'
+                                              : 'ca-app-pub-3652623512305285/4665497764',
+                                        ),
+                                      ],
+                                    ],
                                   );
                                 },
                               ),

@@ -6,6 +6,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
+import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 import '../../grafico/view/grafico_view.dart';
@@ -175,7 +176,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
             ),
           ),
           Text(
-            '\$${format.format(state.totalGastos)}',
+            state.totalGastos.real,
             maxLines: 2,
             style: TextStyle(
               fontSize: 40,
@@ -335,7 +336,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                 height: 10,
               ),
               Text(
-                '\$${format.format(valorDesseMes)}',
+                valorDesseMes.real,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -406,7 +407,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                         builder: (_) => AlertDialog(
                           title: Text(AppStrings.saldoRestante),
                           content: Text(
-                            '\$${format.format(resultado)}',
+                            resultado.real,
                             style: const TextStyle(
                               fontSize: 20,
                               color: Colors.green,

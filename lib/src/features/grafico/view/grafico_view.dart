@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class GraficoView extends StatefulWidget {
   const GraficoView({
@@ -70,6 +74,8 @@ class _GraficoViewState extends State<GraficoView> {
     loadAd();
   }
 
+  final screenshotController = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +95,21 @@ class _GraficoViewState extends State<GraficoView> {
       ),
       bottomNavigationBar: SafeArea(
         child: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () async {
+            final result = await screenshotController.capture();
+            if (result != null) {
+              final directory = await getApplicationDocumentsDirectory();
+              final imagePath =
+                  await File('${directory.path}/image.png').create();
+              await imagePath.writeAsBytes(result);
+              await Share.shareXFiles(
+                [
+                  XFile(imagePath.path),
+                ],
+                text: AppStrings.baixePayplan,
+              );
+            }
+          },
           child: Container(
             height: 60,
             margin: const EdgeInsets.symmetric(
@@ -103,57 +123,159 @@ class _GraficoViewState extends State<GraficoView> {
                 Radius.circular(10),
               ),
             ),
-            child: Center(
-              child: Text(
-                AppStrings.voltar,
-                style: const TextStyle(
-                  fontSize: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.share,
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
                 ),
-              ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  AppStrings.compartilhar,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: SizedBox(
-                height: 300,
-                width: 300,
-                child: PieChart(
-                  PieChartData(
-                      sections: widget.dividas.map((e) {
-                    return PieChartSectionData(
-                      radius: 80,
-                      value: (e.faturas
-                          .firstWhere(
-                            (element) =>
-                                element.ano == state.anoAtual &&
-                                element.mes == state.mesAtual.id,
-                            orElse: () => FaturaMensalEntity(
-                              ano: state.anoAtual,
-                              mes: state.mesAtual.id,
-                              valor: 0,
-                              pago: false,
+        child: SingleChildScrollView(
+          child: Screenshot(
+            controller: screenshotController,
+            child: Container(
+              color: Colors.black,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Text(
+                    '${state.mesAtual.nome} ${state.anoAtual}',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(.7),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    state.totalGastos.real,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Center(
+                    child: SizedBox(
+                      height: 300,
+                      width: 300,
+                      child: PieChart(
+                        PieChartData(
+                            sections: widget.dividas.map((e) {
+                          return PieChartSectionData(
+                            radius: 100,
+                            value: (e.faturas
+                                .firstWhere(
+                                  (element) =>
+                                      element.ano == state.anoAtual &&
+                                      element.mes == state.mesAtual.id,
+                                  orElse: () => FaturaMensalEntity(
+                                    ano: state.anoAtual,
+                                    mes: state.mesAtual.id,
+                                    valor: 0,
+                                    pago: false,
+                                  ),
+                                )
+                                .valor),
+                            title: (e.faturas
+                                    .firstWhere(
+                                      (element) =>
+                                          element.ano == state.anoAtual &&
+                                          element.mes == state.mesAtual.id,
+                                      orElse: () => FaturaMensalEntity(
+                                        ano: state.anoAtual,
+                                        mes: state.mesAtual.id,
+                                        valor: 0,
+                                        pago: false,
+                                      ),
+                                    )
+                                    .valor)
+                                .toString(),
+                            titleStyle: const TextStyle(
+                              color: Colors.white,
                             ),
-                          )
-                          .valor),
-                      title: e.nome,
-                      titleStyle: const TextStyle(
-                        color: Colors.white,
+                            showTitle: true,
+                            color: e.cor,
+                          );
+                        }).toList()),
                       ),
-                      showTitle: true,
-                      color: e.cor,
-                    );
-                  }).toList()),
-                ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Wrap(
+                    direction: Axis.horizontal,
+                    children: widget.dividas.map((e) {
+                      if (e.faturas
+                              .firstWhere(
+                                  (element) =>
+                                      element.ano == state.anoAtual &&
+                                      element.mes == state.mesAtual.id,
+                                  orElse: () => FaturaMensalEntity(
+                                        ano: state.anoAtual,
+                                        mes: state.mesAtual.id,
+                                        valor: 0,
+                                        pago: false,
+                                      ))
+                              .valor ==
+                          0) {
+                        return SizedBox.shrink();
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: 20,
+                              width: 20,
+                              color: e.cor,
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              e.nome,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

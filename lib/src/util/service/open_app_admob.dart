@@ -10,21 +10,21 @@ class AppOpenAdManager {
   AppOpenAd? _appOpenAd;
 
   void loadAd() {
-    AppOpenAd.load(
-      adUnitId: adUnitId,
-      request: AdRequest(),
-      adLoadCallback: AppOpenAdLoadCallback(
-        onAdLoaded: (ad) {
-          _appOpenAd = ad;
-          Future.delayed(Duration(seconds: 5), () {
-            _appOpenAd!.show();
-          });
-        },
-        onAdFailedToLoad: (error) {
-          _appOpenAd = null;
-        },
-      ),
-    );
+    // AppOpenAd.load(
+    //   adUnitId: adUnitId,
+    //   request: AdRequest(),
+    //   adLoadCallback: AppOpenAdLoadCallback(
+    //     onAdLoaded: (ad) {
+    //       _appOpenAd = ad;
+    //       Future.delayed(Duration(seconds: 10), () {
+    //         _appOpenAd!.show();
+    //       });
+    //     },
+    //     onAdFailedToLoad: (error) {
+    //       _appOpenAd = null;
+    //     },
+    //   ),
+    // );
   }
 
   bool get isAdAvailable {

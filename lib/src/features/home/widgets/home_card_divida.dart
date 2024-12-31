@@ -218,6 +218,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
 
   void _editarFaturaBottomSheet() {
     double valorModificado = 0;
+    _faturaTextController.updateValue(faturaAtual!.valor);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -352,10 +353,6 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
             ],
           ),
         );
-      },
-    ).whenComplete(
-      () {
-        _faturaTextController.updateValue(faturaAtual!.valor);
       },
     );
   }
