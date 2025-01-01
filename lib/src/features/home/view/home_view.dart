@@ -163,6 +163,9 @@ class _HomeViewState extends State<HomeView> {
                                           bannerId: Platform.isAndroid
                                               ? 'ca-app-pub-3652623512305285/8596201581'
                                               : 'ca-app-pub-3652623512305285/8683831496',
+                                          textColor: Platform.isAndroid
+                                              ? Colors.black
+                                              : Colors.white,
                                         ),
                                       ],
                                       if (index == 2) ...[
@@ -171,6 +174,9 @@ class _HomeViewState extends State<HomeView> {
                                           bannerId: Platform.isAndroid
                                               ? 'ca-app-pub-3652623512305285/2065348602'
                                               : 'ca-app-pub-3652623512305285/4665497764',
+                                          textColor: Platform.isAndroid
+                                              ? Colors.black
+                                              : Colors.white,
                                         ),
                                       ],
                                     ],

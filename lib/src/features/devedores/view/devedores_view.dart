@@ -129,6 +129,9 @@ class _DevedoresViewState extends State<DevedoresView> {
                               bannerId: Platform.isAndroid
                                   ? 'ca-app-pub-3652623512305285/7183317068'
                                   : 'ca-app-pub-3652623512305285/8630224120',
+                              textColor: Platform.isAndroid
+                                  ? Colors.black
+                                  : Colors.white,
                             ),
                           ],
                           if (index == 2) ...[
@@ -137,6 +140,9 @@ class _DevedoresViewState extends State<DevedoresView> {
                               bannerId: Platform.isAndroid
                                   ? 'ca-app-pub-3652623512305285/1523796275'
                                   : 'ca-app-pub-3652623512305285/8793875655',
+                              textColor: Platform.isAndroid
+                                  ? Colors.black
+                                  : Colors.white,
                             ),
                           ],
                         ],
