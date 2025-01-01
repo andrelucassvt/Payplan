@@ -9,7 +9,7 @@ import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:notes_app/src/util/widgets/admob_native_banner.dart';
+import 'package:notes_app/src/util/widgets/admob_adaptive_banner.dart';
 import 'package:uuid/uuid.dart';
 
 class DevedoresView extends StatefulWidget {
@@ -124,25 +124,17 @@ class _DevedoresViewState extends State<DevedoresView> {
                             },
                           ),
                           if (index == 0) ...[
-                            AdmobNativeBanner(
-                              mainBackgroundColor: Colors.grey.withOpacity(.7),
+                            AdmobAdaptiveBanner(
                               bannerId: Platform.isAndroid
-                                  ? 'ca-app-pub-3652623512305285/7183317068'
-                                  : 'ca-app-pub-3652623512305285/8630224120',
-                              textColor: Platform.isAndroid
-                                  ? Colors.black
-                                  : Colors.white,
+                                  ? 'ca-app-pub-3652623512305285/2185608422'
+                                  : 'ca-app-pub-3652623512305285/9922591661',
                             ),
                           ],
                           if (index == 2) ...[
-                            AdmobNativeBanner(
-                              mainBackgroundColor: Colors.grey.withOpacity(.7),
+                            AdmobAdaptiveBanner(
                               bannerId: Platform.isAndroid
-                                  ? 'ca-app-pub-3652623512305285/1523796275'
-                                  : 'ca-app-pub-3652623512305285/8793875655',
-                              textColor: Platform.isAndroid
-                                  ? Colors.black
-                                  : Colors.white,
+                                  ? 'ca-app-pub-3652623512305285/9872526753'
+                                  : 'ca-app-pub-3652623512305285/4562453770',
                             ),
                           ],
                         ],

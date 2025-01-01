@@ -30,7 +30,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-        bottom: 20,
+        bottom: 10,
       ),
       child: Column(
         children: [
