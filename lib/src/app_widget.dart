@@ -22,7 +22,6 @@ class _AppWidgetState extends State<AppWidget> {
         DeviceOrientation.portraitUp,
       ],
     );
-    openAdmobApp.loadAd();
   }
 
   @override
