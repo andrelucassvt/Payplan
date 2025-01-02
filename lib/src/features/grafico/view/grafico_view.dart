@@ -32,7 +32,6 @@ class _GraficoViewState extends State<GraficoView> {
       ? 'ca-app-pub-3652623512305285/2612926407'
       : 'ca-app-pub-3652623512305285/3055208717';
 
-  /// Loads an interstitial ad.
   void loadAd() {
     InterstitialAd.load(
         adUnitId: adUnitId,
@@ -57,10 +56,9 @@ class _GraficoViewState extends State<GraficoView> {
                 },
                 onAdClicked: (ad) {});
 
+            ad.show();
+
             debugPrint('$ad loaded.');
-            Future.delayed(const Duration(seconds: 7), () {
-              ad.show();
-            });
           },
           onAdFailedToLoad: (LoadAdError error) {
             debugPrint('InterstitialAd failed to load: $error');
@@ -75,6 +73,22 @@ class _GraficoViewState extends State<GraficoView> {
   }
 
   final screenshotController = ScreenshotController();
+
+  double get valorTotalFatura => widget.dividas
+      .map((e) => e.faturas
+          .firstWhere(
+            (element) =>
+                element.ano == state.anoAtual &&
+                element.mes == state.mesAtual.id,
+            orElse: () => FaturaMensalEntity(
+              ano: state.anoAtual,
+              mes: state.mesAtual.id,
+              valor: 0,
+              pago: false,
+            ),
+          )
+          .valor)
+      .fold(0, (previousValue, element) => previousValue + element);
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +184,7 @@ class _GraficoViewState extends State<GraficoView> {
                     height: 10,
                   ),
                   Text(
-                    state.totalGastos.real,
+                    valorTotalFatura.real,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -202,20 +216,20 @@ class _GraficoViewState extends State<GraficoView> {
                                   ),
                                 )
                                 .valor),
-                            title: (e.faturas
-                                    .firstWhere(
-                                      (element) =>
-                                          element.ano == state.anoAtual &&
-                                          element.mes == state.mesAtual.id,
-                                      orElse: () => FaturaMensalEntity(
-                                        ano: state.anoAtual,
-                                        mes: state.mesAtual.id,
-                                        valor: 0,
-                                        pago: false,
-                                      ),
-                                    )
-                                    .valor)
-                                .toString(),
+                            title: e.faturas
+                                .firstWhere(
+                                  (element) =>
+                                      element.ano == state.anoAtual &&
+                                      element.mes == state.mesAtual.id,
+                                  orElse: () => FaturaMensalEntity(
+                                    ano: state.anoAtual,
+                                    mes: state.mesAtual.id,
+                                    valor: 0,
+                                    pago: false,
+                                  ),
+                                )
+                                .valor
+                                .real,
                             titleStyle: const TextStyle(
                               color: Colors.white,
                             ),
@@ -279,70 +293,5 @@ class _GraficoViewState extends State<GraficoView> {
         ),
       ),
     );
-  }
-
-  List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
-      final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-              shadows: shadows,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-              shadows: shadows,
-            ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-              shadows: shadows,
-            ),
-          );
-        case 3:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-              shadows: shadows,
-            ),
-          );
-        default:
-          throw Error();
-      }
-    });
   }
 }
