@@ -16,6 +16,7 @@ class AppOpenAdManager {
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
           appOpenAd = ad;
+          ad.show();
         },
         onAdFailedToLoad: (error) {
           appOpenAd = null;

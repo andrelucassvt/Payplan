@@ -9,6 +9,7 @@ import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
+import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_adaptive_banner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -30,6 +31,7 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.buscarDividas();
+    AppOpenAdManager().loadAd();
     _verificarPermissaoNotificacao();
   }
 
