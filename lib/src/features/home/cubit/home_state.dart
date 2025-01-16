@@ -26,6 +26,16 @@ final class HomeInitial extends HomeState {
   });
 }
 
+final class HomeVersaoNova extends HomeState {
+  HomeVersaoNova({
+    required super.mesAtual,
+    required super.anoAtual,
+    required super.isDividas,
+    required super.dividas,
+    required super.totalGastos,
+  });
+}
+
 final class HomeDividasSucesso extends HomeState {
   HomeDividasSucesso({
     required super.mesAtual,

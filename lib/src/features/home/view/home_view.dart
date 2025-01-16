@@ -3,16 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:localization/localization.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
-import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_adaptive_banner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -31,7 +32,8 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.buscarDividas();
-    AppOpenAdManager().loadAd();
+    //AppOpenAdManager().loadAd();
+    _cubit.verificarVersao();
     _verificarPermissaoNotificacao();
   }
 
@@ -60,12 +62,6 @@ class _HomeViewState extends State<HomeView> {
           ),
         );
       }
-    } else {
-      NotificationService().showLocalNotification(
-        id: 0,
-        title: AppStrings.atencao,
-        body: AppStrings.naoPercaADataPagamento,
-      );
     }
   }
 
@@ -73,8 +69,35 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: BlocBuilder<HomeCubit, HomeState>(
+      body: BlocConsumer<HomeCubit, HomeState>(
         bloc: _cubit,
+        listener: (context, state) {
+          if (state is HomeVersaoNova) {
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text(AppStrings.atencao),
+                  content: Text('novaVersaoDisp'.i18n()),
+                  actions: [
+                    TextButton(
+                      onPressed: () async {
+                        await launchUrlString(
+                          Platform.isAndroid
+                              ? 'https://play.google.com/store/apps/details?id=com.andre.notes_app'
+                              : 'https://apps.apple.com/br/app/payplan/id6450763738',
+                        );
+                        if (context.mounted) Navigator.pop(context);
+                      },
+                      child: Text('atualizar'.i18n()),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        },
         builder: (context, state) {
           return SafeArea(
             bottom: _isSafeAreaBottom,

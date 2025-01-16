@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'home_state.dart';
@@ -22,6 +24,42 @@ class HomeCubit extends Cubit<HomeState> {
         );
 
   String dividaCampoShared = 'dividas';
+
+  Future<void> verificarVersao() async {
+    const url =
+        'https://raw.githubusercontent.com/andrelucassvt/Payplan/refs/heads/main/version-app.json';
+
+    final dio = Dio();
+
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        // Converta a resposta JSON (String) em um Map
+        final data = jsonDecode(response.data);
+
+        final versionUrl =
+            int.parse((data['version'] as String).replaceAll('.', ''));
+        final versionCurrent =
+            int.parse(packageInfo.version.replaceAll('.', ''));
+
+        if (versionUrl > versionCurrent) {
+          emit(
+            HomeVersaoNova(
+              mesAtual: state.mesAtual,
+              anoAtual: state.anoAtual,
+              isDividas: state.isDividas,
+              dividas: state.dividas,
+              totalGastos: state.totalGastos,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<void> removerDivida(DividaEntity dividaEntity) async {
     emit(

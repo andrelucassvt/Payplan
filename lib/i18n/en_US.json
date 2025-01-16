@@ -65,5 +65,7 @@
     "dividasPendentes": "Pending debts",
     "voceTemUmaDividaCom": "You have a debt with",
     "noValorDe": "for a value of",
-    "notificar": "Notify"
+    "notificar": "Notify",
+    "novaVersaoDisp": "New version available, update now!",
+    "atualizar": "Update"
 }

@@ -65,5 +65,7 @@
     "dividasPendentes": "Deudas Pendientes",
     "voceTemUmaDividaCom": "Tienes una deuda con",
     "noValorDe": "por un valor de",
-    "notificar": "Notificar"
+    "notificar": "Notificar",
+    "novaVersaoDisp": "¡Nueva versión disponible!, actualiza para continuar utilizando Payplan",
+    "atualizar": "Actualizar"
 }
