@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/devedores/view/devedores_view.dart';
+import 'package:notes_app/src/features/grafico/view/grafico_view.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-
-import '../../grafico/view/grafico_view.dart';
 
 class HomeTotalWidget extends StatefulWidget {
   const HomeTotalWidget({
@@ -191,7 +190,8 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
           Row(
             children: [
               Expanded(
-                child: InkWell(
+                child: buttonContainerBase(
+                  text: AppStrings.novaDivida,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -202,102 +202,101 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                       ),
                     );
                   },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.whiteOpacity,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Center(
-                      child: Text(
-                        AppStrings.novaDivida,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(
-                width: 10,
+                width: 7,
               ),
               Expanded(
-                child: InkWell(
-                  onTap: () => showModalDesconto(state.totalGastos),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.whiteOpacity,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '-${AppStrings.desconto}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                child: buttonContainerBase(
+                  text: '-${AppStrings.desconto}',
+                  onTap: () {
+                    showModalDesconto(state.totalGastos);
+                  },
                 ),
               ),
               const SizedBox(
-                width: 10,
+                width: 7,
               ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DevedoresView(),
-                    ),
-                  );
-                },
-                child: CircleAvatar(
-                  backgroundColor: AppColors.whiteOpacity,
-                  child: Icon(
-                    Icons.diversity_3_outlined,
+              PopupMenuButton<String>(
+                child: buttonContainerBase(
+                  text: '***',
+                  icon: Icon(
+                    Icons.more_horiz,
                     color: Colors.white,
                   ),
+                  width: 60,
+                  onTap: null,
                 ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              if (state.totalGastos != 0)
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => GraficoView(
-                          homeCubit: _cubit,
-                          dividas: state.dividas,
-                        ),
-                      ),
-                    );
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: AppColors.whiteOpacity,
-                    child: Icon(
-                      Icons.donut_large,
-                      color: Colors.white,
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: 'Devedores',
+                      child: Text(AppStrings.devedores),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DevedoresView(),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ),
+                    if (state.totalGastos != 0)
+                      PopupMenuItem(
+                        value: 'Grafico',
+                        child: Text(AppStrings.graficoGastos),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => GraficoView(
+                                homeCubit: _cubit,
+                                dividas: state.dividas,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ];
+                },
+              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buttonContainerBase({
+    required String text,
+    VoidCallback? onTap,
+    double? width,
+    Widget? icon,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.whiteOpacity,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Center(
+          child: icon ??
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+        ),
       ),
     );
   }

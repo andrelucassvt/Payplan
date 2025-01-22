@@ -36,7 +36,6 @@ class HomeCubit extends Cubit<HomeState> {
       final response = await dio.get(url);
 
       if (response.statusCode == 200) {
-        // Converta a resposta JSON (String) em um Map
         final data = jsonDecode(response.data);
 
         final versionUrl =

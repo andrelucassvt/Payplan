@@ -10,8 +10,8 @@ import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
+import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:notes_app/src/util/widgets/admob_adaptive_banner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -32,9 +32,11 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _cubit.buscarDividas();
-    //AppOpenAdManager().loadAd();
     _cubit.verificarVersao();
     _verificarPermissaoNotificacao();
+    Future.delayed(Duration(seconds: 7), () {
+      AppOpenAdManager().loadAd();
+    });
   }
 
   Future<void> _verificarPermissaoNotificacao() async {
@@ -101,111 +103,106 @@ class _HomeViewState extends State<HomeView> {
         builder: (context, state) {
           return SafeArea(
             bottom: _isSafeAreaBottom,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  HomeTotalWidget(
-                    cubit: _cubit,
-                    state: state,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.only(
-                        left: 10,
-                        right: 10,
-                        top: 10,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 10,
+                ),
+                HomeTotalWidget(
+                  cubit: _cubit,
+                  state: state,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      left: 10,
+                      right: 10,
+                      top: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(.3),
+                      borderRadius: BorderRadius.circular(
+                        20,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(.3),
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        12.0,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          12.0,
-                        ),
-                        child: state.dividas.isEmpty
-                            ? Center(
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => NovaDividaView(
-                                          homeCubit: _cubit,
-                                        ),
+                      child: state.dividas.isEmpty
+                          ? Center(
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => NovaDividaView(
+                                        homeCubit: _cubit,
                                       ),
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 50,
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal: 50,
                                     ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.whiteOpacity,
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        AppStrings.novaDivida,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                  );
+                                },
+                                child: Container(
+                                  height: 50,
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: 50,
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.whiteOpacity,
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      AppStrings.novaDivida,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                                 ),
-                              )
-                            : ListView.builder(
-                                itemCount: state.dividas.length,
-                                controller: _scrollViewController,
-                                itemBuilder: (context, index) {
-                                  return Column(
-                                    children: [
-                                      HomeCardDivida(
-                                        dividaEntity: state.dividas[index],
-                                        homeCubit: _cubit,
-                                      ),
-                                      if (index == 0) ...[
-                                        AdmobAdaptiveBanner(
-                                          bannerId: Platform.isAndroid
-                                              ? 'ca-app-pub-3652623512305285/5889977427'
-                                              : 'ca-app-pub-3652623512305285/9198667043',
-                                        ),
-                                      ],
-                                      if (index == 2) ...[
-                                        AdmobAdaptiveBanner(
-                                          bannerId: Platform.isAndroid
-                                              ? 'ca-app-pub-3652623512305285/7988227382'
-                                              : 'ca-app-pub-3652623512305285/8865877557',
-                                        ),
-                                      ],
-                                    ],
-                                  );
-                                },
                               ),
-                      ),
+                            )
+                          : ListView.builder(
+                              itemCount: state.dividas.length,
+                              controller: _scrollViewController,
+                              itemBuilder: (context, index) {
+                                return Column(
+                                  children: [
+                                    HomeCardDivida(
+                                      dividaEntity: state.dividas[index],
+                                      homeCubit: _cubit,
+                                    ),
+                                    // if (index == 0) ...[
+                                    //   AdmobAdaptiveBanner(
+                                    //     bannerId: Platform.isAndroid
+                                    //         ? 'ca-app-pub-3652623512305285/5889977427'
+                                    //         : 'ca-app-pub-3652623512305285/9198667043',
+                                    //   ),
+                                    // ],
+                                    // if (index == 2) ...[
+                                    //   AdmobAdaptiveBanner(
+                                    //     bannerId: Platform.isAndroid
+                                    //         ? 'ca-app-pub-3652623512305285/7988227382'
+                                    //         : 'ca-app-pub-3652623512305285/8865877557',
+                                    //   ),
+                                    // ],
+                                  ],
+                                );
+                              },
+                            ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
