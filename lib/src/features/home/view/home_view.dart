@@ -9,70 +9,31 @@ import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
-import 'package:notes_app/src/util/service/notification_service.dart';
-import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  const HomeView({
+    super.key,
+    required this.cubit,
+  });
+  final HomeCubit cubit;
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  final _cubit = HomeCubit();
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
   final _scrollViewController = ScrollController();
   final bool _isSafeAreaBottom = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _cubit.buscarDividas();
-    _cubit.verificarVersao();
-    _verificarPermissaoNotificacao();
-    Future.delayed(Duration(seconds: 7), () {
-      AppOpenAdManager().loadAd();
-    });
-  }
-
-  Future<void> _verificarPermissaoNotificacao() async {
-    final result = await NotificationService().verificarPermissaoNotificacao();
-    if (result) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.blue,
-            content: InkWell(
-              onTap: () {
-                openAppSettings();
-              },
-              child: Center(
-                child: Text(
-                  AppStrings.permitirNotificacoes,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: BlocConsumer<HomeCubit, HomeState>(
-        bloc: _cubit,
+        bloc: widget.cubit,
         listener: (context, state) {
           if (state is HomeVersaoNova) {
             showDialog(
@@ -110,7 +71,7 @@ class _HomeViewState extends State<HomeView> {
                   height: 10,
                 ),
                 HomeTotalWidget(
-                  cubit: _cubit,
+                  cubit: widget.cubit,
                   state: state,
                 ),
                 SizedBox(
@@ -124,7 +85,7 @@ class _HomeViewState extends State<HomeView> {
                       top: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(.3),
+                      color: Colors.grey.withValues(alpha: .3),
                       borderRadius: BorderRadius.circular(
                         20,
                       ),
@@ -141,7 +102,7 @@ class _HomeViewState extends State<HomeView> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => NovaDividaView(
-                                        homeCubit: _cubit,
+                                        homeCubit: widget.cubit,
                                       ),
                                     ),
                                   );
@@ -174,12 +135,15 @@ class _HomeViewState extends State<HomeView> {
                           : ListView.builder(
                               itemCount: state.dividas.length,
                               controller: _scrollViewController,
+                              padding: EdgeInsets.only(
+                                bottom: 150,
+                              ),
                               itemBuilder: (context, index) {
                                 return Column(
                                   children: [
                                     HomeCardDivida(
                                       dividaEntity: state.dividas[index],
-                                      homeCubit: _cubit,
+                                      homeCubit: widget.cubit,
                                     ),
                                     // if (index == 0) ...[
                                     //   AdmobAdaptiveBanner(

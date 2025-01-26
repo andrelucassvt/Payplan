@@ -142,7 +142,7 @@ class _DevedoresViewState extends State<DevedoresView> {
                     },
                   ),
                   const SizedBox(
-                    height: 50,
+                    height: 150,
                   ),
                 ],
               ),

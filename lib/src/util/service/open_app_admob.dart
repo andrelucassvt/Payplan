@@ -9,6 +9,8 @@ class AppOpenAdManager {
 
   static AppOpenAd? appOpenAd;
 
+  static int count = 0;
+
   void loadAd() {
     AppOpenAd.load(
       adUnitId: adUnitId,
@@ -16,7 +18,6 @@ class AppOpenAdManager {
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
           appOpenAd = ad;
-          ad.show();
         },
         onAdFailedToLoad: (error) {
           appOpenAd = null;

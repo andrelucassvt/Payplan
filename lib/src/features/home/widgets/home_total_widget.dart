@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
-import 'package:notes_app/src/features/devedores/view/devedores_view.dart';
-import 'package:notes_app/src/features/grafico/view/grafico_view.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
@@ -214,52 +212,6 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     showModalDesconto(state.totalGastos);
                   },
                 ),
-              ),
-              const SizedBox(
-                width: 7,
-              ),
-              PopupMenuButton<String>(
-                child: buttonContainerBase(
-                  text: '***',
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.white,
-                  ),
-                  width: 60,
-                  onTap: null,
-                ),
-                itemBuilder: (context) {
-                  return [
-                    PopupMenuItem(
-                      value: 'Devedores',
-                      child: Text(AppStrings.devedores),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DevedoresView(),
-                          ),
-                        );
-                      },
-                    ),
-                    if (state.totalGastos != 0)
-                      PopupMenuItem(
-                        value: 'Grafico',
-                        child: Text(AppStrings.graficoGastos),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GraficoView(
-                                homeCubit: _cubit,
-                                dividas: state.dividas,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                  ];
-                },
               ),
             ],
           ),

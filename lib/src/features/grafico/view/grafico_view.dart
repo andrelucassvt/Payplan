@@ -32,6 +32,8 @@ class _GraficoViewState extends State<GraficoView> {
       ? 'ca-app-pub-3652623512305285/2612926407'
       : 'ca-app-pub-3652623512305285/3055208717';
 
+  InterstitialAd? interstitialAd;
+
   void loadAd() {
     InterstitialAd.load(
         adUnitId: adUnitId,
@@ -56,7 +58,7 @@ class _GraficoViewState extends State<GraficoView> {
                 },
                 onAdClicked: (ad) {});
 
-            ad.show();
+            interstitialAd = ad;
 
             debugPrint('$ad loaded.');
           },
@@ -107,189 +109,195 @@ class _GraficoViewState extends State<GraficoView> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: GestureDetector(
-          onTap: () async {
-            final result = await screenshotController.capture();
-            if (result != null) {
-              final directory = await getApplicationDocumentsDirectory();
-              final imagePath =
-                  await File('${directory.path}/image.png').create();
-              await imagePath.writeAsBytes(result);
-              await Share.shareXFiles(
-                [
-                  XFile(imagePath.path),
-                ],
-                text: AppStrings.baixePayplan,
-              );
-            }
-          },
-          child: Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 30,
-              vertical: 15,
-            ),
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.share,
-                  color: Colors.white,
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  AppStrings.compartilhar,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Screenshot(
-            controller: screenshotController,
-            child: Container(
-              color: Colors.black,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 50,
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () async {
+                interstitialAd?.show();
+                final result = await screenshotController.capture();
+                if (result != null) {
+                  final directory = await getApplicationDocumentsDirectory();
+                  final imagePath =
+                      await File('${directory.path}/image.png').create();
+                  await imagePath.writeAsBytes(result);
+                  await Share.shareXFiles(
+                    [
+                      XFile(imagePath.path),
+                    ],
+                    text: AppStrings.baixePayplan,
+                  );
+                }
+              },
+              child: Container(
+                height: 60,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
                   ),
-                  Text(
-                    '${state.mesAtual.nome} ${state.anoAtual}',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(.7),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    valorTotalFatura.real,
-                    style: const TextStyle(
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.share,
                       color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Center(
-                    child: SizedBox(
-                      height: 300,
-                      width: 300,
-                      child: PieChart(
-                        PieChartData(
-                            sections: widget.dividas.map((e) {
-                          return PieChartSectionData(
-                            radius: 100,
-                            value: (e.faturas
-                                .firstWhere(
-                                  (element) =>
-                                      element.ano == state.anoAtual &&
-                                      element.mes == state.mesAtual.id,
-                                  orElse: () => FaturaMensalEntity(
-                                    ano: state.anoAtual,
-                                    mes: state.mesAtual.id,
-                                    valor: 0,
-                                    pago: false,
-                                  ),
-                                )
-                                .valor),
-                            title: e.faturas
-                                .firstWhere(
-                                  (element) =>
-                                      element.ano == state.anoAtual &&
-                                      element.mes == state.mesAtual.id,
-                                  orElse: () => FaturaMensalEntity(
-                                    ano: state.anoAtual,
-                                    mes: state.mesAtual.id,
-                                    valor: 0,
-                                    pago: false,
-                                  ),
-                                )
-                                .valor
-                                .real,
-                            titleStyle: const TextStyle(
-                              color: Colors.white,
-                            ),
-                            showTitle: true,
-                            color: e.cor,
-                          );
-                        }).toList()),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      AppStrings.compartilhar,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Wrap(
-                    direction: Axis.horizontal,
-                    children: widget.dividas.map((e) {
-                      if (e.faturas
-                              .firstWhere(
-                                  (element) =>
-                                      element.ano == state.anoAtual &&
-                                      element.mes == state.mesAtual.id,
-                                  orElse: () => FaturaMensalEntity(
+                  ],
+                ),
+              ),
+            ),
+            SingleChildScrollView(
+              child: Screenshot(
+                controller: screenshotController,
+                child: Container(
+                  color: Colors.black,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        '${state.mesAtual.nome} ${state.anoAtual}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(.7),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        valorTotalFatura.real,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Center(
+                        child: SizedBox(
+                          height: 300,
+                          width: 300,
+                          child: PieChart(
+                            PieChartData(
+                                sections: widget.dividas.map((e) {
+                              return PieChartSectionData(
+                                radius: 100,
+                                value: (e.faturas
+                                    .firstWhere(
+                                      (element) =>
+                                          element.ano == state.anoAtual &&
+                                          element.mes == state.mesAtual.id,
+                                      orElse: () => FaturaMensalEntity(
                                         ano: state.anoAtual,
                                         mes: state.mesAtual.id,
                                         valor: 0,
                                         pago: false,
-                                      ))
-                              .valor ==
-                          0) {
-                        return SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              height: 20,
-                              width: 20,
-                              color: e.cor,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              e.nome,
-                              style: const TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                                      ),
+                                    )
+                                    .valor),
+                                title: e.faturas
+                                    .firstWhere(
+                                      (element) =>
+                                          element.ano == state.anoAtual &&
+                                          element.mes == state.mesAtual.id,
+                                      orElse: () => FaturaMensalEntity(
+                                        ano: state.anoAtual,
+                                        mes: state.mesAtual.id,
+                                        valor: 0,
+                                        pago: false,
+                                      ),
+                                    )
+                                    .valor
+                                    .real,
+                                titleStyle: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                                showTitle: true,
+                                color: e.cor,
+                              );
+                            }).toList()),
+                          ),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      Wrap(
+                        direction: Axis.horizontal,
+                        children: widget.dividas.map((e) {
+                          if (e.faturas
+                                  .firstWhere(
+                                      (element) =>
+                                          element.ano == state.anoAtual &&
+                                          element.mes == state.mesAtual.id,
+                                      orElse: () => FaturaMensalEntity(
+                                            ano: state.anoAtual,
+                                            mes: state.mesAtual.id,
+                                            valor: 0,
+                                            pago: false,
+                                          ))
+                                  .valor ==
+                              0) {
+                            return SizedBox.shrink();
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  height: 20,
+                                  width: 20,
+                                  color: e.cor,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  e.nome,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(
+                        height: 100,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

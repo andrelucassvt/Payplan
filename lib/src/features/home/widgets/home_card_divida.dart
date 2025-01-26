@@ -5,6 +5,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 class HomeCardDivida extends StatefulWidget {
@@ -134,7 +135,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.5),
+                        color: Colors.white.withValues(alpha: .5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -217,6 +218,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
   }
 
   void _editarFaturaBottomSheet() {
+    AppOpenAdManager.appOpenAd?.show();
     double valorModificado = 0;
     _faturaTextController.updateValue(faturaAtual!.valor);
     showModalBottomSheet(
