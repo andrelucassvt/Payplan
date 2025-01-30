@@ -41,26 +41,26 @@ class _DevedoresViewState extends State<DevedoresView> {
           // Called when an ad is successfully received.
           onAdLoaded: (ad) {
             ad.fullScreenContentCallback = FullScreenContentCallback(
-                // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {},
-                // Called when an impression occurs on the ad.
-                onAdImpression: (ad) {},
-                // Called when the ad failed to show full screen content.
-                onAdFailedToShowFullScreenContent: (ad, err) {
-                  // Dispose the ad here to free resources.
-                  interstitialAd?.dispose();
-                  loadAd();
-                },
-                // Called when the ad dismissed full screen content.
-                onAdDismissedFullScreenContent: (ad) {
-                  // Dispose the ad here to free resources.
-                  interstitialAd?.dispose();
-                  loadAd();
-                },
-                onAdClicked: (ad) {});
+              // Called when the ad showed the full screen content.
+              onAdShowedFullScreenContent: (ad) {
+                loadAd();
+              },
+              // Called when an impression occurs on the ad.
+              onAdImpression: (ad) {},
+              // Called when the ad failed to show full screen content.
+              onAdFailedToShowFullScreenContent: (ad, err) {
+                // Dispose the ad here to free resources.
+                interstitialAd?.dispose();
+              },
+              // Called when the ad dismissed full screen content.
+              onAdDismissedFullScreenContent: (ad) {
+                // Dispose the ad here to free resources.
+                interstitialAd?.dispose();
+              },
+              onAdClicked: (ad) {},
+            );
 
             interstitialAd = ad;
-            loadAd();
 
             debugPrint('$ad loaded.');
           },

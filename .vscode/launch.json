@@ -8,10 +8,7 @@
         {
             "name": "Payplan",
             "request": "launch",
-            "type": "dart",
-            "args": [
-                "--no-enable-impeller"
-            ]
+            "type": "dart"
         },
         {
             "name": "Payplan (profile mode)",
