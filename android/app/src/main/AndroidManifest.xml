@@ -6,6 +6,7 @@
    <application
         android:label="Payplan"
         android:name="${applicationName}"
+        android:extractNativeLibs="true"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"

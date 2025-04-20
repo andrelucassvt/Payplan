@@ -145,20 +145,6 @@ class _HomeViewState extends State<HomeView> {
                                       dividaEntity: state.dividas[index],
                                       homeCubit: widget.cubit,
                                     ),
-                                    // if (index == 0) ...[
-                                    //   AdmobAdaptiveBanner(
-                                    //     bannerId: Platform.isAndroid
-                                    //         ? 'ca-app-pub-3652623512305285/5889977427'
-                                    //         : 'ca-app-pub-3652623512305285/9198667043',
-                                    //   ),
-                                    // ],
-                                    // if (index == 2) ...[
-                                    //   AdmobAdaptiveBanner(
-                                    //     bannerId: Platform.isAndroid
-                                    //         ? 'ca-app-pub-3652623512305285/7988227382'
-                                    //         : 'ca-app-pub-3652623512305285/8865877557',
-                                    //   ),
-                                    // ],
                                   ],
                                 );
                               },

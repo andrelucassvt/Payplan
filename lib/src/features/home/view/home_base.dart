@@ -113,23 +113,6 @@ class _HomeBaseState extends State<HomeBase> {
                     ),
                     IconButton(
                       icon: CircleAvatar(
-                        backgroundColor: _selectedIndex == 1
-                            ? Colors.deepPurpleAccent
-                            : Colors.transparent,
-                        child: Icon(
-                          Icons.donut_large,
-                          color:
-                              _selectedIndex == 1 ? Colors.white : Colors.grey,
-                        ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _selectedIndex = 1;
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: CircleAvatar(
                         backgroundColor: _selectedIndex == 2
                             ? Colors.deepPurpleAccent
                             : Colors.transparent,
@@ -142,6 +125,23 @@ class _HomeBaseState extends State<HomeBase> {
                       onPressed: () {
                         setState(() {
                           _selectedIndex = 2;
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: CircleAvatar(
+                        backgroundColor: _selectedIndex == 1
+                            ? Colors.deepPurpleAccent
+                            : Colors.transparent,
+                        child: Icon(
+                          Icons.donut_large,
+                          color:
+                              _selectedIndex == 1 ? Colors.white : Colors.grey,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _selectedIndex = 1;
                         });
                       },
                     ),
