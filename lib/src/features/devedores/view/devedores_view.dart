@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 import 'package:notes_app/src/features/devedores/view/widgets/card_devedores_widget.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class DevedoresView extends StatefulWidget {
@@ -29,59 +29,10 @@ class _DevedoresViewState extends State<DevedoresView> {
       ? 'ca-app-pub-3652623512305285/3952051433'
       : 'ca-app-pub-3652623512305285/1026768525';
 
-  InterstitialAd? interstitialAd;
-
-  int countAd = 0;
-
-  void loadAd() {
-    InterstitialAd.load(
-        adUnitId: adUnitId,
-        request: const AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(
-          // Called when an ad is successfully received.
-          onAdLoaded: (ad) {
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              // Called when the ad showed the full screen content.
-              onAdShowedFullScreenContent: (ad) {
-                loadAd();
-              },
-              // Called when an impression occurs on the ad.
-              onAdImpression: (ad) {},
-              // Called when the ad failed to show full screen content.
-              onAdFailedToShowFullScreenContent: (ad, err) {
-                // Dispose the ad here to free resources.
-                interstitialAd?.dispose();
-              },
-              // Called when the ad dismissed full screen content.
-              onAdDismissedFullScreenContent: (ad) {
-                // Dispose the ad here to free resources.
-                interstitialAd?.dispose();
-              },
-              onAdClicked: (ad) {},
-            );
-
-            interstitialAd = ad;
-
-            debugPrint('$ad loaded.');
-          },
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('InterstitialAd failed to load: $error');
-            interstitialAd = null;
-          },
-        ));
-  }
-
   @override
   void initState() {
     super.initState();
     _cubit.buscarDevedores();
-    loadAd();
-  }
-
-  @override
-  void dispose() {
-    interstitialAd?.dispose();
-    super.dispose();
   }
 
   @override
@@ -179,20 +130,12 @@ class _DevedoresViewState extends State<DevedoresView> {
                               );
                             },
                           ),
-                          // if (index == 0) ...[
-                          //   AdmobAdaptiveBanner(
-                          //     bannerId: Platform.isAndroid
-                          //         ? 'ca-app-pub-3652623512305285/2185608422'
-                          //         : 'ca-app-pub-3652623512305285/9922591661',
-                          //   ),
-                          // ],
-                          // if (index == 2) ...[
-                          //   AdmobAdaptiveBanner(
-                          //     bannerId: Platform.isAndroid
-                          //         ? 'ca-app-pub-3652623512305285/9872526753'
-                          //         : 'ca-app-pub-3652623512305285/4562453770',
-                          //   ),
-                          // ],
+                          if (index == 0)
+                            AdmobBannerWidget(
+                              bannerId: Platform.isAndroid
+                                  ? 'ca-app-pub-3652623512305285/2185608422'
+                                  : 'ca-app-pub-3652623512305285/9922591661',
+                            ),
                         ],
                       );
                     },
@@ -343,17 +286,6 @@ class _DevedoresViewState extends State<DevedoresView> {
     ).whenComplete(
       () {
         nomeTextController.clear();
-        if (interstitialAd != null) {
-          countAd++;
-          if (countAd == 2) {
-            countAd = 0;
-            interstitialAd?.show().whenComplete(
-              () {
-                interstitialAd?.dispose();
-              },
-            );
-          }
-        }
       },
     );
   }

@@ -10,6 +10,7 @@ import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
@@ -145,6 +146,18 @@ class _HomeViewState extends State<HomeView> {
                                       dividaEntity: state.dividas[index],
                                       homeCubit: widget.cubit,
                                     ),
+                                    if (index == 0)
+                                      AdmobBannerWidget(
+                                        bannerId: Platform.isAndroid
+                                            ? 'ca-app-pub-3652623512305285/7988227382'
+                                            : 'ca-app-pub-3652623512305285/8865877557',
+                                      ),
+                                    if (index == 2)
+                                      AdmobBannerWidget(
+                                        bannerId: Platform.isAndroid
+                                            ? 'ca-app-pub-3652623512305285/5263156340'
+                                            : 'ca-app-pub-3652623512305285/1323911334',
+                                      ),
                                   ],
                                 );
                               },

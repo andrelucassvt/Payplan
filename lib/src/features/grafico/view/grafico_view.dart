@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
+import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
@@ -11,20 +12,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
-class GraficoView extends StatefulWidget {
-  const GraficoView({
+class GraficosView extends StatefulWidget {
+  const GraficosView({
     required this.dividas,
+    required this.devedores,
     required this.homeCubit,
     super.key,
   });
   final List<DividaEntity> dividas;
+  final List<DevedoresEntity> devedores;
   final HomeCubit homeCubit;
 
   @override
-  State<GraficoView> createState() => _GraficoViewState();
+  State<GraficosView> createState() => _GraficosViewState();
 }
 
-class _GraficoViewState extends State<GraficoView> {
+class _GraficosViewState extends State<GraficosView> {
   int touchedIndex = -1;
   HomeState get state => widget.homeCubit.state;
 
@@ -62,6 +65,7 @@ class _GraficoViewState extends State<GraficoView> {
 
             debugPrint('$ad loaded.');
           },
+
           onAdFailedToLoad: (LoadAdError error) {
             debugPrint('InterstitialAd failed to load: $error');
           },
@@ -74,7 +78,8 @@ class _GraficoViewState extends State<GraficoView> {
     loadAd();
   }
 
-  final screenshotController = ScreenshotController();
+  final screenshotDividasController = ScreenshotController();
+  final screenshotDevedoresController = ScreenshotController();
 
   double get valorTotalFatura => widget.dividas
       .map((e) => e.faturas
@@ -90,6 +95,10 @@ class _GraficoViewState extends State<GraficoView> {
             ),
           )
           .valor)
+      .fold(0, (previousValue, element) => previousValue + element);
+
+  double get valorTotalDevedores => widget.devedores
+      .map((e) => e.valor)
       .fold(0, (previousValue, element) => previousValue + element);
 
   @override
@@ -110,78 +119,57 @@ class _GraficoViewState extends State<GraficoView> {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                interstitialAd?.show();
-                final result = await screenshotController.capture();
-                if (result != null) {
-                  final directory = await getApplicationDocumentsDirectory();
-                  final imagePath =
-                      await File('${directory.path}/image.png').create();
-                  await imagePath.writeAsBytes(result);
-                  await Share.shareXFiles(
-                    [
-                      XFile(imagePath.path),
-                    ],
-                    text: AppStrings.baixePayplan,
-                  );
-                }
-              },
-              child: Container(
-                height: 60,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.share,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      AppStrings.compartilhar,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 20,
               ),
-            ),
-            SingleChildScrollView(
-              child: Screenshot(
-                controller: screenshotController,
+              Screenshot(
+                controller: screenshotDividasController,
                 child: Container(
                   color: Colors.black,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        '${state.mesAtual.nome} ${state.anoAtual}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(.7),
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            '${AppStrings.dividas} (${state.mesAtual.nome} ${state.anoAtual})',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: .7),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              final result =
+                                  await screenshotDividasController.capture();
+                              if (result != null) {
+                                final directory =
+                                    await getApplicationDocumentsDirectory();
+                                final imagePath =
+                                    await File('${directory.path}/image.png')
+                                        .create();
+                                await imagePath.writeAsBytes(result);
+                                await Share.shareXFiles(
+                                  [
+                                    XFile(imagePath.path),
+                                  ],
+                                  text: AppStrings.baixePayplan,
+                                );
+                              }
+                              interstitialAd?.show();
+                            },
+                            icon: Icon(
+                              Icons.share,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 10,
@@ -289,15 +277,137 @@ class _GraficoViewState extends State<GraficoView> {
                           );
                         }).toList(),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Screenshot(
+                controller: screenshotDevedoresController,
+                child: Container(
+                  color: Colors.black,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            AppStrings.devedores,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: .7),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              final result =
+                                  await screenshotDevedoresController.capture();
+                              if (result != null) {
+                                final directory =
+                                    await getApplicationDocumentsDirectory();
+                                final imagePath =
+                                    await File('${directory.path}/image.png')
+                                        .create();
+                                await imagePath.writeAsBytes(result);
+                                await Share.shareXFiles(
+                                  [
+                                    XFile(imagePath.path),
+                                  ],
+                                  text: AppStrings.baixePayplan,
+                                );
+                              }
+                              interstitialAd?.show();
+                            },
+                            icon: Icon(
+                              Icons.share,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        valorTotalDevedores.real,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Center(
+                        child: SizedBox(
+                          height: 300,
+                          width: 300,
+                          child: PieChart(
+                            PieChartData(
+                              sections:
+                                  widget.devedores.asMap().entries.map((e) {
+                                return PieChartSectionData(
+                                  radius: 100,
+                                  value: e.value.valor,
+                                  title: e.value.valor.real,
+                                  titleStyle: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  showTitle: true,
+                                  color: Colors.primaries[
+                                      e.key % Colors.primaries.length],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(
-                        height: 100,
+                        height: 30,
+                      ),
+                      Wrap(
+                        direction: Axis.horizontal,
+                        children: widget.devedores.map((e) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  height: 20,
+                                  width: 20,
+                                  color: Colors.primaries[
+                                      widget.devedores.indexOf(e) %
+                                          Colors.primaries.length],
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  e.nome,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 100,
+              ),
+            ],
+          ),
         ),
       ),
     );

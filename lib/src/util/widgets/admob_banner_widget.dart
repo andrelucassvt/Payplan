@@ -50,18 +50,13 @@ class _AdmobBannerWidgetState extends State<AdmobBannerWidget> {
     if (_bannerAd != null && _isLoaded) {
       return Padding(
         padding: const EdgeInsets.only(
-          bottom: 10,
+          bottom: 5,
         ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: SafeArea(
-            child: SizedBox(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(
-                ad: _bannerAd!,
-              ),
-            ),
+        child: SizedBox(
+          width: _bannerAd!.size.width.toDouble(),
+          height: _bannerAd!.size.height.toDouble(),
+          child: AdWidget(
+            ad: _bannerAd!,
           ),
         ),
       );

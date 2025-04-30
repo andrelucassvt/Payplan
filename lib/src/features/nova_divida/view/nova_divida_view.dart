@@ -412,14 +412,6 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                   ),
                 ],
               ],
-              // const SizedBox(
-              //   height: 20,
-              // ),
-              // AdmobAdaptiveBanner(
-              //   bannerId: Platform.isAndroid
-              //       ? 'ca-app-pub-3652623512305285/5263156340'
-              //       : 'ca-app-pub-3652623512305285/1323911334',
-              // ),
               const SizedBox(
                 height: 100,
               ),
