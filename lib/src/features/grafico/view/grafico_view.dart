@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
@@ -30,53 +29,6 @@ class GraficosView extends StatefulWidget {
 class _GraficosViewState extends State<GraficosView> {
   int touchedIndex = -1;
   HomeState get state => widget.homeCubit.state;
-
-  final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3652623512305285/2612926407'
-      : 'ca-app-pub-3652623512305285/3055208717';
-
-  InterstitialAd? interstitialAd;
-
-  void loadAd() {
-    InterstitialAd.load(
-        adUnitId: adUnitId,
-        request: const AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(
-          // Called when an ad is successfully received.
-          onAdLoaded: (ad) {
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-                // Called when the ad showed the full screen content.
-                onAdShowedFullScreenContent: (ad) {},
-                // Called when an impression occurs on the ad.
-                onAdImpression: (ad) {},
-                // Called when the ad failed to show full screen content.
-                onAdFailedToShowFullScreenContent: (ad, err) {
-                  // Dispose the ad here to free resources.
-                  ad.dispose();
-                },
-                // Called when the ad dismissed full screen content.
-                onAdDismissedFullScreenContent: (ad) {
-                  // Dispose the ad here to free resources.
-                  ad.dispose();
-                },
-                onAdClicked: (ad) {});
-
-            interstitialAd = ad;
-
-            debugPrint('$ad loaded.');
-          },
-
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('InterstitialAd failed to load: $error');
-          },
-        ));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadAd();
-  }
 
   final screenshotDividasController = ScreenshotController();
   final screenshotDevedoresController = ScreenshotController();
@@ -162,7 +114,6 @@ class _GraficosViewState extends State<GraficosView> {
                                   text: AppStrings.baixePayplan,
                                 );
                               }
-                              interstitialAd?.show();
                             },
                             icon: Icon(
                               Icons.share,
@@ -320,7 +271,6 @@ class _GraficosViewState extends State<GraficosView> {
                                   text: AppStrings.baixePayplan,
                                 );
                               }
-                              interstitialAd?.show();
                             },
                             icon: Icon(
                               Icons.share,
