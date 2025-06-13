@@ -22,7 +22,7 @@ class DevedoresView extends StatefulWidget {
 class _DevedoresViewState extends State<DevedoresView> {
   final _cubit = DevedoresCubit();
   final nomeTextController = TextEditingController();
-
+  final pixTextController = TextEditingController();
   final faturaTextController = MoneyMaskedTextController();
 
   final adUnitId = Platform.isAndroid
@@ -154,133 +154,171 @@ class _DevedoresViewState extends State<DevedoresView> {
 
   void novoDevedor({DevedoresEntity? devedoresEntity}) {
     String nome = devedoresEntity?.nome ?? '';
+    String? pix = devedoresEntity?.pix;
     double valorModificado = devedoresEntity?.valor ?? 0;
     nomeTextController.text = nome;
     faturaTextController.text = valorModificado.real;
+    pixTextController.text = devedoresEntity?.pix ?? '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-            border: Border.all(
-              color: Colors.white,
-            ),
-          ),
-          padding: EdgeInsets.all(10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppStrings.novoDevedor,
-                style: TextStyle(
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+                border: Border.all(
                   color: Colors.white,
-                  fontSize: 20,
                 ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              TextField(
-                controller: nomeTextController,
-                onChanged: (value) {
-                  nome = value;
-                  setState(() {});
-                },
-                decoration: InputDecoration(
-                  labelText: AppStrings.nomeDevedor,
-                  labelStyle: TextStyle(
-                    color: Colors.white,
+              padding: EdgeInsets.all(10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppStrings.novoDevedor,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
                   ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
+                    controller: nomeTextController,
+                    onChanged: (value) {
+                      nome = value;
+                      setModalState(() {});
+                    },
+                    decoration: InputDecoration(
+                      labelText: AppStrings.nomeDevedor,
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    style: TextStyle(
                       color: Colors.white,
                     ),
                   ),
-                ),
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextField(
-                controller: faturaTextController,
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                    final filtro1 = value.replaceAll('.', '');
-                    valorModificado =
-                        double.parse(filtro1.replaceAll(',', '.'));
-
-                    setState(() {});
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: AppStrings.valor,
-                  labelStyle: TextStyle(
-                    color: Colors.white,
+                  const SizedBox(
+                    height: 20,
                   ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(
+                  TextField(
+                    controller: pixTextController,
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        pix = value;
+                        setModalState(() {});
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Chave PIX',
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    style: TextStyle(
                       color: Colors.white,
                     ),
                   ),
-                ),
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (devedoresEntity != null) {
-                    _cubit.editarDevedor(
-                      DevedoresEntity(
-                        id: devedoresEntity.id,
-                        nome: nome,
-                        valor: valorModificado,
-                      ),
-                    );
-                  } else {
-                    _cubit.adicionarDevedor(
-                      DevedoresEntity(
-                        id: Uuid().v4(),
-                        nome: nome,
-                        valor: valorModificado,
-                      ),
-                    );
-                  }
-
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                ),
-                child: Text(
-                  AppStrings.salvar,
-                  style: TextStyle(
-                    color: Colors.white,
+                  const SizedBox(
+                    height: 20,
                   ),
-                ),
+                  TextField(
+                    controller: faturaTextController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        final filtro1 = value.replaceAll('.', '');
+                        valorModificado =
+                            double.parse(filtro1.replaceAll(',', '.'));
+
+                        setModalState(() {});
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: AppStrings.valor,
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (nomeTextController.text.isEmpty) {
+                        return;
+                      }
+                      if (devedoresEntity != null) {
+                        _cubit.editarDevedor(
+                          DevedoresEntity(
+                            id: devedoresEntity.id,
+                            nome: nome,
+                            valor: valorModificado,
+                            pix: pix,
+                          ),
+                        );
+                      } else {
+                        _cubit.adicionarDevedor(
+                          DevedoresEntity(
+                            id: Uuid().v4(),
+                            nome: nome,
+                            valor: valorModificado,
+                            pix: pix,
+                          ),
+                        );
+                      }
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: nomeTextController.text.isEmpty
+                          ? Colors.grey
+                          : Colors.deepPurple,
+                    ),
+                    child: Text(
+                      AppStrings.salvar,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 50,
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     ).whenComplete(

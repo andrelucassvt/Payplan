@@ -32,221 +32,237 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
       padding: const EdgeInsets.only(
         bottom: 10,
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              border: Border.all(
-                color: Colors.white.withOpacity(.3),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
+            bottomRight: Radius.circular(10),
+          ),
+          border: Border.all(
+            color: Colors.white.withOpacity(.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.devedoresEntity.nome,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.devedoresEntity.nome,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      widget.devedoresEntity.valor.real,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                      Text(
+                        widget.devedoresEntity.valor.real,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
-                    ),
-                  ],
+                      if (widget.devedoresEntity.pix != null) ...[
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Meu PIX:',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              widget.devedoresEntity.pix!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (widget.devedoresEntity.notificar != null) ...[
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppStrings.notificar,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              '${widget.devedoresEntity.notificar!.day}/${widget.devedoresEntity.notificar!.month}/${widget.devedoresEntity.notificar!.year}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                Row(
+                Column(
                   children: [
                     InkWell(
-                      onTap: () {
-                        Share.share(
-                          '${AppStrings.dividasPendentes}\n\n${widget.devedoresEntity.nome}\n${AppStrings.valor}: ${widget.devedoresEntity.valor.real}\n\n${AppStrings.baixePayplan}',
-                        );
+                      onTap: () async {
+                        final result = await NotificationService()
+                            .verificarPermissaoNotificacao();
+
+                        if (context.mounted) {
+                          if (result) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Colors.blue,
+                                content: InkWell(
+                                  onTap: () {
+                                    openAppSettings();
+                                  },
+                                  child: Center(
+                                    child: Text(
+                                      AppStrings.permitirNotificacoes,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(3101),
+                            ).then((pickedDate) {
+                              if (pickedDate != null) {
+                                try {
+                                  widget.devedoresCubit.editarDevedor(
+                                    widget.devedoresEntity.copyWith(
+                                      notificar: pickedDate,
+                                    ),
+                                  );
+                                  NotificationService().showLocalNotification(
+                                    title: AppStrings.dividasPendentes,
+                                    body: AppStrings.mensagemDivida(
+                                      widget.devedoresEntity.nome,
+                                      widget.devedoresEntity.valor.real,
+                                    ),
+                                    id: widget.index,
+                                    scheduledDate: tz.TZDateTime.from(
+                                      pickedDate,
+                                      tz.local,
+                                    ),
+                                  );
+                                } catch (e, stackTrace) {
+                                  debugPrintStack(
+                                    label: e.toString(),
+                                    stackTrace: stackTrace,
+                                  );
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Center(
+                                          child: Text(
+                                            'Error',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              }
+                            });
+                          }
+                        }
                       },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          AppStrings.cobrar,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: widget.editarDevedor,
-                      icon: Icon(
-                        Icons.edit,
+                      child: Icon(
+                        widget.devedoresEntity.notificar == null
+                            ? Icons.notifications_none_rounded
+                            : Icons.notifications_active,
                         color: Colors.white,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        widget.devedoresCubit.deletarDevedor(
-                          widget.devedoresEntity.id,
-                        );
-                      },
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.red,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-          InkWell(
-            onTap: () async {
-              final result =
-                  await NotificationService().verificarPermissaoNotificacao();
-
-              if (context.mounted) {
-                if (result) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.blue,
-                      content: InkWell(
-                        onTap: () {
-                          openAppSettings();
-                        },
-                        child: Center(
-                          child: Text(
-                            AppStrings.permitirNotificacoes,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(3101),
-                  ).then((pickedDate) {
-                    if (pickedDate != null) {
-                      try {
-                        widget.devedoresCubit.editarDevedor(
-                          widget.devedoresEntity.copyWith(
-                            notificar: pickedDate,
-                          ),
-                        );
-                        NotificationService().showLocalNotification(
-                          title: AppStrings.dividasPendentes,
-                          body: AppStrings.mensagemDivida(
-                            widget.devedoresEntity.nome,
-                            widget.devedoresEntity.valor.real,
-                          ),
-                          id: widget.index,
-                          scheduledDate: tz.TZDateTime.from(
-                            pickedDate,
-                            tz.local,
-                          ),
-                        );
-                      } catch (e, stackTrace) {
-                        debugPrintStack(
-                          label: e.toString(),
-                          stackTrace: stackTrace,
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Center(
-                                child: Text(
-                                  'Error',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    }
-                  });
-                }
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                vertical: 10,
-              ),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(.7),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    AppStrings.notificar,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  if (widget.devedoresEntity.notificar == null)
-                    Icon(
-                      Icons.calendar_month,
-                      color: Colors.white,
-                    ),
-                  if (widget.devedoresEntity.notificar != null)
-                    Text(
-                      '${widget.devedoresEntity.notificar!.day}/${widget.devedoresEntity.notificar!.month}/${widget.devedoresEntity.notificar!.year}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                ],
-              ),
+            const SizedBox(
+              height: 10,
             ),
-          ),
-        ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Share.share(
+                      '${AppStrings.dividasPendentes}\n\n${widget.devedoresEntity.nome}\n${AppStrings.valor}: ${widget.devedoresEntity.valor.real}${widget.devedoresEntity.pix == null ? '' : '\n\nChave PIX: ${widget.devedoresEntity.pix}'}\n\n${AppStrings.baixePayplan}',
+                    );
+                  },
+                  icon: Icon(Icons.attach_money),
+                  label: Text(AppStrings.cobrar),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: widget.editarDevedor,
+                  icon: Icon(Icons.edit),
+                  label: Text('Editar'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    widget.devedoresCubit.deletarDevedor(
+                      widget.devedoresEntity.id,
+                    );
+                  },
+                  icon: Icon(Icons.delete),
+                  label: Text('Deletar'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

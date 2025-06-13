@@ -75,7 +75,7 @@ class _HomeViewState extends State<HomeView> {
                   cubit: widget.cubit,
                   state: state,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Expanded(
