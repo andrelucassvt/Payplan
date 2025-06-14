@@ -221,8 +221,8 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
             const SizedBox(
               height: 10,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              spacing: 10,
               children: [
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(

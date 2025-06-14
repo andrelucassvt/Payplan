@@ -7,6 +7,7 @@ import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 import 'package:notes_app/src/features/devedores/view/widgets/card_devedores_widget.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
+import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
@@ -24,10 +25,6 @@ class _DevedoresViewState extends State<DevedoresView> {
   final nomeTextController = TextEditingController();
   final pixTextController = TextEditingController();
   final faturaTextController = MoneyMaskedTextController();
-
-  final adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3652623512305285/3952051433'
-      : 'ca-app-pub-3652623512305285/1026768525';
 
   @override
   void initState() {
@@ -118,25 +115,32 @@ class _DevedoresViewState extends State<DevedoresView> {
                   ...List.generate(
                     state.devedores.length,
                     (index) {
-                      return Column(
-                        children: [
-                          CardDevedoresWidget(
-                            index: index + 1,
-                            devedoresEntity: state.devedores[index],
-                            devedoresCubit: _cubit,
-                            editarDevedor: () {
-                              novoDevedor(
+                      return ValueListenableBuilder(
+                        valueListenable: UserController.user,
+                        builder: (context, user, __) {
+                          return Column(
+                            children: [
+                              CardDevedoresWidget(
+                                index: index + 1,
                                 devedoresEntity: state.devedores[index],
-                              );
-                            },
-                          ),
-                          if (index == 0)
-                            AdmobBannerWidget(
-                              bannerId: Platform.isAndroid
-                                  ? 'ca-app-pub-3652623512305285/2185608422'
-                                  : 'ca-app-pub-3652623512305285/9922591661',
-                            ),
-                        ],
+                                devedoresCubit: _cubit,
+                                editarDevedor: () {
+                                  novoDevedor(
+                                    devedoresEntity: state.devedores[index],
+                                  );
+                                },
+                              ),
+                              if (!user.isPlus) ...[
+                                if (index == 0)
+                                  AdmobBannerWidget(
+                                    bannerId: Platform.isAndroid
+                                        ? 'ca-app-pub-3652623512305285/2185608422'
+                                        : 'ca-app-pub-3652623512305285/9922591661',
+                                  ),
+                              ],
+                            ],
+                          );
+                        },
                       );
                     },
                   ),

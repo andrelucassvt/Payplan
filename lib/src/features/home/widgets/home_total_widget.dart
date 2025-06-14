@@ -4,7 +4,9 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
+import 'package:notes_app/src/features/plus/view/plus_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
+import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
@@ -111,9 +113,57 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                 ),
               ),
               Row(
+                spacing: 10,
                 children: [
-                  SizedBox(
-                    width: 10,
+                  ValueListenableBuilder(
+                    valueListenable: UserController.user,
+                    builder: (context, user, __) {
+                      if (user.isPlus) {
+                        return SizedBox.shrink();
+                      }
+                      return InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.8,
+                            ),
+                            builder: (context) {
+                              return PlusView();
+                            },
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.whiteOpacity,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            spacing: 2,
+                            children: [
+                              Text(
+                                AppStrings.semAnuncio,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Icon(
+                                Icons.block,
+                                size: 16,
+                                color: Colors.red,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   PopupMenuButton<MesesEnum>(
                     child: Container(

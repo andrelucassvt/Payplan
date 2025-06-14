@@ -73,6 +73,9 @@ class AppStrings {
   static var cobrar = 'cobrar'.i18n();
   static var notificar = 'notificar'.i18n();
   static var dividasPendentes = 'dividasPendentes'.i18n();
+  static var semAnuncio = 'semAnuncios'.i18n();
+  static var removaTodosAnuncios = 'removaTodosAnuncios'.i18n();
+  static var aproveiteSemAnuncios = 'aproveiteSemAnuncios'.i18n();
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';

@@ -27,6 +27,7 @@ class _HomeBaseState extends State<HomeBase> {
   void initState() {
     super.initState();
     _homeCubit.buscarDividas();
+    _homeCubit.buscarIsPlus();
     _homeCubit.verificarVersao();
     _devedoresCubit.buscarDevedores();
     _verificarPermissaoNotificacao();

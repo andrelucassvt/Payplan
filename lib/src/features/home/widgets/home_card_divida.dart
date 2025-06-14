@@ -5,6 +5,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
@@ -125,51 +126,58 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  InkWell(
-                    onTap: _editarFaturaBottomSheet,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        AppStrings.editarFatura,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => NovaDividaView(
-                            homeCubit: widget.homeCubit,
-                            dividaEntity: widget.dividaEntity,
+              ValueListenableBuilder(
+                valueListenable: UserController.user,
+                builder: (context, user, ___) {
+                  return Row(
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          _editarFaturaBottomSheet(user.isPlus);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            AppStrings.editarFatura,
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: AppColors.whiteOpacity,
-                      child: Icon(
-                        Icons.edit,
-                        color: Colors.white,
                       ),
-                    ),
-                  ),
-                ],
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => NovaDividaView(
+                                homeCubit: widget.homeCubit,
+                                dividaEntity: widget.dividaEntity,
+                              ),
+                            ),
+                          );
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: AppColors.whiteOpacity,
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               Column(
                 children: [
@@ -217,8 +225,10 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
     );
   }
 
-  void _editarFaturaBottomSheet() {
-    AppOpenAdManager.appOpenAd?.show();
+  void _editarFaturaBottomSheet(bool isPlus) {
+    if (!isPlus) {
+      AppOpenAdManager.appOpenAd?.show();
+    }
     double valorModificado = 0;
     _faturaTextController.updateValue(faturaAtual!.valor);
     showModalBottomSheet(

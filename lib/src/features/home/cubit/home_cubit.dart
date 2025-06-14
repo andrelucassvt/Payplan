@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -264,5 +265,13 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     buscarDividas();
+  }
+
+  void buscarIsPlus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isPlus = prefs.getBool('isPlus') ?? false;
+    UserController.setUser(
+      UserEntity(isPlus: isPlus),
+    );
   }
 }
