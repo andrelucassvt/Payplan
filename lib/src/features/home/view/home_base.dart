@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
@@ -8,6 +10,7 @@ import 'package:notes_app/src/features/home/view/home_view.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeBase extends StatefulWidget {
@@ -67,94 +70,118 @@ class _HomeBaseState extends State<HomeBase> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        bottomNavigationBar: Container(
-          color: Colors.black,
-          child: SafeArea(
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.withValues(alpha: .7),
-                  ),
+      body: Stack(
+        children: [
+          /// Views
+          [
+            HomeView(cubit: _homeCubit),
+            DevedoresView(),
+            BlocBuilder<DevedoresCubit, DevedoresState>(
+              bloc: _devedoresCubit,
+              builder: (context, stateDevedores) {
+                return BlocBuilder<HomeCubit, HomeState>(
+                  bloc: _homeCubit,
+                  builder: (context, state) {
+                    return GraficosView(
+                      dividas: state.dividas,
+                      devedores: stateDevedores.devedores,
+                      homeCubit: _homeCubit,
+                    );
+                  },
+                );
+              },
+            ),
+          ][_selectedIndex],
+
+          /// -- Bottom Navigation Bar
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: GlassContainerWidget(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 5,
+                  vertical: 3,
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    icon: CircleAvatar(
-                      backgroundColor: _selectedIndex == 0
-                          ? Colors.deepPurpleAccent
-                          : Colors.transparent,
-                      child: Icon(
-                        Icons.home,
-                        color: _selectedIndex == 0 ? Colors.white : Colors.grey,
-                      ),
+                child: Row(
+                  spacing: 20,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Home
+                    _iconBottomNav(
+                      index: 0,
+                      icon: Icons.home,
+                      label: 'Home',
+                      isSelected: _selectedIndex == 0,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _selectedIndex = 0;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: CircleAvatar(
-                      backgroundColor: _selectedIndex == 2
-                          ? Colors.deepPurpleAccent
-                          : Colors.transparent,
-                      child: Icon(
-                        Icons.people,
-                        color: _selectedIndex == 2 ? Colors.white : Colors.grey,
-                      ),
+                    _iconBottomNav(
+                      index: 1,
+                      icon: Icons.people,
+                      label: AppStrings.devedores,
+                      isSelected: _selectedIndex == 1,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _selectedIndex = 2;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: CircleAvatar(
-                      backgroundColor: _selectedIndex == 1
-                          ? Colors.deepPurpleAccent
-                          : Colors.transparent,
-                      child: Icon(
-                        Icons.donut_large,
-                        color: _selectedIndex == 1 ? Colors.white : Colors.grey,
-                      ),
+                    _iconBottomNav(
+                      index: 2,
+                      icon: Icons.bar_chart,
+                      label: AppStrings.graficos,
+                      isSelected: _selectedIndex == 2,
                     ),
-                    onPressed: () {
-                      _devedoresCubit.buscarDevedores();
-                      _homeCubit.buscarDividas();
-                      setState(() {
-                        _selectedIndex = 1;
-                      });
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _iconBottomNav({
+    required int index,
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      splashColor: Colors.transparent,
+      onTap: () {
+        if (index == 2) {
+          _devedoresCubit.buscarDevedores();
+          _homeCubit.buscarDividas();
+        }
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 5,
         ),
-        body: [
-          HomeView(cubit: _homeCubit),
-          BlocBuilder<DevedoresCubit, DevedoresState>(
-            bloc: _devedoresCubit,
-            builder: (context, stateDevedores) {
-              return BlocBuilder<HomeCubit, HomeState>(
-                bloc: _homeCubit,
-                builder: (context, state) {
-                  return GraficosView(
-                    dividas: state.dividas,
-                    devedores: stateDevedores.devedores,
-                    homeCubit: _homeCubit,
-                  );
-                },
-              );
-            },
-          ),
-          DevedoresView(),
-        ][_selectedIndex]);
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: isSelected
+              ? Colors.white.withValues(alpha: .4)
+              : Colors.transparent,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.black : Colors.white,
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.black : Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -8,6 +8,7 @@ import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 
 class HomeCardDivida extends StatefulWidget {
   const HomeCardDivida({
@@ -135,15 +136,8 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                         onTap: () {
                           _editarFaturaBottomSheet(user.isPlus);
                         },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .5),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        child: GlassContainerWidget(
+                          padding: EdgeInsets.all(10),
                           child: Text(
                             AppStrings.editarFatura,
                             style: TextStyle(
@@ -167,8 +161,8 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                             ),
                           );
                         },
-                        child: CircleAvatar(
-                          backgroundColor: AppColors.whiteOpacity,
+                        child: GlassContainerWidget(
+                          padding: EdgeInsets.all(10),
                           child: Icon(
                             Icons.edit,
                             color: Colors.white,
@@ -236,22 +230,9 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
+        return GlassContainerWidget(
           padding: EdgeInsets.symmetric(
             horizontal: 20,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            border: Border.all(
-              color: Colors.white,
-            ),
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(40.0),
-              topRight: const Radius.circular(40.0),
-            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -289,10 +270,16 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                     color: Colors.white,
                   ),
                   decoration: InputDecoration(
-                      labelText: AppStrings.valorParcela,
-                      labelStyle: TextStyle(
+                    labelText: AppStrings.valorParcela,
+                    labelStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
                         color: Colors.white,
-                      )),
+                      ),
+                    ),
+                  ),
                   onChanged: (value) {
                     if (value.isNotEmpty) {
                       final filtro1 = value.replaceAll('.', '');
@@ -307,8 +294,8 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
               SizedBox(
                 height: 50,
               ),
-              ElevatedButton(
-                onPressed: () {
+              InkWell(
+                onTap: () {
                   final tratamentoFaturaListaFatura =
                       widget.dividaEntity.faturas.map(
                     (e) {
@@ -355,8 +342,18 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
 
                   Navigator.of(context).pop();
                 },
-                child: Text(
-                  AppStrings.salvar,
+                child: GlassContainerWidget(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    AppStrings.salvar,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(

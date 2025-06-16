@@ -8,10 +8,10 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
-import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
+import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
@@ -109,18 +109,14 @@ class _HomeViewState extends State<HomeView> {
                                     ),
                                   );
                                 },
-                                child: Container(
+                                child: GlassContainerWidget(
                                   height: 50,
                                   margin: EdgeInsets.symmetric(
-                                    horizontal: 50,
+                                    horizontal: 10,
                                   ),
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.whiteOpacity,
-                                    borderRadius: BorderRadius.circular(30),
                                   ),
                                   child: Center(
                                     child: Text(

@@ -10,6 +10,7 @@ import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
+import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 
 class HomeTotalWidget extends StatefulWidget {
   const HomeTotalWidget({
@@ -136,14 +137,10 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                             },
                           );
                         },
-                        child: Container(
+                        child: GlassContainerWidget(
                           padding: EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.whiteOpacity,
-                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             spacing: 2,
@@ -166,14 +163,10 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     },
                   ),
                   PopupMenuButton<MesesEnum>(
-                    child: Container(
+                    child: GlassContainerWidget(
                       padding: EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteOpacity,
-                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         children: [
@@ -278,15 +271,10 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
   }) {
     return InkWell(
       onTap: onTap,
-      child: Container(
-        width: width,
+      child: GlassContainerWidget(
         padding: EdgeInsets.symmetric(
           horizontal: 10,
           vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.whiteOpacity,
-          borderRadius: BorderRadius.circular(30),
         ),
         child: Center(
           child: icon ??
@@ -311,23 +299,8 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: 20,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            border: Border.all(
-              color: Colors.white,
-            ),
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(40.0),
-              topRight: const Radius.circular(40.0),
-            ),
-          ),
+        return GlassContainerWidget(
+          padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -358,12 +331,15 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
               const SizedBox(
                 height: 10,
               ),
-              Text(
-                valorDesseMes.real,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+              GlassContainerWidget(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  valorDesseMes.real,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -403,10 +379,16 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                           color: Colors.white,
                         ),
                         decoration: InputDecoration(
-                            labelText: AppStrings.salario,
-                            labelStyle: TextStyle(
+                          labelText: AppStrings.salario,
+                          labelStyle: TextStyle(
+                            color: Colors.white,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
                               color: Colors.white,
-                            )),
+                            ),
+                          ),
+                        ),
                         onChanged: (value) {
                           if (value.isNotEmpty) {
                             final filtro1 = value.replaceAll('.', '');
@@ -422,8 +404,8 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                   const SizedBox(
                     width: 20,
                   ),
-                  ElevatedButton(
-                    onPressed: () {
+                  InkWell(
+                    onTap: () {
                       final resultado = valorDigitado - valorDesseMes;
                       showDialog(
                         context: context,
@@ -440,7 +422,16 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                         ),
                       );
                     },
-                    child: Icon(Icons.check),
+                    child: GlassContainerWidget(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),

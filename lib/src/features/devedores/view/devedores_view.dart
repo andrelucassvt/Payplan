@@ -5,12 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 import 'package:notes_app/src/features/devedores/view/widgets/card_devedores_widget.dart';
-import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
+import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class DevedoresView extends StatefulWidget {
@@ -84,14 +84,10 @@ class _DevedoresViewState extends State<DevedoresView> {
                     onTap: () {
                       novoDevedor();
                     },
-                    child: Container(
+                    child: GlassContainerWidget(
                       padding: EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteOpacity,
-                        borderRadius: BorderRadius.circular(30),
                       ),
                       child: Center(
                         child: Text(
@@ -170,19 +166,9 @@ class _DevedoresViewState extends State<DevedoresView> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Container(
+            return GlassContainerWidget(
               margin: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                border: Border.all(
-                  color: Colors.white,
-                ),
               ),
               padding: EdgeInsets.all(10),
               child: Column(
