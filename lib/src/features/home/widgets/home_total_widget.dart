@@ -300,6 +300,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return GlassContainerWidget(
+          margin: MediaQuery.of(context).viewInsets,
           padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

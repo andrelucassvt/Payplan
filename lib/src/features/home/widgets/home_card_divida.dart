@@ -231,6 +231,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return GlassContainerWidget(
+          margin: MediaQuery.of(context).viewInsets,
           padding: EdgeInsets.symmetric(
             horizontal: 20,
           ),
