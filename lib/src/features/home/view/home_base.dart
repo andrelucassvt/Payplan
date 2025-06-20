@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -103,6 +104,11 @@ class _HomeBaseState extends State<HomeBase> {
                   horizontal: 5,
                   vertical: 3,
                 ),
+                margin: Platform.isAndroid
+                    ? EdgeInsets.only(
+                        bottom: 10,
+                      )
+                    : null,
                 child: Row(
                   spacing: 20,
                   mainAxisAlignment: MainAxisAlignment.center,
