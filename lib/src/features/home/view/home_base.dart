@@ -93,7 +93,6 @@ class _HomeBaseState extends State<HomeBase> {
             ),
           ][_selectedIndex],
 
-          /// -- Bottom Navigation Bar
           SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
