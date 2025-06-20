@@ -62,13 +62,12 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                   showCupertinoModalPopup(
                     context: context,
                     builder: (context) {
-                      return Container(
+                      return GlassContainerWidget(
                         height: 216,
                         padding: const EdgeInsets.only(top: 6.0),
                         margin: EdgeInsets.only(
                           bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                        color: Colors.black,
                         child: CupertinoPicker(
                           itemExtent: 50,
                           scrollController: scrollController,
@@ -86,6 +85,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               );

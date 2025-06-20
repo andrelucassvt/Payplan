@@ -8,8 +8,7 @@ class GlassContainerWidget extends StatefulWidget {
     this.padding,
     this.margin,
     this.height,
-    this.sigmaX,
-    this.sigmaY,
+    this.blur,
     this.alpha = 0.16,
     super.key,
   });
@@ -17,8 +16,7 @@ class GlassContainerWidget extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final double? height;
-  final double? sigmaX;
-  final double? sigmaY;
+  final double? blur;
   final double alpha;
 
   @override
@@ -35,8 +33,8 @@ class _GlassContainerWidgetState extends State<GlassContainerWidget> {
         borderRadius: BorderRadius.circular(30),
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: widget.sigmaX ?? 10,
-            sigmaY: widget.sigmaY ?? 5,
+            sigmaX: widget.blur ?? 10,
+            sigmaY: widget.blur ?? 10,
           ),
           blendMode: BlendMode.srcOver,
           child: Container(
