@@ -151,73 +151,52 @@ class _GraficosViewState extends State<GraficosView> {
                                 height: 20,
                               ),
                               Center(
-                                child: Container(
+                                child: SizedBox(
                                   height: 300,
-                                  margin: EdgeInsets.symmetric(horizontal: 20),
-                                  child: BarChart(
-                                    BarChartData(
-                                        rotationQuarterTurns: 1,
-                                        borderData: FlBorderData(
-                                          show: true,
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: .2,
-                                            ),
-                                          ),
-                                        ),
-                                        titlesData: FlTitlesData(
-                                          show: true,
-                                          leftTitles: AxisTitles(
-                                            drawBelowEverything: true,
-                                            sideTitles: SideTitles(
-                                              getTitlesWidget: (value, meta) {
-                                                return SideTitleWidget(
-                                                  meta: meta,
-                                                  child: Text(
-                                                    value.toStringAsFixed(0),
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              showTitles: true,
-                                              reservedSize: 30,
-                                            ),
-                                          ),
-                                          rightTitles: const AxisTitles(),
-                                          topTitles: const AxisTitles(),
-                                        ),
-                                        barGroups: widget.dividas
-                                            .asMap()
-                                            .entries
-                                            .map((e) {
-                                          return BarChartGroupData(
-                                            x: 1 + e.key,
-                                            barRods: [
-                                              BarChartRodData(
-                                                toY: e.value.faturas
-                                                    .firstWhere(
-                                                      (element) =>
-                                                          element.ano ==
-                                                              state.anoAtual &&
-                                                          element.mes ==
-                                                              state.mesAtual.id,
-                                                      orElse: () =>
-                                                          FaturaMensalEntity(
-                                                        ano: state.anoAtual,
-                                                        mes: state.mesAtual.id,
-                                                        valor: 0,
-                                                        pago: false,
-                                                      ),
-                                                    )
-                                                    .valor,
-                                                color: e.value.cor,
-                                                width: 30,
+                                  width: 300,
+                                  child: PieChart(
+                                    PieChartData(
+                                        sections: widget.dividas.map((e) {
+                                      return PieChartSectionData(
+                                        radius: 100,
+                                        value: (e.faturas
+                                            .firstWhere(
+                                              (element) =>
+                                                  element.ano ==
+                                                      state.anoAtual &&
+                                                  element.mes ==
+                                                      state.mesAtual.id,
+                                              orElse: () => FaturaMensalEntity(
+                                                ano: state.anoAtual,
+                                                mes: state.mesAtual.id,
+                                                valor: 0,
+                                                pago: false,
                                               ),
-                                            ],
-                                          );
-                                        }).toList()),
+                                            )
+                                            .valor),
+                                        title: e.faturas
+                                            .firstWhere(
+                                              (element) =>
+                                                  element.ano ==
+                                                      state.anoAtual &&
+                                                  element.mes ==
+                                                      state.mesAtual.id,
+                                              orElse: () => FaturaMensalEntity(
+                                                ano: state.anoAtual,
+                                                mes: state.mesAtual.id,
+                                                valor: 0,
+                                                pago: false,
+                                              ),
+                                            )
+                                            .valor
+                                            .real,
+                                        titleStyle: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        showTitle: true,
+                                        color: e.cor,
+                                      );
+                                    }).toList()),
                                   ),
                                 ),
                               ),
@@ -335,63 +314,32 @@ class _GraficosViewState extends State<GraficosView> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(
+                              SizedBox(
                                 height: 20,
                               ),
                               Center(
-                                child: Container(
+                                child: SizedBox(
                                   height: 300,
-                                  margin: EdgeInsets.symmetric(horizontal: 20),
-                                  child: BarChart(
-                                    BarChartData(
-                                        rotationQuarterTurns: 1,
-                                        borderData: FlBorderData(
-                                          show: true,
-                                          border: Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: .2,
-                                            ),
+                                  width: 300,
+                                  child: PieChart(
+                                    PieChartData(
+                                      sections: widget.devedores
+                                          .asMap()
+                                          .entries
+                                          .map((e) {
+                                        return PieChartSectionData(
+                                          radius: 100,
+                                          value: e.value.valor,
+                                          title: e.value.valor.real,
+                                          titleStyle: const TextStyle(
+                                            color: Colors.white,
                                           ),
-                                        ),
-                                        titlesData: FlTitlesData(
-                                          show: true,
-                                          leftTitles: AxisTitles(
-                                            drawBelowEverything: true,
-                                            sideTitles: SideTitles(
-                                              getTitlesWidget: (value, meta) {
-                                                return SideTitleWidget(
-                                                  meta: meta,
-                                                  child: Text(
-                                                    value.toStringAsFixed(0),
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              showTitles: true,
-                                              reservedSize: 30,
-                                            ),
-                                          ),
-                                          rightTitles: const AxisTitles(),
-                                          topTitles: const AxisTitles(),
-                                        ),
-                                        barGroups: widget.devedores
-                                            .asMap()
-                                            .entries
-                                            .map((e) {
-                                          return BarChartGroupData(
-                                            x: 1 + e.key,
-                                            barRods: [
-                                              BarChartRodData(
-                                                toY: e.value.valor,
-                                                color: Colors.primaries[e.key %
-                                                    Colors.primaries.length],
-                                                width: 30,
-                                              ),
-                                            ],
-                                          );
-                                        }).toList()),
+                                          showTitle: true,
+                                          color: Colors.primaries[
+                                              e.key % Colors.primaries.length],
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),

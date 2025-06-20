@@ -98,6 +98,9 @@ class _HomeBaseState extends State<HomeBase> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: GlassContainerWidget(
+                sigmaX: 5,
+                sigmaY: 5,
+                alpha: .13,
                 padding: EdgeInsets.symmetric(
                   horizontal: 5,
                   vertical: 3,

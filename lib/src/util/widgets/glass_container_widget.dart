@@ -8,12 +8,18 @@ class GlassContainerWidget extends StatefulWidget {
     this.padding,
     this.margin,
     this.height,
+    this.sigmaX,
+    this.sigmaY,
+    this.alpha = 0.16,
     super.key,
   });
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final double? height;
+  final double? sigmaX;
+  final double? sigmaY;
+  final double alpha;
 
   @override
   State<GlassContainerWidget> createState() => _GlassContainerWidgetState();
@@ -28,14 +34,19 @@ class _GlassContainerWidgetState extends State<GlassContainerWidget> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 5),
+          filter: ImageFilter.blur(
+            sigmaX: widget.sigmaX ?? 10,
+            sigmaY: widget.sigmaY ?? 5,
+          ),
           blendMode: BlendMode.srcOver,
           child: Container(
             height: widget.height,
             padding: widget.padding,
             margin: widget.margin,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .16),
+              color: Colors.white.withValues(
+                alpha: widget.alpha,
+              ),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
                 width: 1,
