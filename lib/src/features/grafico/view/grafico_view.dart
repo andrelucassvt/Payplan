@@ -16,10 +16,15 @@ class GraficosView extends StatefulWidget {
     required this.dividas,
     required this.devedores,
     required this.homeCubit,
+    required this.screenshotDividasController,
+    required this.screenshotDevedoresController,
     super.key,
   });
   final List<DividaEntity> dividas;
   final List<DevedoresEntity> devedores;
+
+  final ScreenshotController screenshotDividasController;
+  final ScreenshotController screenshotDevedoresController;
   final HomeCubit homeCubit;
 
   @override
@@ -29,9 +34,6 @@ class GraficosView extends StatefulWidget {
 class _GraficosViewState extends State<GraficosView> {
   int touchedIndex = -1;
   HomeState get state => widget.homeCubit.state;
-
-  final screenshotDividasController = ScreenshotController();
-  final screenshotDevedoresController = ScreenshotController();
 
   double get valorTotalFatura => widget.dividas
       .map((e) => e.faturas
@@ -90,7 +92,7 @@ class _GraficosViewState extends State<GraficosView> {
                       height: 20,
                     ),
                     Screenshot(
-                      controller: screenshotDividasController,
+                      controller: widget.screenshotDividasController,
                       child: Container(
                         color: Colors.black,
                         child: Column(
@@ -111,9 +113,9 @@ class _GraficosViewState extends State<GraficosView> {
                                   ),
                                   IconButton(
                                     onPressed: () async {
-                                      final result =
-                                          await screenshotDividasController
-                                              .capture();
+                                      final result = await widget
+                                          .screenshotDividasController
+                                          .capture();
                                       if (result != null) {
                                         final directory =
                                             await getApplicationDocumentsDirectory();
@@ -257,7 +259,7 @@ class _GraficosViewState extends State<GraficosView> {
                       height: 20,
                     ),
                     Screenshot(
-                      controller: screenshotDevedoresController,
+                      controller: widget.screenshotDevedoresController,
                       child: Container(
                         color: Colors.black,
                         child: Column(
@@ -278,9 +280,9 @@ class _GraficosViewState extends State<GraficosView> {
                                   ),
                                   IconButton(
                                     onPressed: () async {
-                                      final result =
-                                          await screenshotDevedoresController
-                                              .capture();
+                                      final result = await widget
+                                          .screenshotDevedoresController
+                                          .capture();
                                       if (result != null) {
                                         final directory =
                                             await getApplicationDocumentsDirectory();
@@ -381,7 +383,7 @@ class _GraficosViewState extends State<GraficosView> {
                       ),
                     ),
                     const SizedBox(
-                      height: 100,
+                      height: 130,
                     ),
                   ],
                 ),

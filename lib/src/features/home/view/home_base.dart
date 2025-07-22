@@ -1,18 +1,24 @@
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:as_design_system/navbar/as_navbar.dart';
+import 'package:as_design_system/navbar/util/as_nav_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 import 'package:notes_app/src/features/devedores/view/devedores_view.dart';
 import 'package:notes_app/src/features/grafico/view/grafico_view.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/view/home_view.dart';
+import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
+import 'package:notes_app/src/util/helpers/devedores_helper.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/service/open_app_admob.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeBase extends StatefulWidget {
   const HomeBase({super.key});
@@ -26,6 +32,12 @@ class _HomeBaseState extends State<HomeBase> {
   final _devedoresCubit = DevedoresCubit();
 
   int _selectedIndex = 0;
+
+  final List<ScrollController> _scrollControllers =
+      List.generate(3, (index) => ScrollController());
+
+  final screenshotDividasController = ScreenshotController();
+  final screenshotDevedoresController = ScreenshotController();
 
   @override
   void initState() {
@@ -73,10 +85,14 @@ class _HomeBaseState extends State<HomeBase> {
     return Scaffold(
       body: Stack(
         children: [
-          /// Views
           [
-            HomeView(cubit: _homeCubit),
-            DevedoresView(),
+            HomeView(
+              cubit: _homeCubit,
+              scrollController: _scrollControllers[0],
+            ),
+            DevedoresView(
+              devedoresCubit: _devedoresCubit,
+            ),
             BlocBuilder<DevedoresCubit, DevedoresState>(
               bloc: _devedoresCubit,
               builder: (context, stateDevedores) {
@@ -87,107 +103,116 @@ class _HomeBaseState extends State<HomeBase> {
                       dividas: state.dividas,
                       devedores: stateDevedores.devedores,
                       homeCubit: _homeCubit,
+                      screenshotDividasController: screenshotDividasController,
+                      screenshotDevedoresController:
+                          screenshotDevedoresController,
                     );
                   },
                 );
               },
             ),
           ][_selectedIndex],
-
           SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: GlassContainerWidget(
-                blur: 5,
-                alpha: .13,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 5,
-                  vertical: 3,
+              child: AsNavbar(
+                key: Key(_selectedIndex.toString()),
+                scrollController: _scrollControllers[_selectedIndex],
+                colorItemSelected: Colors.red,
+                floatingIconRight: AsNavIcon(
+                  icon:
+                      _selectedIndex == 2 ? Icon(Icons.share) : Icon(Icons.add),
+                  onTap: () async {
+                    if (_selectedIndex == 0) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NovaDividaView(
+                            homeCubit: _homeCubit,
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    if (_selectedIndex == 1) {
+                      showNovoDevedorModal(
+                        context: context,
+                        cubit: _devedoresCubit,
+                        nomeTextController: TextEditingController(),
+                        pixTextController: TextEditingController(),
+                        faturaTextController: MoneyMaskedTextController(
+                          initialValue: 0,
+                          leftSymbol: 'R\$ ',
+                          decimalSeparator: ',',
+                          thousandSeparator: '.',
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (_selectedIndex == 2) {
+                      final image1 =
+                          await screenshotDividasController.capture();
+                      final image2 =
+                          await screenshotDevedoresController.capture();
+
+                      if (image1 != null && image2 != null) {
+                        final directory =
+                            await getApplicationDocumentsDirectory();
+                        final imagePath =
+                            await File('${directory.path}/image.png').create();
+                        await imagePath.writeAsBytes(image1);
+                        final imagePath2 =
+                            await File('${directory.path}/image2.png').create();
+                        await imagePath2.writeAsBytes(image2);
+                        await Share.shareXFiles(
+                          [
+                            XFile(imagePath.path),
+                            XFile(imagePath2.path),
+                          ],
+                          text: AppStrings.baixePayplan,
+                        );
+                      }
+                    }
+                  },
                 ),
-                margin: Platform.isAndroid
-                    ? EdgeInsets.only(
-                        bottom: 10,
-                      )
-                    : null,
-                child: Row(
-                  spacing: 20,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Home
-                    _iconBottomNav(
-                      index: 0,
-                      icon: Icons.home,
-                      label: 'Home',
-                      isSelected: _selectedIndex == 0,
-                    ),
-                    _iconBottomNav(
-                      index: 1,
-                      icon: Icons.people,
-                      label: AppStrings.devedores,
-                      isSelected: _selectedIndex == 1,
-                    ),
-                    _iconBottomNav(
-                      index: 2,
-                      icon: Icons.bar_chart,
-                      label: AppStrings.graficos,
-                      isSelected: _selectedIndex == 2,
-                    ),
-                  ],
-                ),
+                navIcons: [
+                  AsNavIcon(
+                    icon: Icon(Icons.home),
+                    title: 'Home',
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                    },
+                  ),
+                  AsNavIcon(
+                    icon: Icon(Icons.people),
+                    title: AppStrings.devedores,
+                    onTap: () {
+                      _devedoresCubit.buscarDevedores();
+                      setState(() {
+                        _selectedIndex = 1;
+                      });
+                    },
+                  ),
+                  AsNavIcon(
+                    icon: Icon(Icons.bar_chart),
+                    title: AppStrings.graficos,
+                    onTap: () {
+                      _devedoresCubit.buscarDevedores();
+                      _homeCubit.buscarDividas();
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                    },
+                  ),
+                ],
+                indexSelected: _selectedIndex,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _iconBottomNav({
-    required int index,
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-  }) {
-    return InkWell(
-      splashColor: Colors.transparent,
-      onTap: () {
-        if (index == 2) {
-          _devedoresCubit.buscarDevedores();
-          _homeCubit.buscarDividas();
-        }
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 5,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: isSelected
-              ? Colors.white.withValues(alpha: .4)
-              : Colors.transparent,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.black : Colors.white,
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.black : Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

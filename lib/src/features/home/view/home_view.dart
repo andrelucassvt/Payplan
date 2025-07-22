@@ -16,10 +16,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({
-    super.key,
     required this.cubit,
+    required this.scrollController,
+    super.key,
   });
   final HomeCubit cubit;
+  final ScrollController scrollController;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -27,7 +29,6 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
-  final _scrollViewController = ScrollController();
   final bool _isSafeAreaBottom = false;
 
   @override
@@ -132,7 +133,7 @@ class _HomeViewState extends State<HomeView> {
                             )
                           : ListView.builder(
                               itemCount: state.dividas.length,
-                              controller: _scrollViewController,
+                              controller: widget.scrollController,
                               padding: EdgeInsets.only(
                                 bottom: 150,
                               ),
