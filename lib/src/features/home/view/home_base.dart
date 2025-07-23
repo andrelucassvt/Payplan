@@ -92,6 +92,7 @@ class _HomeBaseState extends State<HomeBase> {
             ),
             DevedoresView(
               devedoresCubit: _devedoresCubit,
+              scrollController: _scrollControllers[1],
             ),
             BlocBuilder<DevedoresCubit, DevedoresState>(
               bloc: _devedoresCubit,
@@ -115,100 +116,125 @@ class _HomeBaseState extends State<HomeBase> {
           SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: AsNavbar(
-                key: Key(_selectedIndex.toString()),
-                scrollController: _scrollControllers[_selectedIndex],
-                colorItemSelected: Colors.red,
-                floatingIconRight: AsNavIcon(
-                  icon:
-                      _selectedIndex == 2 ? Icon(Icons.share) : Icon(Icons.add),
-                  onTap: () async {
-                    if (_selectedIndex == 0) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => NovaDividaView(
-                            homeCubit: _homeCubit,
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-                    if (_selectedIndex == 1) {
-                      showNovoDevedorModal(
-                        context: context,
-                        cubit: _devedoresCubit,
-                        nomeTextController: TextEditingController(),
-                        pixTextController: TextEditingController(),
-                        faturaTextController: MoneyMaskedTextController(
-                          initialValue: 0,
-                          leftSymbol: 'R\$ ',
-                          decimalSeparator: ',',
-                          thousandSeparator: '.',
-                        ),
-                      );
-                      return;
-                    }
-
-                    if (_selectedIndex == 2) {
-                      final image1 =
-                          await screenshotDividasController.capture();
-                      final image2 =
-                          await screenshotDevedoresController.capture();
-
-                      if (image1 != null && image2 != null) {
-                        final directory =
-                            await getApplicationDocumentsDirectory();
-                        final imagePath =
-                            await File('${directory.path}/image.png').create();
-                        await imagePath.writeAsBytes(image1);
-                        final imagePath2 =
-                            await File('${directory.path}/image2.png').create();
-                        await imagePath2.writeAsBytes(image2);
-                        await Share.shareXFiles(
-                          [
-                            XFile(imagePath.path),
-                            XFile(imagePath2.path),
-                          ],
-                          text: AppStrings.baixePayplan,
-                        );
-                      }
-                    }
-                  },
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: Platform.isIOS ? 0 : 10,
                 ),
-                navIcons: [
-                  AsNavIcon(
-                    icon: Icon(Icons.home),
-                    title: 'Home',
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 0;
-                      });
+                child: AsNavbar(
+                  key: Key(_selectedIndex.toString()),
+                  scrollController: _scrollControllers[_selectedIndex],
+                  colorItemSelected: Colors.red,
+                  floatingIconRight: AsNavIcon(
+                    icon: _selectedIndex == 2
+                        ? Icon(Icons.share)
+                        : Icon(Icons.add),
+                    onTap: () async {
+                      if (_selectedIndex == 0) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => NovaDividaView(
+                              homeCubit: _homeCubit,
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (_selectedIndex == 1) {
+                        showNovoDevedorModal(
+                          context: context,
+                          cubit: _devedoresCubit,
+                          nomeTextController: TextEditingController(),
+                          pixTextController: TextEditingController(),
+                          faturaTextController: MoneyMaskedTextController(
+                            initialValue: 0,
+                            leftSymbol: 'R\$ ',
+                            decimalSeparator: ',',
+                            thousandSeparator: '.',
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (_selectedIndex == 2) {
+                        try {
+                          final image1 =
+                              await screenshotDividasController.capture();
+                          final image2 =
+                              await screenshotDevedoresController.capture();
+
+                          final List<XFile> filesToShare = [];
+                          final directory =
+                              await getApplicationDocumentsDirectory();
+
+                          if (image1 != null) {
+                            final imagePath =
+                                await File('${directory.path}/image.png')
+                                    .create();
+                            await imagePath.writeAsBytes(image1);
+                            filesToShare.add(XFile(imagePath.path));
+                          }
+                          if (image2 != null) {
+                            final imagePath2 =
+                                await File('${directory.path}/image2.png')
+                                    .create();
+                            await imagePath2.writeAsBytes(image2);
+                            filesToShare.add(XFile(imagePath2.path));
+                          }
+                          if (filesToShare.isNotEmpty) {
+                            await Share.shareXFiles(
+                              filesToShare,
+                              text: AppStrings.baixePayplan,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Erro ao capturar as imagens para compartilhar.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      }
                     },
                   ),
-                  AsNavIcon(
-                    icon: Icon(Icons.people),
-                    title: AppStrings.devedores,
-                    onTap: () {
-                      _devedoresCubit.buscarDevedores();
-                      setState(() {
-                        _selectedIndex = 1;
-                      });
-                    },
-                  ),
-                  AsNavIcon(
-                    icon: Icon(Icons.bar_chart),
-                    title: AppStrings.graficos,
-                    onTap: () {
-                      _devedoresCubit.buscarDevedores();
-                      _homeCubit.buscarDividas();
-                      setState(() {
-                        _selectedIndex = 2;
-                      });
-                    },
-                  ),
-                ],
-                indexSelected: _selectedIndex,
+                  navIcons: [
+                    AsNavIcon(
+                      icon: Icon(Icons.home),
+                      title: 'Home',
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 0;
+                        });
+                      },
+                    ),
+                    AsNavIcon(
+                      icon: Icon(Icons.people),
+                      title: AppStrings.devedores,
+                      onTap: () {
+                        _devedoresCubit.buscarDevedores();
+                        setState(() {
+                          _selectedIndex = 1;
+                        });
+                      },
+                    ),
+                    AsNavIcon(
+                      icon: Icon(Icons.bar_chart),
+                      title: AppStrings.graficos,
+                      onTap: () {
+                        _devedoresCubit.buscarDevedores();
+                        _homeCubit.buscarDividas();
+                        setState(() {
+                          _selectedIndex = 2;
+                        });
+                      },
+                    ),
+                  ],
+                  indexSelected: _selectedIndex,
+                ),
               ),
             ),
           ),

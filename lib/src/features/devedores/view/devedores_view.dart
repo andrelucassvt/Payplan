@@ -15,9 +15,11 @@ import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 class DevedoresView extends StatefulWidget {
   const DevedoresView({
     required this.devedoresCubit,
+    required this.scrollController,
     super.key,
   });
   final DevedoresCubit devedoresCubit;
+  final ScrollController scrollController;
 
   @override
   State<DevedoresView> createState() => _DevedoresViewState();
@@ -58,6 +60,7 @@ class _DevedoresViewState extends State<DevedoresView> {
               horizontal: 10,
             ),
             child: SingleChildScrollView(
+              controller: widget.scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
