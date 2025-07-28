@@ -12,6 +12,7 @@ Future<void> showNovoDevedorModal({
   required TextEditingController nomeTextController,
   required TextEditingController pixTextController,
   required TextEditingController faturaTextController,
+  required TextEditingController mensagemTextController,
   DevedoresEntity? devedoresEntity,
 }) async {
   String nome = devedoresEntity?.nome ?? '';
@@ -20,6 +21,7 @@ Future<void> showNovoDevedorModal({
   nomeTextController.text = nome;
   faturaTextController.text = valorModificado.real;
   pixTextController.text = devedoresEntity?.pix ?? '';
+  mensagemTextController.text = devedoresEntity?.message ?? '';
 
   await showModalBottomSheet(
     context: context,
@@ -98,6 +100,21 @@ Future<void> showNovoDevedorModal({
                   ),
                   style: TextStyle(color: Colors.white),
                 ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: mensagemTextController,
+                  onChanged: (value) {
+                    setModalState(() {});
+                  },
+                  decoration: InputDecoration(
+                    labelText: AppStrings.mensagem,
+                    labelStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                ),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
@@ -111,6 +128,7 @@ Future<void> showNovoDevedorModal({
                           nome: nome,
                           valor: valorModificado,
                           pix: pix,
+                          message: mensagemTextController.text,
                         ),
                       );
                     } else {
@@ -120,6 +138,7 @@ Future<void> showNovoDevedorModal({
                           nome: nome,
                           valor: valorModificado,
                           pix: pix,
+                          message: mensagemTextController.text,
                         ),
                       );
                     }

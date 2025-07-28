@@ -24,6 +24,10 @@ class HomeCubit extends Cubit<HomeState> {
           ),
         );
 
+  bool temDividas() {
+    return state.dividas.isNotEmpty;
+  }
+
   String dividaCampoShared = 'dividas';
 
   Future<void> verificarVersao() async {

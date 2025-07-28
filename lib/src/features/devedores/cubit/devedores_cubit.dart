@@ -15,6 +15,10 @@ class DevedoresCubit extends Cubit<DevedoresState> {
 
   String devedoresCampoShared = 'devedores';
 
+  bool temDevedores() {
+    return state.devedores.isNotEmpty;
+  }
+
   void buscarDevedores() async {
     emit(DevedoresLoading(
       devedores: state.devedores,

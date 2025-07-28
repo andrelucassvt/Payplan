@@ -3,6 +3,7 @@ class DevedoresEntity {
   final String nome;
   final double valor;
   final String? pix;
+  final String? message;
   final DateTime? notificar;
 
   DevedoresEntity({
@@ -10,6 +11,7 @@ class DevedoresEntity {
     required this.nome,
     required this.valor,
     this.pix,
+    this.message,
     this.notificar,
   });
 
@@ -19,6 +21,7 @@ class DevedoresEntity {
       'nome': nome,
       'valor': valor,
       'pix': pix,
+      'message': message,
       'notificar': notificar?.millisecondsSinceEpoch,
     };
   }
@@ -29,6 +32,7 @@ class DevedoresEntity {
       nome: map['nome'] as String,
       valor: map['valor'] as double,
       pix: map['pix'] as String?,
+      message: map['message'] as String?,
       notificar: map['notificar'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['notificar'] as int)
           : null,
@@ -40,6 +44,7 @@ class DevedoresEntity {
     String? nome,
     double? valor,
     String? pix,
+    String? message,
     DateTime? notificar,
   }) {
     return DevedoresEntity(
@@ -47,6 +52,7 @@ class DevedoresEntity {
       nome: nome ?? this.nome,
       valor: valor ?? this.valor,
       pix: pix ?? this.pix,
+      message: message ?? this.message,
       notificar: notificar ?? this.notificar,
     );
   }

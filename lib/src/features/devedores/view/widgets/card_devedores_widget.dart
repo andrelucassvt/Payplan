@@ -42,7 +42,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
             bottomRight: Radius.circular(10),
           ),
           border: Border.all(
-            color: Colors.white.withOpacity(.3),
+            color: Colors.white.withValues(alpha: .3),
           ),
         ),
         child: Column(
@@ -159,47 +159,63 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                               initialDate: DateTime.now(),
                               firstDate: DateTime.now(),
                               lastDate: DateTime(3101),
-                            ).then((pickedDate) {
+                            ).then((pickedDate) async {
                               if (pickedDate != null) {
-                                try {
-                                  widget.devedoresCubit.editarDevedor(
-                                    widget.devedoresEntity.copyWith(
-                                      notificar: pickedDate,
-                                    ),
+                                if (!context.mounted) return;
+                                final pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  initialEntryMode: TimePickerEntryMode.input,
+                                );
+                                if (pickedTime != null) {
+                                  final scheduledDate = DateTime(
+                                    pickedDate.year,
+                                    pickedDate.month,
+                                    pickedDate.day,
+                                    pickedTime.hour,
+                                    pickedTime.minute,
                                   );
-                                  NotificationService().showLocalNotification(
-                                    title: AppStrings.dividasPendentes,
-                                    body: AppStrings.mensagemDivida(
-                                      widget.devedoresEntity.nome,
-                                      widget.devedoresEntity.valor.real,
-                                    ),
-                                    id: widget.index,
-                                    scheduledDate: tz.TZDateTime.from(
-                                      pickedDate,
-                                      tz.local,
-                                    ),
-                                  );
-                                } catch (e, stackTrace) {
-                                  debugPrintStack(
-                                    label: e.toString(),
-                                    stackTrace: stackTrace,
-                                  );
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Center(
-                                          child: Text(
-                                            'Error',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
+                                  try {
+                                    widget.devedoresCubit.editarDevedor(
+                                      widget.devedoresEntity.copyWith(
+                                        notificar: scheduledDate,
+                                      ),
+                                    );
+                                    NotificationService().showLocalNotification(
+                                      title: AppStrings.dividasPendentes,
+                                      body: AppStrings.mensagemDivida(
+                                        widget.devedoresEntity.nome,
+                                        widget.devedoresEntity.valor.real,
+                                      ),
+                                      id: widget.index,
+                                      scheduledDate: tz.TZDateTime.from(
+                                        scheduledDate,
+                                        tz.local,
+                                      ),
+                                    );
+                                  } catch (e, stackTrace) {
+                                    debugPrintStack(
+                                      label: e.toString(),
+                                      stackTrace: stackTrace,
+                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: Colors.red,
+                                          content: Center(
+                                            child: Text(
+                                              'Error',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    }
                                   }
                                 }
                               }
@@ -231,7 +247,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                   ),
                   onPressed: () {
                     Share.share(
-                      '${AppStrings.dividasPendentes}\n\n${widget.devedoresEntity.nome}\n${AppStrings.valor}: ${widget.devedoresEntity.valor.real}${widget.devedoresEntity.pix == null ? '' : '\n\nChave PIX: ${widget.devedoresEntity.pix}'}\n\n${AppStrings.baixePayplan}',
+                      '${AppStrings.dividasPendentes}\n\n${widget.devedoresEntity.nome}\n${AppStrings.valor}: ${widget.devedoresEntity.valor.real}${widget.devedoresEntity.pix == null ? '' : '\n\nChave PIX: ${widget.devedoresEntity.pix}'}\n\n${widget.devedoresEntity.message ?? ''}',
                     );
                   },
                   icon: Icon(Icons.attach_money),

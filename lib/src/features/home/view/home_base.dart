@@ -80,6 +80,11 @@ class _HomeBaseState extends State<HomeBase> {
     }
   }
 
+  final nomeTextController = TextEditingController();
+  final pixTextController = TextEditingController();
+  final faturaTextController = MoneyMaskedTextController();
+  final mensagemTextController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,24 +149,22 @@ class _HomeBaseState extends State<HomeBase> {
                         showNovoDevedorModal(
                           context: context,
                           cubit: _devedoresCubit,
-                          nomeTextController: TextEditingController(),
-                          pixTextController: TextEditingController(),
-                          faturaTextController: MoneyMaskedTextController(
-                            initialValue: 0,
-                            leftSymbol: 'R\$ ',
-                            decimalSeparator: ',',
-                            thousandSeparator: '.',
-                          ),
+                          nomeTextController: nomeTextController,
+                          pixTextController: pixTextController,
+                          faturaTextController: faturaTextController,
+                          mensagemTextController: mensagemTextController,
                         );
                         return;
                       }
 
                       if (_selectedIndex == 2) {
                         try {
-                          final image1 =
-                              await screenshotDividasController.capture();
-                          final image2 =
-                              await screenshotDevedoresController.capture();
+                          final image1 = _homeCubit.temDividas()
+                              ? await screenshotDividasController.capture()
+                              : null;
+                          final image2 = _devedoresCubit.temDevedores()
+                              ? await screenshotDevedoresController.capture()
+                              : null;
 
                           final List<XFile> filesToShare = [];
                           final directory =
@@ -191,8 +194,7 @@ class _HomeBaseState extends State<HomeBase> {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                    'Erro ao capturar as imagens para compartilhar.'),
+                                content: Text('Captura de tela falhou.'),
                                 backgroundColor: Colors.red,
                               ),
                             );

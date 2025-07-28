@@ -77,6 +77,7 @@ class AppStrings {
   static var removaTodosAnuncios = 'removaTodosAnuncios'.i18n();
   static var aproveiteSemAnuncios = 'aproveiteSemAnuncios'.i18n();
   static var graficos = 'graficos'.i18n();
+  static var mensagem = 'mensagem'.i18n();
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';

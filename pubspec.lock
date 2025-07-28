@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: analyzer
-      sha256: b1ade5707ab7a90dfd519eaac78a7184341d19adb6096c68d499b59c7c6cf880
+      sha256: "974859dc0ff5f37bc4313244b3218c791810d03ab3470a579580279ba971a48d"
       url: "https://pub.dev"
     source: hosted
-    version: "7.7.0"
+    version: "7.7.1"
   archive:
     dependency: transitive
     description:
@@ -38,7 +38,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "0d1b6d5192b83d97f81db88c8419f149b82e1170"
+      resolved-ref: bc6187c82d26c902b1d0c4a99bcc7bc0e16c8531
       url: "https://github.com/andrelucassvt/as-design-system.git"
     source: git
     version: "0.0.1"

@@ -29,6 +29,7 @@ class _DevedoresViewState extends State<DevedoresView> {
   final nomeTextController = TextEditingController();
   final pixTextController = TextEditingController();
   final faturaTextController = MoneyMaskedTextController();
+  final mensagemTextController = TextEditingController();
 
   @override
   void initState() {
@@ -93,6 +94,7 @@ class _DevedoresViewState extends State<DevedoresView> {
                         nomeTextController: nomeTextController,
                         pixTextController: pixTextController,
                         faturaTextController: faturaTextController,
+                        mensagemTextController: mensagemTextController,
                       );
                     },
                     child: GlassContainerWidget(
@@ -139,6 +141,8 @@ class _DevedoresViewState extends State<DevedoresView> {
                                     pixTextController: pixTextController,
                                     faturaTextController: faturaTextController,
                                     devedoresEntity: state.devedores[index],
+                                    mensagemTextController:
+                                        mensagemTextController,
                                   );
                                 },
                               ),
