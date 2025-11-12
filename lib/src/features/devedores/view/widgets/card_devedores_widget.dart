@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
@@ -54,12 +55,125 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.devedoresEntity.nome,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.devedoresEntity.nome,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              final result = await NotificationService()
+                                  .verificarPermissaoNotificacao();
+
+                              if (context.mounted) {
+                                if (result) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.blue,
+                                      content: InkWell(
+                                        onTap: () {
+                                          openAppSettings();
+                                        },
+                                        child: Center(
+                                          child: Text(
+                                            AppStrings.permitirNotificacoes,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(3101),
+                                  ).then((pickedDate) async {
+                                    if (pickedDate != null) {
+                                      if (!context.mounted) return;
+                                      final pickedTime = await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now(),
+                                        initialEntryMode:
+                                            TimePickerEntryMode.input,
+                                      );
+                                      if (pickedTime != null) {
+                                        final scheduledDate = DateTime(
+                                          pickedDate.year,
+                                          pickedDate.month,
+                                          pickedDate.day,
+                                          pickedTime.hour,
+                                          pickedTime.minute,
+                                        );
+                                        try {
+                                          widget.devedoresCubit.editarDevedor(
+                                            widget.devedoresEntity.copyWith(
+                                              notificar: scheduledDate,
+                                            ),
+                                          );
+                                          NotificationService()
+                                              .showLocalNotification(
+                                            title: AppStrings.dividasPendentes,
+                                            body: AppStrings.mensagemDivida(
+                                              widget.devedoresEntity.nome,
+                                              widget.devedoresEntity.valor.real,
+                                            ),
+                                            id: widget.index,
+                                            scheduledDate: tz.TZDateTime.from(
+                                              scheduledDate,
+                                              tz.local,
+                                            ),
+                                          );
+                                        } catch (e, stackTrace) {
+                                          debugPrintStack(
+                                            label: e.toString(),
+                                            stackTrace: stackTrace,
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                backgroundColor: Colors.red,
+                                                content: Center(
+                                                  child: Text(
+                                                    'Error',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      }
+                                    }
+                                  });
+                                }
+                              }
+                            },
+                            child: Icon(
+                              widget.devedoresEntity.notificar == null
+                                  ? Icons.notifications_none_rounded
+                                  : Icons.notifications_active,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
                         widget.devedoresEntity.valor.real,
@@ -83,14 +197,40 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                                 fontSize: 15,
                               ),
                             ),
-                            Text(
-                              widget.devedoresEntity.pix!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.devedoresEntity.pix!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(
+                                        text: widget.devedoresEntity.pix!));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('PIX copiado!'),
+                                        duration: Duration(seconds: 2),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.copy,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
                             ),
                           ],
                         ),
@@ -123,114 +263,6 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                       ],
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    InkWell(
-                      onTap: () async {
-                        final result = await NotificationService()
-                            .verificarPermissaoNotificacao();
-
-                        if (context.mounted) {
-                          if (result) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: Colors.blue,
-                                content: InkWell(
-                                  onTap: () {
-                                    openAppSettings();
-                                  },
-                                  child: Center(
-                                    child: Text(
-                                      AppStrings.permitirNotificacoes,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          } else {
-                            showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(3101),
-                            ).then((pickedDate) async {
-                              if (pickedDate != null) {
-                                if (!context.mounted) return;
-                                final pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                  initialEntryMode: TimePickerEntryMode.input,
-                                );
-                                if (pickedTime != null) {
-                                  final scheduledDate = DateTime(
-                                    pickedDate.year,
-                                    pickedDate.month,
-                                    pickedDate.day,
-                                    pickedTime.hour,
-                                    pickedTime.minute,
-                                  );
-                                  try {
-                                    widget.devedoresCubit.editarDevedor(
-                                      widget.devedoresEntity.copyWith(
-                                        notificar: scheduledDate,
-                                      ),
-                                    );
-                                    NotificationService().showLocalNotification(
-                                      title: AppStrings.dividasPendentes,
-                                      body: AppStrings.mensagemDivida(
-                                        widget.devedoresEntity.nome,
-                                        widget.devedoresEntity.valor.real,
-                                      ),
-                                      id: widget.index,
-                                      scheduledDate: tz.TZDateTime.from(
-                                        scheduledDate,
-                                        tz.local,
-                                      ),
-                                    );
-                                  } catch (e, stackTrace) {
-                                    debugPrintStack(
-                                      label: e.toString(),
-                                      stackTrace: stackTrace,
-                                    );
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.red,
-                                          content: Center(
-                                            child: Text(
-                                              'Error',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                }
-                              }
-                            });
-                          }
-                        }
-                      },
-                      child: Icon(
-                        widget.devedoresEntity.notificar == null
-                            ? Icons.notifications_none_rounded
-                            : Icons.notifications_active,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

@@ -37,6 +37,10 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3652623512305285~3030528728"/>
+            
+        <!-- Support for 16KB page sizes required for Android 15+ -->
+        <property android:name="android.app.16kb_page_size" android:value="true" />
+            
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
