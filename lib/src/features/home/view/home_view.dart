@@ -8,6 +8,7 @@ import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
+import 'package:notes_app/src/features/plus/view/plus_view.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
@@ -30,6 +31,27 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
   final bool _isSafeAreaBottom = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!UserController.user.value.isPlus) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          builder: (context) {
+            return PlusView();
+          },
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
