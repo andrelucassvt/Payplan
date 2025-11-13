@@ -25,13 +25,18 @@ platform :ios do
 
   desc "Upload a new build to TestFlight"
   lane :deploy do
-    build_app(workspace: "Runner.xcworkspace", scheme: "Runner")
+    sh "flutter clean && flutter pub get"
+    sh "rm -f Podfile.lock && pod install"
+    sh "flutter build ipa --release"
     app_store_connect_api_key(
       key_id: "AB483SC484",
       issuer_id: "ed91d643-bec4-4821-9a7a-3cc9d63ba124",
       key_filepath: "fastlane/AB483SC484.p8"
     )
-    upload_to_testflight
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/notes_app.ipa",
+      app_identifier: "com.andre.notesApp",
+    )
   end
 end
 
