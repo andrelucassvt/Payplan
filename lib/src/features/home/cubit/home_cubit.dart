@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/model/divida_model.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -76,30 +77,16 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    final resultDividas = prefs.getStringList(
-          dividaCampoShared,
-        ) ??
-        [];
-    List<DividaEntity> dividas = [];
+    final resultDividas = prefs.getStringList(dividaCampoShared) ?? [];
 
-    dividas = resultDividas.map(
-      (e) {
-        return DividaEntity.fromJson(json.decode(e));
-      },
-    ).toList();
+    final dividas = resultDividas
+        .map((e) => DividaModel.fromJson(json.decode(e)))
+        .toList()
+      ..removeWhere((element) => element.id == dividaEntity.id);
 
-    dividas.removeWhere(
-      (element) => element.id == dividaEntity.id,
-    );
-
-    final dividasEncode = dividas
-        .map(
-          (e) => json.encode(e.toMap()),
-        )
-        .toList();
     prefs.setStringList(
       dividaCampoShared,
-      dividasEncode,
+      dividas.map((e) => json.encode(e.toJson())).toList(),
     );
     buscarDividas();
   }
@@ -115,35 +102,21 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    final resultDividas = prefs.getStringList(
-          dividaCampoShared,
-        ) ??
-        [];
-    List<DividaEntity> dividas = [];
+    final resultDividas = prefs.getStringList(dividaCampoShared) ?? [];
 
-    dividas = resultDividas.map(
-      (e) {
-        return DividaEntity.fromJson(json.decode(e));
-      },
-    ).toList();
-
-    dividas = dividas.map(
-      (e) {
-        if (e.id == dividaEntity.id) {
-          return dividaEntity;
-        }
-        return e;
-      },
-    ).toList();
-
-    final dividasEncode = dividas
+    final dividas = resultDividas
+        .map((e) => DividaModel.fromJson(json.decode(e)))
+        .toList()
         .map(
-          (e) => json.encode(e.toMap()),
+          (e) => e.id == dividaEntity.id
+              ? DividaModel.fromEntity(dividaEntity)
+              : e,
         )
         .toList();
+
     prefs.setStringList(
       dividaCampoShared,
-      dividasEncode,
+      dividas.map((e) => json.encode(e.toJson())).toList(),
     );
     buscarDividas();
   }
@@ -159,17 +132,12 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    final resultDividas = prefs.getStringList(
-          dividaCampoShared,
-        ) ??
-        [];
-    final dividaConvert = json.encode(dividaEntity.toMap());
+    final resultDividas = prefs.getStringList(dividaCampoShared) ?? [];
 
-    resultDividas.add(dividaConvert);
-    prefs.setStringList(
-      dividaCampoShared,
-      resultDividas,
+    resultDividas.add(
+      json.encode(DividaModel.fromEntity(dividaEntity).toJson()),
     );
+    prefs.setStringList(dividaCampoShared, resultDividas);
     buscarDividas();
   }
 
@@ -184,43 +152,16 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    final result = prefs.getStringList(
-          dividaCampoShared,
-        ) ??
-        [];
+    final result = prefs.getStringList(dividaCampoShared) ?? [];
 
-    List<DividaEntity> dividas = [];
+    final dividas =
+        result.map((e) => DividaModel.fromJson(json.decode(e))).toList();
 
-    dividas = result.map(
-      (e) {
-        return DividaEntity.fromJson(json.decode(e));
-      },
-    ).toList();
-
-    final filtroGastos = dividas
-        .map(
-          (e) => e.faturas
-              .where(
-                (element) =>
-                    element.ano == state.anoAtual &&
-                    element.mes == state.mesAtual.id &&
-                    !element.pago,
-              )
-              .toList(),
-        )
-        .toList();
-
-    double somaGastos = 0;
-
-    filtroGastos
-        .map(
-          (e) => e.map(
-            (e) {
-              somaGastos = somaGastos + e.valor;
-            },
-          ).toList(),
-        )
-        .toList();
+    final somaGastos = dividas.fold<double>(
+      0.0,
+      (soma, divida) =>
+          soma + divida.totalNaoPagoDoMes(state.anoAtual, state.mesAtual.id),
+    );
 
     emit(
       HomeDividasSucesso(

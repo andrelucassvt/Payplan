@@ -1,13 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+@immutable
 class DividaEntity {
-  final String id;
-  final String nome;
-  final bool mensal;
-  final Color cor;
-  final List<FaturaMensalEntity> faturas;
-
-  DividaEntity({
+  const DividaEntity({
     required this.id,
     required this.nome,
     required this.mensal,
@@ -15,28 +11,28 @@ class DividaEntity {
     required this.faturas,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'nome': nome,
-      'mensal': mensal,
-      'cor': cor.value,
-      'faturas': faturas.map((x) => x.toMap()).toList(),
-    };
+  final String id;
+  final String nome;
+  final bool mensal;
+  final Color cor;
+  final List<FaturaMensalEntity> faturas;
+
+  /// Retorna as faturas do mês/ano especificado.
+  List<FaturaMensalEntity> faturasDoMes(int ano, int mes) {
+    return faturas.where((f) => f.ano == ano && f.mes == mes).toList();
   }
 
-  factory DividaEntity.fromJson(Map<String, dynamic> map) {
-    return DividaEntity(
-      id: map['id'] as String,
-      nome: map['nome'] as String,
-      mensal: map['mensal'] as bool,
-      cor: Color(map['cor'] as int),
-      faturas: List<FaturaMensalEntity>.from(
-        (map['faturas'] as List<dynamic>).map<FaturaMensalEntity>(
-          (x) => FaturaMensalEntity.fromJson(x as Map<String, dynamic>),
-        ),
-      ),
-    );
+  /// Soma dos valores não pagos no mês/ano especificado.
+  double totalNaoPagoDoMes(int ano, int mes) {
+    return faturasDoMes(ano, mes)
+        .where((f) => !f.pago)
+        .fold(0.0, (soma, f) => soma + f.valor);
+  }
+
+  /// Retorna a fatura do mês/ano, ou `null` se não existir.
+  FaturaMensalEntity? faturaDoMes(int ano, int mes) {
+    final result = faturasDoMes(ano, mes);
+    return result.isEmpty ? null : result.first;
   }
 
   DividaEntity copyWith({
@@ -54,37 +50,39 @@ class DividaEntity {
       faturas: faturas ?? this.faturas,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DividaEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          nome == other.nome &&
+          mensal == other.mensal &&
+          cor == other.cor &&
+          listEquals(faturas, other.faturas);
+
+  @override
+  int get hashCode => Object.hash(id, nome, mensal, cor, faturas);
+
+  @override
+  String toString() => 'DividaEntity(id: $id, nome: $nome, mensal: $mensal, '
+      'cor: $cor, faturas: $faturas)';
 }
 
+@immutable
 class FaturaMensalEntity {
-  final int ano;
-  final int mes;
-  final bool pago;
-  final double valor;
-  FaturaMensalEntity({
+  const FaturaMensalEntity({
     required this.ano,
     required this.mes,
     required this.valor,
     this.pago = false,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'ano': ano,
-      'mes': mes,
-      'pago': pago,
-      'valor': valor,
-    };
-  }
-
-  factory FaturaMensalEntity.fromJson(Map<String, dynamic> map) {
-    return FaturaMensalEntity(
-      ano: map['ano'] as int,
-      mes: map['mes'] as int,
-      pago: map['pago'] as bool,
-      valor: map['valor'] as double,
-    );
-  }
+  final int ano;
+  final int mes;
+  final bool pago;
+  final double valor;
 
   FaturaMensalEntity copyWith({
     int? ano,
@@ -99,4 +97,21 @@ class FaturaMensalEntity {
       valor: valor ?? this.valor,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FaturaMensalEntity &&
+          runtimeType == other.runtimeType &&
+          ano == other.ano &&
+          mes == other.mes &&
+          pago == other.pago &&
+          valor == other.valor;
+
+  @override
+  int get hashCode => Object.hash(ano, mes, pago, valor);
+
+  @override
+  String toString() =>
+      'FaturaMensalEntity(ano: $ano, mes: $mes, pago: $pago, valor: $valor)';
 }
