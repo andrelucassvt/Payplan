@@ -29,7 +29,7 @@ class PlusShopContent extends StatelessWidget {
           Text(
             AppStrings.removaTodosAnuncios,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           ),
           const SizedBox(height: 40),
           SizedBox(
@@ -37,7 +37,8 @@ class PlusShopContent extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isProcessing ? null : onBuy,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: const Color(0xFF5C5FEF),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: isProcessing

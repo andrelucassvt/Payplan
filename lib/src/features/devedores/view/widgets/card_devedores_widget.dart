@@ -10,10 +10,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 const _kAccent = Color(0xFF5C5FEF);
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
-const _kSurface = Color(0xFFF3F4FF);
-const _kDivider = Color(0xFFEEEFF5);
 
 class CardDevedoresWidget extends StatefulWidget {
   const CardDevedoresWidget({
@@ -37,11 +33,12 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -69,10 +66,10 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                   children: [
                     Text(
                       e.nome,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -98,7 +95,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                         ? Icons.notifications_none_rounded
                         : Icons.notifications_active_rounded,
                     size: 20,
-                    color: e.notificar == null ? _kTextSecondary : _kAccent,
+                    color: e.notificar == null ? cs.onSurfaceVariant : _kAccent,
                   ),
                 ),
               ),
@@ -110,7 +107,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: _kSurface,
+                color: cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -122,9 +119,9 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                       e.pix!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -141,10 +138,10 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                       );
                     },
                     borderRadius: BorderRadius.circular(6),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
                       child: Icon(Icons.copy_outlined,
-                          size: 16, color: _kTextSecondary),
+                          size: 16, color: cs.onSurfaceVariant),
                     ),
                   ),
                 ],
@@ -156,17 +153,17 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.schedule_rounded,
-                    size: 13, color: _kTextSecondary),
+                Icon(Icons.schedule_rounded,
+                    size: 13, color: cs.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Text(
                   '${AppStrings.notificar}: '
                   '${e.notificar!.day.toString().padLeft(2, '0')}/'
                   '${e.notificar!.month.toString().padLeft(2, '0')}/'
                   '${e.notificar!.year}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -174,7 +171,8 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
           ],
           // — Divider + action buttons —
           const SizedBox(height: 12),
-          const Divider(color: _kDivider, height: 1),
+          Divider(
+              color: Theme.of(context).colorScheme.outlineVariant, height: 1),
           const SizedBox(height: 10),
           Row(
             children: [

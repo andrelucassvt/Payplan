@@ -6,8 +6,6 @@ import 'package:uuid/uuid.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
 
 const _kAccent = Color(0xFF5C5FEF);
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
 
 Future<void> showNovoDevedorModal({
   required BuildContext context,
@@ -33,13 +31,15 @@ Future<void> showNovoDevedorModal({
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setModalState) {
+          final cs = Theme.of(context).colorScheme;
           return Container(
             margin: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
             ),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             child: Column(
@@ -52,7 +52,7 @@ Future<void> showNovoDevedorModal({
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE5E7EB),
+                      color: cs.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -60,10 +60,10 @@ Future<void> showNovoDevedorModal({
                 const SizedBox(height: 16),
                 Text(
                   AppStrings.novoDevedor,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: _kTextPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -180,25 +180,26 @@ class _LightTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       onChanged: onChanged,
-      style: const TextStyle(fontSize: 15, color: _kTextPrimary),
+      style: TextStyle(fontSize: 15, color: cs.onSurface),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: _kTextSecondary, fontSize: 14),
+        labelStyle: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
         filled: true,
-        fillColor: const Color(0xFFF9FAFB),
+        fillColor: cs.surfaceContainerHighest,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: BorderSide(color: cs.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: BorderSide(color: cs.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

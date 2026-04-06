@@ -86,7 +86,7 @@ class _HomeBaseState extends State<HomeBase> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: IndexedStack(
         index: _selectedIndex,
         children: [
@@ -121,9 +121,9 @@ class _HomeBaseState extends State<HomeBase> {
       floatingActionButton: _buildFab(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        indicatorColor: const Color(0xFFEEEEFF),
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) async {
           if (index == 1) _devedoresCubit.buscarDevedores();

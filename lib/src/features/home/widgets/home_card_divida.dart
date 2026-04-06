@@ -8,9 +8,6 @@ import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/service/ads/app_open_ad_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
-const _kSurface = Color(0xFFF3F4FF);
 const _kAccent = Color(0xFF5C5FEF);
 
 class HomeCardDivida extends StatefulWidget {
@@ -76,13 +73,14 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
   Widget build(BuildContext context) {
     if (faturaAtual == null) return const SizedBox.shrink();
 
+    final cs = Theme.of(context).colorScheme;
     final cor = widget.dividaEntity.cor;
     final isPaid = faturaAtual!.pago;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -113,10 +111,10 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                               children: [
                                 Text(
                                   widget.dividaEntity.nome,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: _kTextPrimary,
+                                    color: cs.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -141,11 +139,11 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
-                                  color: _kTextPrimary,
+                                  color: cs.onSurface,
                                   decoration: isPaid
                                       ? TextDecoration.lineThrough
                                       : null,
-                                  decorationColor: _kTextSecondary,
+                                  decorationColor: cs.onSurfaceVariant,
                                 ),
                               ),
                               Transform.scale(
@@ -234,12 +232,14 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        final cs = Theme.of(context).colorScheme;
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
           child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(28)),
             ),
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
             child: Column(
@@ -251,7 +251,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE5E7EB),
+                      color: cs.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -259,8 +259,8 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                 const SizedBox(height: 20),
                 Text(
                   AppStrings.editarFatura,
-                  style: const TextStyle(
-                    color: _kTextPrimary,
+                  style: TextStyle(
+                    color: cs.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -269,15 +269,15 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                 TextFormField(
                   controller: _faturaTextController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(
-                    color: _kTextPrimary,
+                  style: TextStyle(
+                    color: cs.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                   decoration: InputDecoration(
                     labelText: AppStrings.valorParcela,
-                    labelStyle: const TextStyle(color: _kTextSecondary),
+                    labelStyle: TextStyle(color: cs.onSurfaceVariant),
                     filled: true,
-                    fillColor: _kSurface,
+                    fillColor: cs.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -374,12 +374,13 @@ class _ActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(10),
         ),
         child: icon != null

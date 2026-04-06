@@ -53,16 +53,16 @@ class _PlusViewState extends State<PlusView> {
             appBar: AppBar(
               title: Text(
                 AppStrings.semAnuncio,
-                style: const TextStyle(color: Colors.white),
               ),
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: const Color(0xFF5C5FEF),
+              foregroundColor: Colors.white,
               centerTitle: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_downward, color: Colors.white),
+                icon: const Icon(Icons.arrow_downward),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
-            backgroundColor: Colors.black,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: switch (state) {
               PlusInitial() || PlusLoading() => const Center(
                   child: CircularProgressIndicator(),
@@ -70,7 +70,6 @@ class _PlusViewState extends State<PlusView> {
               PlusStoreUnavailable() => Center(
                   child: Text(
                     AppStrings.lojaIndisponivel,
-                    style: const TextStyle(color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -92,7 +91,6 @@ class _PlusViewState extends State<PlusView> {
                   : Center(
                       child: Text(
                         AppStrings.lojaIndisponivel,
-                        style: const TextStyle(color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
                     ),

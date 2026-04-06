@@ -15,7 +15,7 @@ class PlusPremiumContent extends StatelessWidget {
           Text(
             AppStrings.aproveiteSemAnuncios,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           ),
         ],
       ),

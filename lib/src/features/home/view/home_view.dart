@@ -32,7 +32,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocConsumer<HomeCubit, HomeState>(
         bloc: widget.cubit,
         listener: (context, state) {
@@ -82,10 +82,10 @@ class _HomeViewState extends State<HomeView> {
                     children: [
                       Text(
                         AppStrings.novaDivida,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF9CA3AF),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           letterSpacing: 0.8,
                         ),
                       ),
@@ -142,6 +142,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -150,22 +151,22 @@ class _EmptyState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFFEEEEFF),
+              color: cs.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.receipt_long_outlined,
               size: 36,
-              color: Color(0xFF5C5FEF),
+              color: cs.primary,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Nenhuma dívida cadastrada',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 6),
@@ -174,7 +175,7 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: const Color(0xFF9CA3AF),
+              color: cs.onSurfaceVariant,
               height: 1.5,
             ),
           ),

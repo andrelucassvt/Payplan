@@ -11,11 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
-const _kBackground = Color(0xFFF8F9FF);
 const _kAccent = Color(0xFF5C5FEF);
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
-const _kSurface = Color(0xFFF3F4FF);
 
 class GraficosView extends StatefulWidget {
   const GraficosView({
@@ -52,17 +48,18 @@ class _GraficosViewState extends State<GraficosView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: _kTextPrimary,
+        titleTextStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 17,
           fontWeight: FontWeight.w600,
         ),
-        iconTheme: const IconThemeData(color: _kTextPrimary),
+        iconTheme:
+            IconThemeData(color: Theme.of(context).colorScheme.onSurface),
         title: Text(AppStrings.graficoGastos),
       ),
       body: valorTotalFatura == 0 && valorTotalDevedores == 0
@@ -82,7 +79,8 @@ class _GraficosViewState extends State<GraficosView> {
                             _share(widget.screenshotDividasController),
                         screenshotController:
                             widget.screenshotDividasController,
-                        screenshotBackground: _kBackground,
+                        screenshotBackground:
+                            Theme.of(context).scaffoldBackgroundColor,
                         chart: PieChart(
                           PieChartData(
                             sectionsSpace: 3,
@@ -121,7 +119,8 @@ class _GraficosViewState extends State<GraficosView> {
                             _share(widget.screenshotDevedoresController),
                         screenshotController:
                             widget.screenshotDevedoresController,
-                        screenshotBackground: _kBackground,
+                        screenshotBackground:
+                            Theme.of(context).scaffoldBackgroundColor,
                         chart: PieChart(
                           PieChartData(
                             sectionsSpace: 3,
@@ -197,11 +196,12 @@ class _ChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Screenshot(
       controller: screenshotController,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -225,10 +225,10 @@ class _ChartCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: _kTextSecondary,
+                      color: cs.onSurfaceVariant,
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -250,10 +250,10 @@ class _ChartCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               total,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
-                color: _kTextPrimary,
+                color: cs.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
@@ -286,6 +286,7 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -298,23 +299,19 @@ class _LegendItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: _kTextPrimary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 13, color: cs.onSurface),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: _kTextSecondary,
-              fontWeight: FontWeight.w500,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
             ),
           ),
         ],
@@ -330,6 +327,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -337,32 +335,32 @@ class _EmptyState extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: const BoxDecoration(
-              color: _kSurface,
+            decoration: BoxDecoration(
+              color: cs.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.pie_chart_outline_rounded,
               size: 36,
-              color: _kAccent,
+              color: cs.primary,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Nenhum dado para exibir',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: _kTextPrimary,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Adicione dívidas ou devedores\npara ver os gráficos',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
         ],

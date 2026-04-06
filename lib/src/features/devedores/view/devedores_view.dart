@@ -10,11 +10,7 @@ import 'package:notes_app/src/util/service/ads/ad_config.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 
-const _kBackground = Color(0xFFF8F9FF);
 const _kAccent = Color(0xFF5C5FEF);
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
-const _kSurface = Color(0xFFF3F4FF);
 
 class DevedoresView extends StatefulWidget {
   const DevedoresView({
@@ -56,17 +52,18 @@ class _DevedoresViewState extends State<DevedoresView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: _kTextPrimary,
+        titleTextStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 17,
           fontWeight: FontWeight.w600,
         ),
-        iconTheme: const IconThemeData(color: _kTextPrimary),
+        iconTheme:
+            IconThemeData(color: Theme.of(context).colorScheme.onSurface),
         title: Text(AppStrings.devedores),
       ),
       body: SafeArea(
@@ -82,7 +79,7 @@ class _DevedoresViewState extends State<DevedoresView> {
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -105,20 +102,22 @@ class _DevedoresViewState extends State<DevedoresView> {
                           children: [
                             Text(
                               AppStrings.total,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: _kTextSecondary,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                                 letterSpacing: 0.8,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               state.totalValorDevedor.real,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w700,
-                                color: _kTextPrimary,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -156,10 +155,10 @@ class _DevedoresViewState extends State<DevedoresView> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     AppStrings.devedores.toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -216,6 +215,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -223,32 +223,32 @@ class _EmptyState extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: const BoxDecoration(
-              color: _kSurface,
+            decoration: BoxDecoration(
+              color: cs.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.people_outline_rounded,
               size: 36,
-              color: _kAccent,
+              color: cs.primary,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Nenhum devedor cadastrado',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: _kTextPrimary,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Adicione quem te deve\npara controlar os valores',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),

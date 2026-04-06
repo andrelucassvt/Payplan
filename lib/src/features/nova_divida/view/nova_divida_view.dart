@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
-import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:uuid/uuid.dart';
@@ -82,16 +81,13 @@ class _NovaDividaViewState extends State<NovaDividaView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           widget.dividaEntity != null
               ? AppStrings.atualizarDivida
               : AppStrings.novaDivida,
-          style: TextStyle(
-            color: Colors.white,
-          ),
         ),
         actions: [
           if (widget.dividaEntity != null)
@@ -109,16 +105,14 @@ class _NovaDividaViewState extends State<NovaDividaView> {
               },
               child: Text(
                 AppStrings.deletar,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.red,
                 ),
               ),
             ),
         ],
-        backgroundColor: Colors.deepPurple,
-        iconTheme: IconThemeData(
-          color: Colors.white,
-        ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -228,21 +222,19 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                 height: 20,
               ),
               Container(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 20,
                 ),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: AppColors.whiteOpacity,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  borderRadius: BorderRadius.circular(
-                    10,
-                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextFormField(
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   decoration: InputDecoration.collapsed(
                     hintText: AppStrings.digiteONomeDivida,
@@ -260,7 +252,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
               Text(
                 AppStrings.corDaDivida,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                 ),
               ),
@@ -346,7 +338,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                           '${quantidadeParcelas}x',
                           style: TextStyle(
                             fontSize: 25,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         itemBuilder: (context) {
@@ -376,28 +368,27 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                     height: 20,
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 20,
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: AppColors.whiteOpacity,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
-                      borderRadius: BorderRadius.circular(
-                        10,
-                      ),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextFormField(
                       controller: _faturaTextController,
                       keyboardType: TextInputType.number,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       decoration: InputDecoration(
                           labelText: AppStrings.valorParcela,
                           labelStyle: TextStyle(
-                            color: Colors.white,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           )),
                       onChanged: (value) {
                         setState(() {

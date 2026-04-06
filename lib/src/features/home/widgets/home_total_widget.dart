@@ -6,12 +6,10 @@ import 'package:notes_app/src/features/plus/view/plus_view.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/enum/meses_enum.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
+import 'package:notes_app/src/util/service/theme_controller.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 
 const _kAccent = Color(0xFF5C5FEF);
-const _kTextPrimary = Color(0xFF1F2937);
-const _kTextSecondary = Color(0xFF6B7280);
-const _kSurface = Color(0xFFF3F4FF);
 
 class HomeTotalWidget extends StatefulWidget {
   const HomeTotalWidget({
@@ -32,11 +30,12 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -58,10 +57,10 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
           const SizedBox(height: 20),
           Text(
             AppStrings.total,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: _kTextSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
           ),
@@ -69,43 +68,75 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
           Text(
             state.totalGastos.real,
             maxLines: 2,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.w700,
-              color: _kTextPrimary,
+              color: cs.onSurface,
               letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 16),
-          InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => _showModalDesconto(state.totalGastos),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: _kSurface,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
                 borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.remove_circle_outline,
-                    size: 16,
-                    color: _kAccent,
+                onTap: () => _showModalDesconto(state.totalGastos),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    AppStrings.desconto,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: _kAccent,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.remove_circle_outline,
+                        size: 16,
+                        color: _kAccent,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        AppStrings.desconto,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _kAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: ThemeController.themeMode,
+                builder: (context, _, __) {
+                  final isDark = ThemeController.isDark(context);
+                  return GestureDetector(
+                    onTap: () => ThemeController.toggle(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isDark
+                            ? Icons.light_mode_outlined
+                            : Icons.dark_mode_outlined,
+                        size: 16,
+                        color: _kAccent,
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -120,12 +151,14 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        final cs = Theme.of(context).colorScheme;
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
           child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(28)),
             ),
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
             child: Column(
@@ -137,7 +170,7 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE5E7EB),
+                      color: cs.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -145,19 +178,19 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                 const SizedBox(height: 20),
                 Text(
                   AppStrings.adicioneOValorTotalDescontado,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: _kTextPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   AppStrings.valorDesseMes,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -167,25 +200,25 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: _kSurface,
+                    color: cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     valorDesseMes.real,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: _kTextPrimary,
+                      color: cs.onSurface,
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   AppStrings.digiteOSaldoQueSeraDescontado,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: _kTextSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -195,15 +228,15 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget> {
                       child: TextFormField(
                         controller: faturaTextController,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(
-                          color: _kTextPrimary,
+                        style: TextStyle(
+                          color: cs.onSurface,
                           fontWeight: FontWeight.w600,
                         ),
                         decoration: InputDecoration(
                           labelText: AppStrings.salario,
-                          labelStyle: const TextStyle(color: _kTextSecondary),
+                          labelStyle: TextStyle(color: cs.onSurfaceVariant),
                           filled: true,
-                          fillColor: _kSurface,
+                          fillColor: cs.surfaceContainerHighest,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -276,6 +309,7 @@ class _TopRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -284,24 +318,24 @@ class _TopRow extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _kSurface,
+              color: cs.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
                 Text(
                   state.anoAtual.toString(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: _kTextPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   Icons.expand_more_rounded,
                   size: 18,
-                  color: _kTextSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ],
             ),
@@ -367,7 +401,7 @@ class _TopRow extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: _kSurface,
+                  color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -380,10 +414,10 @@ class _TopRow extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       state.mesAtual.nome,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _kTextPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                   ],
@@ -411,9 +445,9 @@ class _TopRow extends StatelessWidget {
     );
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => Container(
+      builder: (ctx) => Container(
         height: 216,
-        color: Colors.white,
+        color: Theme.of(ctx).colorScheme.surface,
         child: CupertinoPicker(
           itemExtent: 50,
           scrollController: scrollController,
@@ -423,8 +457,8 @@ class _TopRow extends StatelessWidget {
             (index) => Center(
               child: Text(
                 (2024 + index).toString(),
-                style: const TextStyle(
-                  color: _kTextPrimary,
+                style: TextStyle(
+                  color: Theme.of(ctx).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
