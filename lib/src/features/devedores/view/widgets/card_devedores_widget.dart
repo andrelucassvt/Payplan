@@ -9,6 +9,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+const _kAccent = Color(0xFF5C5FEF);
+const _kTextPrimary = Color(0xFF1F2937);
+const _kTextSecondary = Color(0xFF6B7280);
+const _kSurface = Color(0xFFF3F4FF);
+const _kDivider = Color(0xFFEEEFF5);
+
 class CardDevedoresWidget extends StatefulWidget {
   const CardDevedoresWidget({
     required this.devedoresEntity,
@@ -27,287 +33,294 @@ class CardDevedoresWidget extends StatefulWidget {
 }
 
 class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
+  DevedoresEntity get e => widget.devedoresEntity;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 10,
-      ),
-      child: Container(
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _kAccent.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: .3),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // — Header row: name + notification icon —
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      e.nome,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _kTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      e.valor.real,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: _kAccent,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () => _handleNotificacao(context),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(
+                    e.notificar == null
+                        ? Icons.notifications_none_rounded
+                        : Icons.notifications_active_rounded,
+                    size: 20,
+                    color: e.notificar == null ? _kTextSecondary : _kAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // — PIX —
+          if (e.pix != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _kSurface,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.pix, size: 16, color: _kAccent),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      e.pix!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: _kTextPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: e.pix!));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('PIX copiado!'),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(Icons.copy_outlined,
+                          size: 16, color: _kTextSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          // — Notificar —
+          if (e.notificar != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.schedule_rounded,
+                    size: 13, color: _kTextSecondary),
+                const SizedBox(width: 4),
+                Text(
+                  '${AppStrings.notificar}: '
+                  '${e.notificar!.day.toString().padLeft(2, '0')}/'
+                  '${e.notificar!.month.toString().padLeft(2, '0')}/'
+                  '${e.notificar!.year}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: _kTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          // — Divider + action buttons —
+          const SizedBox(height: 12),
+          const Divider(color: _kDivider, height: 1),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _ActionChip(
+                icon: Icons.attach_money_rounded,
+                label: AppStrings.cobrar,
+                color: const Color(0xFF10B981),
+                onTap: () => Share.share(
+                  '${AppStrings.dividasPendentes}\n\n${e.nome}\n'
+                  '${AppStrings.valor}: ${e.valor.real}'
+                  '${e.pix == null ? '' : '\n\nChave PIX: ${e.pix}'}'
+                  '\n\n${e.message ?? ''}',
+                ),
+              ),
+              const SizedBox(width: 8),
+              _ActionChip(
+                icon: Icons.edit_outlined,
+                label: 'Editar',
+                color: _kAccent,
+                onTap: widget.editarDevedor,
+              ),
+              const SizedBox(width: 8),
+              _ActionChip(
+                icon: Icons.delete_outline_rounded,
+                label: 'Deletar',
+                color: const Color(0xFFEF4444),
+                onTap: () => widget.devedoresCubit.deletarDevedor(e.id),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleNotificacao(BuildContext context) async {
+    final denied = await NotificationService().verificarPermissaoNotificacao();
+    if (!context.mounted) return;
+
+    if (denied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.blue,
+          content: InkWell(
+            onTap: openAppSettings,
+            child: Center(
+              child: Text(
+                AppStrings.permitirNotificacoes,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.devedoresEntity.nome,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              final result = await NotificationService()
-                                  .verificarPermissaoNotificacao();
+      );
+      return;
+    }
 
-                              if (context.mounted) {
-                                if (result) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: Colors.blue,
-                                      content: InkWell(
-                                        onTap: () {
-                                          openAppSettings();
-                                        },
-                                        child: Center(
-                                          child: Text(
-                                            AppStrings.permitirNotificacoes,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate: DateTime(3101),
-                                  ).then((pickedDate) async {
-                                    if (pickedDate != null) {
-                                      if (!context.mounted) return;
-                                      final pickedTime = await showTimePicker(
-                                        context: context,
-                                        initialTime: TimeOfDay.now(),
-                                        initialEntryMode:
-                                            TimePickerEntryMode.input,
-                                      );
-                                      if (pickedTime != null) {
-                                        final scheduledDate = DateTime(
-                                          pickedDate.year,
-                                          pickedDate.month,
-                                          pickedDate.day,
-                                          pickedTime.hour,
-                                          pickedTime.minute,
-                                        );
-                                        try {
-                                          widget.devedoresCubit.editarDevedor(
-                                            widget.devedoresEntity.copyWith(
-                                              notificar: scheduledDate,
-                                            ),
-                                          );
-                                          NotificationService()
-                                              .showLocalNotification(
-                                            title: AppStrings.dividasPendentes,
-                                            body: AppStrings.mensagemDivida(
-                                              widget.devedoresEntity.nome,
-                                              widget.devedoresEntity.valor.real,
-                                            ),
-                                            id: widget.index,
-                                            scheduledDate: tz.TZDateTime.from(
-                                              scheduledDate,
-                                              tz.local,
-                                            ),
-                                          );
-                                        } catch (e, stackTrace) {
-                                          debugPrintStack(
-                                            label: e.toString(),
-                                            stackTrace: stackTrace,
-                                          );
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                backgroundColor: Colors.red,
-                                                content: Center(
-                                                  child: Text(
-                                                    'Error',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    }
-                                  });
-                                }
-                              }
-                            },
-                            child: Icon(
-                              widget.devedoresEntity.notificar == null
-                                  ? Icons.notifications_none_rounded
-                                  : Icons.notifications_active,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        widget.devedoresEntity.valor.real,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                      if (widget.devedoresEntity.pix != null) ...[
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Meu PIX:',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    widget.devedoresEntity.pix!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Clipboard.setData(ClipboardData(
-                                        text: widget.devedoresEntity.pix!));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('PIX copiado!'),
-                                        duration: Duration(seconds: 2),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  },
-                                  child: Icon(
-                                    Icons.copy,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        ),
-                      ],
-                      if (widget.devedoresEntity.notificar != null) ...[
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppStrings.notificar,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Text(
-                              '${widget.devedoresEntity.notificar!.day}/${widget.devedoresEntity.notificar!.month}/${widget.devedoresEntity.notificar!.year}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Wrap(
-              spacing: 10,
-              children: [
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Share.share(
-                      '${AppStrings.dividasPendentes}\n\n${widget.devedoresEntity.nome}\n${AppStrings.valor}: ${widget.devedoresEntity.valor.real}${widget.devedoresEntity.pix == null ? '' : '\n\nChave PIX: ${widget.devedoresEntity.pix}'}\n\n${widget.devedoresEntity.message ?? ''}',
-                    );
-                  },
-                  icon: Icon(Icons.attach_money),
-                  label: Text(AppStrings.cobrar),
-                ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: widget.editarDevedor,
-                  icon: Icon(Icons.edit),
-                  label: Text('Editar'),
-                ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    widget.devedoresCubit.deletarDevedor(
-                      widget.devedoresEntity.id,
-                    );
-                  },
-                  icon: Icon(Icons.delete),
-                  label: Text('Deletar'),
-                ),
-              ],
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(3101),
+    );
+    if (pickedDate == null || !context.mounted) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.input,
+    );
+    if (pickedTime == null) return;
+
+    final scheduledDate = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    try {
+      widget.devedoresCubit.editarDevedor(
+        e.copyWith(notificar: scheduledDate),
+      );
+      NotificationService().showLocalNotification(
+        title: AppStrings.dividasPendentes,
+        body: AppStrings.mensagemDivida(e.nome, e.valor.real),
+        id: widget.index,
+        scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      );
+    } catch (error, stackTrace) {
+      debugPrintStack(label: error.toString(), stackTrace: stackTrace);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Center(child: Text('Erro ao agendar notificação')),
+          ),
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ],
         ),

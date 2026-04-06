@@ -7,12 +7,10 @@ import 'package:localization/localization.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
-import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/service/ads/ad_config.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
-import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeView extends StatefulWidget {
@@ -30,12 +28,11 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
-  final bool _isSafeAreaBottom = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFFF8F9FF),
       body: BlocConsumer<HomeCubit, HomeState>(
         bloc: widget.cubit,
         listener: (context, state) {
@@ -45,6 +42,9 @@ class _HomeViewState extends State<HomeView> {
               context: context,
               builder: (context) {
                 return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   title: Text(AppStrings.atencao),
                   content: Text('novaVersaoDisp'.i18n()),
                   actions: [
@@ -67,112 +67,118 @@ class _HomeViewState extends State<HomeView> {
         },
         builder: (context, state) {
           return SafeArea(
-            bottom: _isSafeAreaBottom,
+            bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 10,
-                ),
                 HomeTotalWidget(
                   cubit: widget.cubit,
                   state: state,
                 ),
-                const SizedBox(
-                  height: 10,
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Text(
+                        AppStrings.novaDivida,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(height: 8),
                 Expanded(
-                  child: Container(
-                    padding: EdgeInsets.only(
-                      left: 10,
-                      right: 10,
-                      top: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: .3),
-                      borderRadius: BorderRadius.circular(
-                        20,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        12.0,
-                      ),
-                      child: state.dividas.isEmpty
-                          ? Center(
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => NovaDividaView(
-                                        homeCubit: widget.cubit,
-                                      ),
+                  child: state.dividas.isEmpty
+                      ? _EmptyState(cubit: widget.cubit)
+                      : ListView.builder(
+                          itemCount: state.dividas.length,
+                          controller: widget.scrollController,
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                          itemBuilder: (context, index) {
+                            return ValueListenableBuilder(
+                              valueListenable: UserController.user,
+                              builder: (context, user, __) {
+                                return Column(
+                                  children: [
+                                    HomeCardDivida(
+                                      dividaEntity: state.dividas[index],
+                                      homeCubit: widget.cubit,
                                     ),
-                                  );
-                                },
-                                child: GlassContainerWidget(
-                                  height: 50,
-                                  margin: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 10,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      AppStrings.novaDivida,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : ListView.builder(
-                              itemCount: state.dividas.length,
-                              controller: widget.scrollController,
-                              padding: EdgeInsets.only(
-                                bottom: 150,
-                              ),
-                              itemBuilder: (context, index) {
-                                return ValueListenableBuilder(
-                                  valueListenable: UserController.user,
-                                  builder: (context, user, __) {
-                                    return Column(
-                                      children: [
-                                        HomeCardDivida(
-                                          dividaEntity: state.dividas[index],
-                                          homeCubit: widget.cubit,
+                                    if (!user.isPlus) ...[
+                                      if (index == 0)
+                                        AdmobBannerWidget(
+                                          adUnitId: AdConfig.homeBanner1,
                                         ),
-                                        if (!user.isPlus) ...[
-                                          if (index == 0) ...[
-                                            AdmobBannerWidget(
-                                              adUnitId: AdConfig.homeBanner1,
-                                            ),
-                                          ],
-                                          if (index == 1) ...[
-                                            AdmobBannerWidget(
-                                              adUnitId: AdConfig.homeBanner2,
-                                            ),
-                                          ],
-                                        ],
-                                      ],
-                                    );
-                                  },
+                                      if (index == 1)
+                                        AdmobBannerWidget(
+                                          adUnitId: AdConfig.homeBanner2,
+                                        ),
+                                    ],
+                                  ],
                                 );
                               },
-                            ),
-                    ),
-                  ),
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.cubit});
+  final HomeCubit cubit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEFF),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.receipt_long_outlined,
+              size: 36,
+              color: Color(0xFF5C5FEF),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Nenhuma dívida cadastrada',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Toque no + para adicionar sua\nprimeira dívida',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: const Color(0xFF9CA3AF),
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }

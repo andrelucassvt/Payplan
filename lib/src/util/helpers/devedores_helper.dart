@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
-import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 import 'package:uuid/uuid.dart';
 import 'package:notes_app/src/features/devedores/cubit/devedores_cubit.dart';
+
+const _kAccent = Color(0xFF5C5FEF);
+const _kTextPrimary = Color(0xFF1F2937);
+const _kTextSecondary = Color(0xFF6B7280);
 
 Future<void> showNovoDevedorModal({
   required BuildContext context,
@@ -30,131 +33,125 @@ Future<void> showNovoDevedorModal({
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setModalState) {
-          return GlassContainerWidget(
+          return Container(
             margin: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            padding: EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // — Drag handle —
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5E7EB),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
                   AppStrings.novoDevedor,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _kTextPrimary,
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextField(
+                const SizedBox(height: 20),
+                _LightTextField(
                   controller: nomeTextController,
-                  onChanged: (value) {
-                    nome = value;
+                  label: AppStrings.nomeDevedor,
+                  onChanged: (v) {
+                    nome = v;
                     setModalState(() {});
                   },
-                  decoration: InputDecoration(
-                    labelText: AppStrings.nomeDevedor,
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
                 ),
-                const SizedBox(height: 20),
-                TextField(
+                const SizedBox(height: 14),
+                _LightTextField(
                   controller: pixTextController,
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      pix = value;
-                      setModalState(() {});
-                    }
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Chave PIX',
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: faturaTextController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      final filtro1 = value.replaceAll('.', '');
-                      valorModificado =
-                          double.tryParse(filtro1.replaceAll(',', '.')) ?? 0;
-                      setModalState(() {});
-                    }
-                  },
-                  decoration: InputDecoration(
-                    labelText: AppStrings.valor,
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: mensagemTextController,
-                  onChanged: (value) {
+                  label: 'Chave PIX',
+                  onChanged: (v) {
+                    pix = v.isNotEmpty ? v : null;
                     setModalState(() {});
                   },
-                  decoration: InputDecoration(
-                    labelText: AppStrings.mensagem,
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                ),
+                const SizedBox(height: 14),
+                _LightTextField(
+                  controller: faturaTextController,
+                  label: AppStrings.valor,
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) {
+                    if (v.isNotEmpty) {
+                      final filtered = v.replaceAll('.', '');
+                      valorModificado =
+                          double.tryParse(filtered.replaceAll(',', '.')) ?? 0;
+                      setModalState(() {});
+                    }
+                  },
+                ),
+                const SizedBox(height: 14),
+                _LightTextField(
+                  controller: mensagemTextController,
+                  label: AppStrings.mensagem,
+                  onChanged: (_) => setModalState(() {}),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: nomeTextController.text.isEmpty
+                        ? null
+                        : () {
+                            if (devedoresEntity != null) {
+                              cubit.editarDevedor(
+                                DevedoresEntity(
+                                  id: devedoresEntity.id,
+                                  nome: nome,
+                                  valor: valorModificado,
+                                  pix: pix,
+                                  message: mensagemTextController.text,
+                                ),
+                              );
+                            } else {
+                              cubit.adicionarDevedor(
+                                DevedoresEntity(
+                                  id: const Uuid().v4(),
+                                  nome: nome,
+                                  valor: valorModificado,
+                                  pix: pix,
+                                  message: mensagemTextController.text,
+                                ),
+                              );
+                            }
+                            Navigator.pop(context);
+                          },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _kAccent,
+                      disabledBackgroundColor: const Color(0xFFE5E7EB),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      AppStrings.salvar,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  style: TextStyle(color: Colors.white),
                 ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    if (nomeTextController.text.isEmpty) {
-                      return;
-                    }
-                    if (devedoresEntity != null) {
-                      cubit.editarDevedor(
-                        DevedoresEntity(
-                          id: devedoresEntity.id,
-                          nome: nome,
-                          valor: valorModificado,
-                          pix: pix,
-                          message: mensagemTextController.text,
-                        ),
-                      );
-                    } else {
-                      cubit.adicionarDevedor(
-                        DevedoresEntity(
-                          id: Uuid().v4(),
-                          nome: nome,
-                          valor: valorModificado,
-                          pix: pix,
-                          message: mensagemTextController.text,
-                        ),
-                      );
-                    }
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: nomeTextController.text.isEmpty
-                        ? Colors.grey
-                        : Colors.deepPurple,
-                  ),
-                  child: Text(
-                    AppStrings.salvar,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                SizedBox(height: 50),
               ],
             ),
           );
@@ -164,4 +161,50 @@ Future<void> showNovoDevedorModal({
   ).whenComplete(() {
     nomeTextController.clear();
   });
+}
+
+// ---------------------------------------------------------------------------
+
+class _LightTextField extends StatelessWidget {
+  const _LightTextField({
+    required this.controller,
+    required this.label,
+    required this.onChanged,
+    this.keyboardType,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final ValueChanged<String> onChanged;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      onChanged: onChanged,
+      style: const TextStyle(fontSize: 15, color: _kTextPrimary),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: _kTextSecondary, fontSize: 14),
+        filled: true,
+        fillColor: const Color(0xFFF9FAFB),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _kAccent, width: 1.5),
+        ),
+      ),
+    );
+  }
 }
