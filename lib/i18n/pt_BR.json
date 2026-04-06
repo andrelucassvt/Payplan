@@ -79,5 +79,11 @@
     "comprasRestauradas": "Compras restauradas com sucesso!",
     "compraRealizada": "Compra realizada com sucesso!",
     "graficos": "Gráficos",
-    "mensagem": "Mensagem"
+    "mensagem": "Mensagem",
+    "sub-dividas": "Sub-itens",
+    "adicionar-sub-divida": "Adicionar sub-item",
+    "nome-sub-divida": "Nome do sub-item",
+    "recorrente": "Recorrente",
+    "unica-no-mes": "Única neste mês",
+    "nenhum-sub-item": "Nenhum sub-item adicionado"
 }

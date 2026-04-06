@@ -79,6 +79,12 @@
     "comprasRestauradas": "Purchases restored successfully!",
     "compraRealizada": "Purchase successful!",
     "graficos": "Charts",
-    "mensagem": "Message"
+    "mensagem": "Message",
+    "sub-dividas": "Sub-items",
+    "adicionar-sub-divida": "Add sub-item",
+    "nome-sub-divida": "Sub-item name",
+    "recorrente": "Recurring",
+    "unica-no-mes": "One-time this month",
+    "nenhum-sub-item": "No sub-items added"
 
 }

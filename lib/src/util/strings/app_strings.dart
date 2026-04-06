@@ -85,6 +85,12 @@ class AppStrings {
   static var compraRealizada = 'compraRealizada'.i18n();
   static var graficos = 'graficos'.i18n();
   static var mensagem = 'mensagem'.i18n();
+  static var subDividas = 'sub-dividas'.i18n();
+  static var adicionarSubDivida = 'adicionar-sub-divida'.i18n();
+  static var nomeSubDivida = 'nome-sub-divida'.i18n();
+  static var recorrente = 'recorrente'.i18n();
+  static var unicaNoMes = 'unica-no-mes'.i18n();
+  static var nenhumSubItem = 'nenhum-sub-item'.i18n();
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';

@@ -219,4 +219,27 @@ class HomeCubit extends Cubit<HomeState> {
       UserEntity(isPlus: isPlus),
     );
   }
+
+  Future<void> adicionarSubDivida(
+    DividaEntity divida,
+    SubDividaEntity subDivida,
+  ) async {
+    await atualizarDivida(
+      divida.copyWith(
+        subDividas: [...divida.subDividas, subDivida],
+      ),
+    );
+  }
+
+  Future<void> removerSubDivida(
+    DividaEntity divida,
+    String subDividaId,
+  ) async {
+    await atualizarDivida(
+      divida.copyWith(
+        subDividas:
+            divida.subDividas.where((s) => s.id != subDividaId).toList(),
+      ),
+    );
+  }
 }

@@ -38,6 +38,50 @@ class FaturaMensalModel extends FaturaMensalEntity {
   }
 }
 
+class SubDividaModel extends SubDividaEntity {
+  const SubDividaModel({
+    required super.id,
+    required super.nome,
+    required super.valor,
+    required super.recorrente,
+    super.mes,
+    super.ano,
+  });
+
+  factory SubDividaModel.fromJson(Map<String, dynamic> json) {
+    return SubDividaModel(
+      id: json['id'] as String,
+      nome: json['nome'] as String,
+      valor: (json['valor'] as num).toDouble(),
+      recorrente: json['recorrente'] as bool,
+      mes: json['mes'] as int?,
+      ano: json['ano'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'nome': nome,
+      'valor': valor,
+      'recorrente': recorrente,
+      'mes': mes,
+      'ano': ano,
+    };
+  }
+
+  factory SubDividaModel.fromEntity(SubDividaEntity entity) {
+    return SubDividaModel(
+      id: entity.id,
+      nome: entity.nome,
+      valor: entity.valor,
+      recorrente: entity.recorrente,
+      mes: entity.mes,
+      ano: entity.ano,
+    );
+  }
+}
+
 class DividaModel extends DividaEntity {
   const DividaModel({
     required super.id,
@@ -45,6 +89,7 @@ class DividaModel extends DividaEntity {
     required super.mensal,
     required super.cor,
     required super.faturas,
+    super.subDividas = const [],
   });
 
   factory DividaModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +100,9 @@ class DividaModel extends DividaEntity {
       cor: Color(json['cor'] as int),
       faturas: (json['faturas'] as List<dynamic>)
           .map((e) => FaturaMensalModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      subDividas: ((json['sub-dividas'] as List<dynamic>?) ?? [])
+          .map((e) => SubDividaModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -67,6 +115,8 @@ class DividaModel extends DividaEntity {
       'cor': cor.toARGB32(),
       'faturas':
           faturas.map((f) => FaturaMensalModel.fromEntity(f).toJson()).toList(),
+      'sub-dividas':
+          subDividas.map((s) => SubDividaModel.fromEntity(s).toJson()).toList(),
     };
   }
 
@@ -77,6 +127,7 @@ class DividaModel extends DividaEntity {
       mensal: entity.mensal,
       cor: entity.cor,
       faturas: entity.faturas,
+      subDividas: entity.subDividas,
     );
   }
 }

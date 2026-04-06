@@ -29,7 +29,7 @@ class CardDevedoresWidget extends StatefulWidget {
 }
 
 class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
-  DevedoresEntity get e => widget.devedoresEntity;
+  DevedoresEntity get entity => widget.devedoresEntity;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      e.nome,
+                      entity.nome,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -74,7 +74,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      e.valor.real,
+                      entity.valor.real,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -91,65 +91,67 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: Icon(
-                    e.notificar == null
+                    entity.notificar == null
                         ? Icons.notifications_none_rounded
                         : Icons.notifications_active_rounded,
                     size: 20,
-                    color: e.notificar == null ? cs.onSurfaceVariant : _kAccent,
+                    color: entity.notificar == null
+                        ? cs.onSurfaceVariant
+                        : _kAccent,
                   ),
                 ),
               ),
             ],
           ),
           // — PIX —
-          if (e.pix != null) ...[
+          if (entity.pix != null) ...[
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.pix, size: 16, color: _kAccent),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      e.pix!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: cs.onSurface,
-                        fontWeight: FontWeight.w500,
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: entity.pix!));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('PIX copiado!'),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.pix, size: 16, color: _kAccent),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        entity.pix!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: cs.onSurface,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: e.pix!));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('PIX copiado!'),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(6),
-                    child: Padding(
+                    Padding(
                       padding: const EdgeInsets.all(4),
                       child: Icon(Icons.copy_outlined,
                           size: 16, color: cs.onSurfaceVariant),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
           // — Notificar —
-          if (e.notificar != null) ...[
+          if (entity.notificar != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
@@ -158,9 +160,9 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                 const SizedBox(width: 4),
                 Text(
                   '${AppStrings.notificar}: '
-                  '${e.notificar!.day.toString().padLeft(2, '0')}/'
-                  '${e.notificar!.month.toString().padLeft(2, '0')}/'
-                  '${e.notificar!.year}',
+                  '${entity.notificar!.day.toString().padLeft(2, '0')}/'
+                  '${entity.notificar!.month.toString().padLeft(2, '0')}/'
+                  '${entity.notificar!.year}',
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onSurfaceVariant,
@@ -181,10 +183,10 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                 label: AppStrings.cobrar,
                 color: const Color(0xFF10B981),
                 onTap: () => Share.share(
-                  '${AppStrings.dividasPendentes}\n\n${e.nome}\n'
-                  '${AppStrings.valor}: ${e.valor.real}'
-                  '${e.pix == null ? '' : '\n\nChave PIX: ${e.pix}'}'
-                  '\n\n${e.message ?? ''}',
+                  '${AppStrings.dividasPendentes}\n\n${entity.nome}\n'
+                  '${AppStrings.valor}: ${entity.valor.real}'
+                  '${entity.pix == null ? '' : '\n\nChave PIX: ${entity.pix}'}'
+                  '\n\n${entity.message ?? ''}',
                 ),
               ),
               const SizedBox(width: 8),
@@ -199,7 +201,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                 icon: Icons.delete_outline_rounded,
                 label: 'Deletar',
                 color: const Color(0xFFEF4444),
-                onTap: () => widget.devedoresCubit.deletarDevedor(e.id),
+                onTap: () => widget.devedoresCubit.deletarDevedor(entity.id),
               ),
             ],
           ),
@@ -259,11 +261,11 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
 
     try {
       widget.devedoresCubit.editarDevedor(
-        e.copyWith(notificar: scheduledDate),
+        entity.copyWith(notificar: scheduledDate),
       );
       NotificationService().showLocalNotification(
         title: AppStrings.dividasPendentes,
-        body: AppStrings.mensagemDivida(e.nome, e.valor.real),
+        body: AppStrings.mensagemDivida(entity.nome, entity.valor.real),
         id: widget.index,
         scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
       );
