@@ -31,7 +31,7 @@ platform :android do
   end
 
   desc "Deploy a new version to the Google Play"
-  lane :deploy do
+  lane :prod do
     sh "flutter clean && flutter pub get"
     sh "flutter build appbundle --release"
 

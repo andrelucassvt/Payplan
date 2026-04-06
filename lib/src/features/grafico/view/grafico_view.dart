@@ -35,9 +35,12 @@ class GraficosView extends StatefulWidget {
 class _GraficosViewState extends State<GraficosView> {
   HomeState get state => widget.homeCubit.state;
 
-  // Fix: use the faturaDoMes helper to avoid the FaturaMensalModel type mismatch
-  double _valorFatura(DividaEntity e) =>
-      e.faturaDoMes(state.anoAtual, state.mesAtual.id)?.valor ?? 0;
+  double _valorFatura(DividaEntity e) {
+    final faturaValor =
+        e.faturaDoMes(state.anoAtual, state.mesAtual.id)?.valor ?? 0;
+    return faturaValor +
+        e.totalSubDividasDoMes(state.anoAtual, state.mesAtual.id);
+  }
 
   double get valorTotalFatura =>
       widget.dividas.map(_valorFatura).fold(0, (prev, el) => prev + el);

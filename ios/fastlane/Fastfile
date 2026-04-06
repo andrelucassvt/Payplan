@@ -24,7 +24,7 @@ platform :ios do
   end
 
   desc "Upload a new build to TestFlight"
-  lane :deploy do
+  lane :prod do
     sh "flutter clean && flutter pub get"
     sh "rm -f Podfile.lock && pod install"
     sh "flutter build ipa --release"
