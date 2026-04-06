@@ -1,4 +1,4 @@
-# Payplan — Codex Agent Instructions
+# Payplan — Agent Instructions
 
 App Flutter de controle financeiro pessoal: gestão de dívidas, devedores, gráficos e plano premium.
 Flutter 3 / Dart ^3.5.4 · Versão 2.5.5+70 · Pacote: `notes_app`
@@ -13,7 +13,7 @@ Antes de gerar ou modificar código, leia o arquivo de arquitetura **sempre** e 
 
 | Arquivo | Quando ler |
 |---|---|
-| `.github/instructions/architecture.instructions.md` | **Sempre** — regras gerais de arquitetura |
+| `.agents/rules/architecture.instructions.md` | **Sempre** — regras gerais de arquitetura |
 
 ## 🛠️ Skills especializadas
 
@@ -77,7 +77,7 @@ Prompt files em `.github/prompts/` para tarefas pré-definidas:
 1. **Mínimo obrigatório**: View + Cubit + State + rota + DI
 2. **Dados locais**: injete `StorageService` diretamente no Cubit
 3. **API externa**: crie também Entity + Repository Interface + Model + DataSource + RepositoryImpl
-4. Siga a estrutura de pastas descrita em `.github/instructions/architecture.instructions.md`
+4. Siga a estrutura de pastas descrita em `.agents/rules/architecture.instructions.md`
 
 ## Estrutura do Projeto
 
@@ -104,3 +104,35 @@ lib/
         ├── strings/             # Constantes de strings
         └── widgets/             # Widgets reutilizáveis globais
 ```
+
+## Comandos Úteis
+
+```bash
+flutter pub get           # Instalar dependências
+flutter run               # Executar o app
+flutter build apk         # Build Android APK
+flutter build ipa         # Build iOS IPA
+flutter analyze           # Lint e análise estática
+flutter test              # Executar testes
+```
+
+## Dependências Externas
+
+| Categoria | Pacote | Versão |
+|---|---|---|
+| State Management | flutter_bloc | ^9.0.0 |
+| DI | get_it | ^8.0.2 |
+| Network | dio | ^5.9.0 |
+| Functional | dartz | ^0.10.1 |
+| Storage | shared_preferences | ^2.3.3 |
+| Storage | path_provider | ^2.0.15 |
+| i18n | flutter_localization | ^0.3.1 |
+| i18n | localization | ^2.1.0 |
+| i18n | intl | ^0.20.2 |
+| Ads | google_mobile_ads | ^6.0.0 |
+| Notifications | flutter_local_notifications | ^18.0.1 |
+| IAP | in_app_purchase | ^3.2.3 |
+| Charts | fl_chart | ^1.1.1 |
+| Design System | as_design_system | git (main) |
+| UI | flutter_masked_text2, cupertino_icons | vários |
+| Utilities | uuid, path, share_plus, screenshot, package_info_plus, url_launcher, permission_handler | vários |

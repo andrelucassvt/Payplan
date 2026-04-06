@@ -76,6 +76,13 @@ class AppStrings {
   static var semAnuncio = 'semAnuncios'.i18n();
   static var removaTodosAnuncios = 'removaTodosAnuncios'.i18n();
   static var aproveiteSemAnuncios = 'aproveiteSemAnuncios'.i18n();
+  static var termoDeUsoEula = 'termoDeUsoEula'.i18n();
+  static var termoDePrivacidade = 'termoDePrivacidade'.i18n();
+  static var restaurarCompras = 'restaurarCompras'.i18n();
+  static var removerAnunciosPor = 'removerAnunciosPor'.i18n();
+  static var lojaIndisponivel = 'lojaIndisponivel'.i18n();
+  static var comprasRestauradas = 'comprasRestauradas'.i18n();
+  static var compraRealizada = 'compraRealizada'.i18n();
   static var graficos = 'graficos'.i18n();
   static var mensagem = 'mensagem'.i18n();
 

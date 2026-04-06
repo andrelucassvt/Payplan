@@ -9,6 +9,7 @@ import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
 import 'package:notes_app/src/features/home/widgets/home_total_widget.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
+import 'package:notes_app/src/util/service/ads/ad_config.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
@@ -148,18 +149,16 @@ class _HomeViewState extends State<HomeView> {
                                           homeCubit: widget.cubit,
                                         ),
                                         if (!user.isPlus) ...[
-                                          if (index == 0)
+                                          if (index == 0) ...[
                                             AdmobBannerWidget(
-                                              bannerId: Platform.isAndroid
-                                                  ? 'ca-app-pub-3652623512305285/7988227382'
-                                                  : 'ca-app-pub-3652623512305285/8865877557',
+                                              adUnitId: AdConfig.homeBanner1,
                                             ),
-                                          if (index == 1)
+                                          ],
+                                          if (index == 1) ...[
                                             AdmobBannerWidget(
-                                              bannerId: Platform.isAndroid
-                                                  ? 'ca-app-pub-3652623512305285/5263156340'
-                                                  : 'ca-app-pub-3652623512305285/1323911334',
+                                              adUnitId: AdConfig.homeBanner2,
                                             ),
+                                          ],
                                         ],
                                       ],
                                     );

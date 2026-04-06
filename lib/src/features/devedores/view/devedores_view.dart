@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
@@ -8,6 +6,7 @@ import 'package:notes_app/src/features/devedores/view/widgets/card_devedores_wid
 import 'package:notes_app/src/util/entity/user_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/helpers/devedores_helper.dart';
+import 'package:notes_app/src/util/service/ads/ad_config.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/admob_banner_widget.dart';
 import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
@@ -149,9 +148,7 @@ class _DevedoresViewState extends State<DevedoresView> {
                               if (!user.isPlus) ...[
                                 if (index == 0)
                                   AdmobBannerWidget(
-                                    bannerId: Platform.isAndroid
-                                        ? 'ca-app-pub-3652623512305285/2185608422'
-                                        : 'ca-app-pub-3652623512305285/9922591661',
+                                    adUnitId: AdConfig.devedoresBanner,
                                   ),
                               ],
                             ],

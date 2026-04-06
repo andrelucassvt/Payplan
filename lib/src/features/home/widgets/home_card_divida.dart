@@ -6,7 +6,7 @@ import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/colors/app_colors.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/entity/user_entity.dart';
-import 'package:notes_app/src/util/service/open_app_admob.dart';
+import 'package:notes_app/src/util/service/ads/app_open_ad_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:notes_app/src/util/widgets/glass_container_widget.dart';
 
@@ -221,7 +221,7 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
 
   void _editarFaturaBottomSheet(bool isPlus) {
     if (!isPlus) {
-      AppOpenAdManager.appOpenAd?.show();
+      AppOpenAdService.instance.show();
     }
     double valorModificado = 0;
     _faturaTextController.updateValue(faturaAtual!.valor);

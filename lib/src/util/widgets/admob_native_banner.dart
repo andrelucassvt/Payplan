@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,12 +6,13 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdmobNativeBanner extends StatefulWidget {
   const AdmobNativeBanner({
-    required this.bannerId,
+    required this.adUnitId,
     this.mainBackgroundColor,
     this.textColor,
     super.key,
   });
-  final String bannerId;
+
+  final String adUnitId;
   final Color? mainBackgroundColor;
   final Color? textColor;
 
@@ -19,22 +21,26 @@ class AdmobNativeBanner extends StatefulWidget {
 }
 
 class _AdmobNativeBannerState extends State<AdmobNativeBanner> {
-  NativeAd? nativeAd;
-  bool _nativeAdIsLoaded = false;
+  NativeAd? _nativeAd;
+  bool _isLoaded = false;
 
-  void loadAd() {
-    nativeAd = NativeAd(
-      adUnitId: widget.bannerId,
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  void _loadAd() {
+    _nativeAd = NativeAd(
+      adUnitId: widget.adUnitId,
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          debugPrint('$NativeAd loaded.');
-          setState(() {
-            _nativeAdIsLoaded = true;
-          });
+          if (mounted) setState(() => _isLoaded = true);
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('$NativeAd failed to load: $error');
+          log('AdmobNativeBanner: failed to load — $error');
           ad.dispose();
+          _nativeAd = null;
         },
       ),
       request: const AdRequest(),
@@ -48,7 +54,7 @@ class _AdmobNativeBannerState extends State<AdmobNativeBanner> {
           textColor: widget.textColor ?? Colors.white,
           backgroundColor: Platform.isAndroid
               ? widget.mainBackgroundColor
-              : Colors.white.withOpacity(.6),
+              : Colors.white.withValues(alpha: 0.6),
           style: NativeTemplateFontStyle.monospace,
           size: 16.0,
         ),
@@ -58,7 +64,6 @@ class _AdmobNativeBannerState extends State<AdmobNativeBanner> {
         ),
         secondaryTextStyle: NativeTemplateTextStyle(
           textColor: widget.textColor ?? Colors.white,
-          // backgroundColor: Colors.white,
           style: NativeTemplateFontStyle.bold,
           size: 16.0,
         ),
@@ -72,27 +77,22 @@ class _AdmobNativeBannerState extends State<AdmobNativeBanner> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    loadAd();
+  void dispose() {
+    _nativeAd?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (nativeAd != null && _nativeAdIsLoaded) {
-      return Padding(
-        padding: const EdgeInsets.only(
-          bottom: 10,
-        ),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.width * (91 / 355),
-          width: MediaQuery.of(context).size.width,
-          child: AdWidget(
-            ad: nativeAd!,
-          ),
-        ),
-      );
-    }
-    return SizedBox.shrink();
+    if (!_isLoaded || _nativeAd == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.width * (91 / 355),
+        width: MediaQuery.of(context).size.width,
+        child: AdWidget(ad: _nativeAd!),
+      ),
+    );
   }
 }

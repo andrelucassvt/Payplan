@@ -13,7 +13,7 @@ import 'package:notes_app/src/features/home/view/home_view.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
 import 'package:notes_app/src/util/helpers/devedores_helper.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
-import 'package:notes_app/src/util/service/open_app_admob.dart';
+import 'package:notes_app/src/util/service/ads/app_open_ad_service.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,7 +48,7 @@ class _HomeBaseState extends State<HomeBase> {
     _devedoresCubit.buscarDevedores();
     _verificarPermissaoNotificacao();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AppOpenAdManager().loadAd();
+      AppOpenAdService.instance.load();
     });
   }
 
