@@ -39,7 +39,7 @@ class DevedoresCubit extends Cubit<DevedoresState> {
 
     double totalValorDevedor = 0;
     for (var element in devedores) {
-      totalValorDevedor += element.valor;
+      totalValorDevedor += element.valorPendente;
     }
 
     emit(DevedoresSucesso(
@@ -151,6 +151,41 @@ class DevedoresCubit extends Cubit<DevedoresState> {
     prefs.setStringList(
       devedoresCampoShared,
       devedoresEncode,
+    );
+
+    buscarDevedores();
+  }
+
+  void toggleParcelaPaga(
+    String devedorId,
+    int numeroParcela,
+    bool pago,
+  ) async {
+    emit(DevedoresLoading(
+      devedores: state.devedores,
+      totalValorDevedor: state.totalValorDevedor,
+    ));
+    final prefs = await SharedPreferences.getInstance();
+    final resultDevedores = prefs.getStringList(devedoresCampoShared) ?? [];
+
+    List<DevedoresEntity> devedores = resultDevedores
+        .map((e) => DevedoresEntity.fromJson(json.decode(e)))
+        .toList();
+
+    devedores = devedores.map((devedor) {
+      if (devedor.id != devedorId) return devedor;
+      final parcelasAtualizadas = devedor.parcelas.map((parcela) {
+        if (parcela.numero == numeroParcela) {
+          return parcela.copyWith(pago: pago);
+        }
+        return parcela;
+      }).toList();
+      return devedor.copyWith(parcelas: parcelasAtualizadas);
+    }).toList();
+
+    prefs.setStringList(
+      devedoresCampoShared,
+      devedores.map((e) => json.encode(e.toMap())).toList(),
     );
 
     buscarDevedores();

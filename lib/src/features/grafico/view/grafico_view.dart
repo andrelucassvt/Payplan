@@ -55,8 +55,9 @@ class _GraficosViewState extends State<GraficosView>
   double get valorTotalFatura =>
       widget.dividas.map(_valorFatura).fold(0, (prev, el) => prev + el);
 
-  double get valorTotalDevedores =>
-      widget.devedores.map((e) => e.valor).fold(0, (prev, el) => prev + el);
+  double get valorTotalDevedores => widget.devedores
+      .map((e) => e.valorPendente)
+      .fold(0, (prev, el) => prev + el);
 
   @override
   void initState() {
@@ -235,6 +236,8 @@ class _GraficosViewState extends State<GraficosView>
                                   },
                                 ),
                                 sections: widget.devedores
+                                    .where((e) => e.valorPendente > 0)
+                                    .toList()
                                     .asMap()
                                     .entries
                                     .map(
@@ -242,7 +245,7 @@ class _GraficosViewState extends State<GraficosView>
                                         radius: _touchedDevedorIndex == e.key
                                             ? 96
                                             : 80,
-                                        value: e.value.valor,
+                                        value: e.value.valorPendente,
                                         title: '',
                                         color: Colors.primaries[
                                             e.key % Colors.primaries.length],
@@ -252,6 +255,8 @@ class _GraficosViewState extends State<GraficosView>
                               ),
                             ),
                             legend: widget.devedores
+                                .where((e) => e.valorPendente > 0)
+                                .toList()
                                 .asMap()
                                 .entries
                                 .map(
@@ -259,7 +264,7 @@ class _GraficosViewState extends State<GraficosView>
                                     color: Colors.primaries[
                                         e.key % Colors.primaries.length],
                                     label: e.value.nome,
-                                    value: e.value.valor.real,
+                                    value: e.value.valorPendente.real,
                                     isHighlighted:
                                         _touchedDevedorIndex == e.key,
                                   ),

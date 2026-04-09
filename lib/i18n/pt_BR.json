@@ -86,5 +86,9 @@
     "nome-sub-divida": "Nome do sub-item",
     "recorrente": "Recorrente",
     "unica-no-mes": "Única neste mês",
-    "nenhum-sub-item": "Nenhum sub-item adicionado"
+    "nenhum-sub-item": "Nenhum sub-item adicionado",
+    "parcelar-devedor": "Parcelar",
+    "quitado": "Quitado",
+    "ver-mais": "Ver mais (%s)",
+    "ver-menos": "Ver menos"
 }

@@ -86,6 +86,9 @@
     "nome-sub-divida": "Sub-item name",
     "recorrente": "Recurring",
     "unica-no-mes": "One-time this month",
-    "nenhum-sub-item": "No sub-items added"
-
+    "nenhum-sub-item": "No sub-items added",
+    "parcelar-devedor": "Split into installments",
+    "quitado": "Paid off",
+    "ver-mais": "See more (%s)",
+    "ver-menos": "See less"
 }

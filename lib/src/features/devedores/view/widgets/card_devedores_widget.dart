@@ -30,6 +30,7 @@ class CardDevedoresWidget extends StatefulWidget {
 
 class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
   DevedoresEntity get entity => widget.devedoresEntity;
+  bool _expandedParcelas = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,14 +75,32 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      entity.valor.real,
-                      style: const TextStyle(
+                      entity.valorPendente.real,
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: _kAccent,
+                        color: entity.parcelas.isNotEmpty &&
+                                entity.parcelas.every((p) => p.pago)
+                            ? const Color(0xFF10B981)
+                            : _kAccent,
                         letterSpacing: -0.3,
                       ),
                     ),
+                    if (entity.parcelas.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        entity.parcelas.every((p) => p.pago)
+                            ? AppStrings.quitado
+                            : '${entity.parcelas.where((p) => p.pago).length}/${entity.parcelas.length} quitadas',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: entity.parcelas.every((p) => p.pago)
+                              ? const Color(0xFF10B981)
+                              : cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -173,6 +192,70 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
           ],
           // — Divider + action buttons —
           const SizedBox(height: 12),
+          if (entity.parcelas.isNotEmpty) ...[
+            Divider(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              height: 1,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+              child: Column(
+                children: [
+                  ...(_expandedParcelas
+                          ? entity.parcelas
+                          : entity.parcelas.take(3).toList())
+                      .map(
+                    (parcela) => _ParcelaRow(
+                      parcela: parcela,
+                      total: entity.parcelas.length,
+                      onToggle: (value) =>
+                          widget.devedoresCubit.toggleParcelaPaga(
+                        entity.id,
+                        parcela.numero,
+                        value,
+                      ),
+                    ),
+                  ),
+                  if (entity.parcelas.length > 3) ...[
+                    const Divider(height: 8, thickness: 0.5),
+                    GestureDetector(
+                      onTap: () => setState(
+                        () => _expandedParcelas = !_expandedParcelas,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _expandedParcelas
+                                  ? AppStrings.verMenos
+                                  : AppStrings.verMais(
+                                      entity.parcelas.length - 3,
+                                    ),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _kAccent,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              _expandedParcelas
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
+                              size: 16,
+                              color: _kAccent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
           Divider(
               color: Theme.of(context).colorScheme.outlineVariant, height: 1),
           const SizedBox(height: 10),
@@ -184,7 +267,7 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
                 color: const Color(0xFF10B981),
                 onTap: () => Share.share(
                   '${AppStrings.dividasPendentes}\n\n${entity.nome}\n'
-                  '${AppStrings.valor}: ${entity.valor.real}'
+                  '${AppStrings.valor}: ${entity.valorPendente.real}'
                   '${entity.pix == null ? '' : '\n\nChave PIX: ${entity.pix}'}'
                   '\n\n${entity.message ?? ''}',
                 ),
@@ -280,6 +363,69 @@ class _CardDevedoresWidgetState extends State<CardDevedoresWidget> {
         );
       }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+class _ParcelaRow extends StatelessWidget {
+  const _ParcelaRow({
+    required this.parcela,
+    required this.total,
+    required this.onToggle,
+  });
+
+  final ParcelaDevedorEntity parcela;
+  final int total;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.parcelaNumero(parcela.numero, total),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: parcela.pago ? cs.onSurfaceVariant : cs.onSurface,
+                    decoration:
+                        parcela.pago ? TextDecoration.lineThrough : null,
+                    decorationColor: cs.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  parcela.valor.real,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: parcela.pago ? cs.onSurfaceVariant : _kAccent,
+                    decoration:
+                        parcela.pago ? TextDecoration.lineThrough : null,
+                    decorationColor: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: parcela.pago,
+              activeColor: const Color(0xFF10B981),
+              onChanged: onToggle,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

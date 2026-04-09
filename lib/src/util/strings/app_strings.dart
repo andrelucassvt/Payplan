@@ -93,6 +93,10 @@ class AppStrings {
   static var recorrente = 'recorrente'.i18n();
   static var unicaNoMes = 'unica-no-mes'.i18n();
   static var nenhumSubItem = 'nenhum-sub-item'.i18n();
+  static var parcelarDevedor = 'parcelar-devedor'.i18n();
+  static var quitado = 'quitado'.i18n();
+  static var verMenos = 'ver-menos'.i18n();
+  static String verMais(int count) => 'ver-mais'.i18n([count.toString()]);
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';
