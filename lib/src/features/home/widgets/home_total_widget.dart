@@ -15,131 +15,216 @@ class HomeTotalWidget extends StatefulWidget {
   const HomeTotalWidget({
     required this.cubit,
     required this.state,
+    required this.isCollapsed,
     super.key,
   });
   final HomeCubit cubit;
   final HomeState state;
+  final bool isCollapsed;
 
   @override
   State<HomeTotalWidget> createState() => _HomeTotalWidgetState();
 }
 
-class _HomeTotalWidgetState extends State<HomeTotalWidget> {
+class _HomeTotalWidgetState extends State<HomeTotalWidget>
+    with SingleTickerProviderStateMixin {
   HomeCubit get _cubit => widget.cubit;
   HomeState get state => widget.state;
+
+  late final AnimationController _controller;
+  late final CurvedAnimation _curvedAnim;
+  late final Animation<double> _fadeAnim;
+  late final Animation<double> _sizeAnim;
+  late final Animation<double> _fontAnim;
+  late final Animation<AlignmentGeometry> _alignAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _curvedAnim = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _fadeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_curvedAnim);
+    _sizeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_curvedAnim);
+    _fontAnim = Tween<double>(begin: 36.0, end: 24.0).animate(_curvedAnim);
+    _alignAnim = AlignmentTween(
+      begin: Alignment.centerLeft,
+      end: Alignment.center,
+    ).animate(_curvedAnim);
+  }
+
+  @override
+  void didUpdateWidget(HomeTotalWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCollapsed != oldWidget.isCollapsed) {
+      if (widget.isCollapsed) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _curvedAnim.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF5C5FEF).withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _TopRow(cubit: _cubit, state: state),
-          const SizedBox(height: 20),
-          Text(
-            AppStrings.total,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            state.totalGastos.real,
-            maxLines: 2,
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => _showModalDesconto(state.totalGastos),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.remove_circle_outline,
-                        size: 16,
-                        color: _kAccent,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        AppStrings.desconto,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: _kAccent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF5C5FEF).withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
-              const SizedBox(width: 8),
-              ValueListenableBuilder<ThemeMode>(
-                valueListenable: ThemeController.themeMode,
-                builder: (context, _, __) {
-                  final isDark = ThemeController.isDark(context);
-                  return GestureDetector(
-                    onTap: () => ThemeController.toggle(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        isDark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        size: 16,
-                        color: _kAccent,
-                      ),
-                    ),
-                  );
-                },
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRect(
+                child: SizeTransition(
+                  sizeFactor: _sizeAnim,
+                  axisAlignment: -1.0,
+                  child: FadeTransition(
+                    opacity: _fadeAnim,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _TopRow(cubit: _cubit, state: state),
+                        const SizedBox(height: 20),
+                        Text(
+                          AppStrings.total,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: _alignAnim.value,
+                child: Text(
+                  state.totalGastos.real,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: _fontAnim.value,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              ClipRect(
+                child: SizeTransition(
+                  sizeFactor: _sizeAnim,
+                  axisAlignment: 1.0,
+                  child: FadeTransition(
+                    opacity: _fadeAnim,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () =>
+                                  _showModalDesconto(state.totalGastos),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.remove_circle_outline,
+                                      size: 16,
+                                      color: _kAccent,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      AppStrings.desconto,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: _kAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ValueListenableBuilder<ThemeMode>(
+                              valueListenable: ThemeController.themeMode,
+                              builder: (context, _, __) {
+                                final isDark = ThemeController.isDark(context);
+                                return GestureDetector(
+                                  onTap: () => ThemeController.toggle(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      isDark
+                                          ? Icons.light_mode_outlined
+                                          : Icons.dark_mode_outlined,
+                                      size: 16,
+                                      color: _kAccent,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

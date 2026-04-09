@@ -28,6 +28,26 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
+  bool _isCollapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final shouldCollapse = widget.scrollController.offset > 60;
+    if (shouldCollapse != _isCollapsed) {
+      setState(() => _isCollapsed = shouldCollapse);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +94,7 @@ class _HomeViewState extends State<HomeView> {
                 HomeTotalWidget(
                   cubit: widget.cubit,
                   state: state,
+                  isCollapsed: _isCollapsed,
                 ),
                 const SizedBox(height: 8),
                 Padding(
