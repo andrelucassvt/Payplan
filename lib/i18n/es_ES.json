@@ -17,6 +17,7 @@
     "valor-parcela": "Valor de la cuota",
     "nao-pode-modificar": "*No se puede modificar más tarde",
     "quantidade-parcelas": "Cantidad de cuotas",
+    "parcela-numero": "Cuota %s de %s",
     "digite-o-nome-carto": "Ingrese el nombre de la tarjeta...",
     "digite-o-nome-divida": "Ingrese el nombre de la deuda...",
     "digite-o-valor-fatura": "Ingrese el monto de la factura",

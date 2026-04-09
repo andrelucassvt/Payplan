@@ -13,6 +13,7 @@
     "devedores" : "Debtors",
     "permitirNotificacoes": "Allow notifications",
     "quantidade-parcelas": "Number of installments",
+    "parcela-numero": "Installment %s of %s",
     "valor-parcela": "Installment value",
     "nao-pode-modificar": "*Cannot be modified later",
     "salvar": "Save",

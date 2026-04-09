@@ -60,6 +60,21 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
     return result[0];
   }
 
+  int? get _numeroParcela {
+    if (widget.dividaEntity.mensal) return null;
+    final faturas = widget.dividaEntity.faturas;
+    final atual = faturaAtual;
+    if (faturas.isEmpty || atual == null) return null;
+    final sorted = [...faturas]..sort((a, b) {
+        if (a.ano != b.ano) return a.ano.compareTo(b.ano);
+        return a.mes.compareTo(b.mes);
+      });
+    final idx = sorted.indexWhere(
+      (f) => f.ano == atual.ano && f.mes == atual.mes,
+    );
+    return idx == -1 ? null : idx + 1;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -149,15 +164,37 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      widget.dividaEntity.nome,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          widget.dividaEntity.nome,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (!widget.dividaEntity.mensal &&
+                            _numeroParcela != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              AppStrings.parcelaNumero(
+                                _numeroParcela!,
+                                widget.dividaEntity.faturas.length,
+                              ),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.80),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),

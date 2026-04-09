@@ -32,7 +32,17 @@ class GraficosView extends StatefulWidget {
   State<GraficosView> createState() => _GraficosViewState();
 }
 
-class _GraficosViewState extends State<GraficosView> {
+class _GraficosViewState extends State<GraficosView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _entranceController;
+  late final Animation<double> _fadeCard1;
+  late final Animation<Offset> _slideCard1;
+  late final Animation<double> _fadeCard2;
+  late final Animation<Offset> _slideCard2;
+
+  int _touchedDividaIndex = -1;
+  int _touchedDevedorIndex = -1;
+
   HomeState get state => widget.homeCubit.state;
 
   double _valorFatura(DividaEntity e) {
@@ -49,7 +59,57 @@ class _GraficosViewState extends State<GraficosView> {
       widget.devedores.map((e) => e.valor).fold(0, (prev, el) => prev + el);
 
   @override
+  void initState() {
+    super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+
+    _fadeCard1 = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+      ),
+    );
+    _slideCard1 = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+      ),
+    );
+    _fadeCard2 = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
+      ),
+    );
+    _slideCard2 = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _entranceController.forward();
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dividasFiltered =
+        widget.dividas.where((e) => _valorFatura(e) > 0).toList();
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -66,7 +126,7 @@ class _GraficosViewState extends State<GraficosView> {
         title: Text(AppStrings.graficoGastos),
       ),
       body: valorTotalFatura == 0 && valorTotalDevedores == 0
-          ? _EmptyState()
+          ? const _EmptyState()
           : SafeArea(
               bottom: false,
               child: SingleChildScrollView(
@@ -74,87 +134,139 @@ class _GraficosViewState extends State<GraficosView> {
                 child: Column(
                   children: [
                     if (valorTotalFatura != 0)
-                      _ChartCard(
-                        title:
-                            '${AppStrings.dividas} · ${state.mesAtual.nome} ${state.anoAtual}',
-                        total: valorTotalFatura.real,
-                        onShare: () =>
-                            _share(widget.screenshotDividasController),
-                        screenshotController:
-                            widget.screenshotDividasController,
-                        screenshotBackground:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        chart: PieChart(
-                          PieChartData(
-                            sectionsSpace: 3,
-                            centerSpaceRadius: 40,
-                            sections: widget.dividas
-                                .where((e) => _valorFatura(e) > 0)
+                      FadeTransition(
+                        opacity: _fadeCard1,
+                        child: SlideTransition(
+                          position: _slideCard1,
+                          child: _ChartCard(
+                            title:
+                                '${AppStrings.dividas} · ${state.mesAtual.nome} ${state.anoAtual}',
+                            total: valorTotalFatura,
+                            onShare: () =>
+                                _share(widget.screenshotDividasController),
+                            screenshotController:
+                                widget.screenshotDividasController,
+                            screenshotBackground:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            chart: PieChart(
+                              PieChartData(
+                                sectionsSpace: 3,
+                                centerSpaceRadius: 40,
+                                pieTouchData: PieTouchData(
+                                  touchCallback: (event, pieTouchResponse) {
+                                    setState(() {
+                                      if (!event.isInterestedForInteractions ||
+                                          pieTouchResponse == null ||
+                                          pieTouchResponse.touchedSection ==
+                                              null) {
+                                        _touchedDividaIndex = -1;
+                                        return;
+                                      }
+                                      _touchedDividaIndex = pieTouchResponse
+                                          .touchedSection!.touchedSectionIndex;
+                                    });
+                                  },
+                                ),
+                                sections: dividasFiltered
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) => PieChartSectionData(
+                                        radius: _touchedDividaIndex == entry.key
+                                            ? 96
+                                            : 80,
+                                        value: _valorFatura(entry.value),
+                                        title: '',
+                                        color: entry.value.cor,
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                            legend: dividasFiltered
+                                .asMap()
+                                .entries
                                 .map(
-                                  (e) => PieChartSectionData(
-                                    radius: 80,
-                                    value: _valorFatura(e),
-                                    title: '',
-                                    color: e.cor,
+                                  (entry) => _LegendItem(
+                                    color: entry.value.cor,
+                                    label: entry.value.nome,
+                                    value: _valorFatura(entry.value).real,
+                                    isHighlighted:
+                                        _touchedDividaIndex == entry.key,
                                   ),
                                 )
                                 .toList(),
                           ),
                         ),
-                        legend: widget.dividas
-                            .where((e) => _valorFatura(e) > 0)
-                            .map(
-                              (e) => _LegendItem(
-                                color: e.cor,
-                                label: e.nome,
-                                value: _valorFatura(e).real,
-                              ),
-                            )
-                            .toList(),
                       ),
                     if (valorTotalFatura != 0 && valorTotalDevedores != 0)
                       const SizedBox(height: 16),
                     if (valorTotalDevedores != 0)
-                      _ChartCard(
-                        title: AppStrings.devedores,
-                        total: valorTotalDevedores.real,
-                        onShare: () =>
-                            _share(widget.screenshotDevedoresController),
-                        screenshotController:
-                            widget.screenshotDevedoresController,
-                        screenshotBackground:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        chart: PieChart(
-                          PieChartData(
-                            sectionsSpace: 3,
-                            centerSpaceRadius: 40,
-                            sections: widget.devedores
+                      FadeTransition(
+                        opacity: _fadeCard2,
+                        child: SlideTransition(
+                          position: _slideCard2,
+                          child: _ChartCard(
+                            title: AppStrings.devedores,
+                            total: valorTotalDevedores,
+                            onShare: () =>
+                                _share(widget.screenshotDevedoresController),
+                            screenshotController:
+                                widget.screenshotDevedoresController,
+                            screenshotBackground:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            chart: PieChart(
+                              PieChartData(
+                                sectionsSpace: 3,
+                                centerSpaceRadius: 40,
+                                pieTouchData: PieTouchData(
+                                  touchCallback: (event, pieTouchResponse) {
+                                    setState(() {
+                                      if (!event.isInterestedForInteractions ||
+                                          pieTouchResponse == null ||
+                                          pieTouchResponse.touchedSection ==
+                                              null) {
+                                        _touchedDevedorIndex = -1;
+                                        return;
+                                      }
+                                      _touchedDevedorIndex = pieTouchResponse
+                                          .touchedSection!.touchedSectionIndex;
+                                    });
+                                  },
+                                ),
+                                sections: widget.devedores
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (e) => PieChartSectionData(
+                                        radius: _touchedDevedorIndex == e.key
+                                            ? 96
+                                            : 80,
+                                        value: e.value.valor,
+                                        title: '',
+                                        color: Colors.primaries[
+                                            e.key % Colors.primaries.length],
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                            legend: widget.devedores
                                 .asMap()
                                 .entries
                                 .map(
-                                  (e) => PieChartSectionData(
-                                    radius: 80,
-                                    value: e.value.valor,
-                                    title: '',
+                                  (e) => _LegendItem(
                                     color: Colors.primaries[
                                         e.key % Colors.primaries.length],
+                                    label: e.value.nome,
+                                    value: e.value.valor.real,
+                                    isHighlighted:
+                                        _touchedDevedorIndex == e.key,
                                   ),
                                 )
                                 .toList(),
                           ),
                         ),
-                        legend: widget.devedores
-                            .asMap()
-                            .entries
-                            .map(
-                              (e) => _LegendItem(
-                                color: Colors
-                                    .primaries[e.key % Colors.primaries.length],
-                                label: e.value.nome,
-                                value: e.value.valor.real,
-                              ),
-                            )
-                            .toList(),
                       ),
                   ],
                 ),
@@ -190,7 +302,7 @@ class _ChartCard extends StatelessWidget {
   });
 
   final String title;
-  final String total;
+  final double total;
   final Widget chart;
   final List<Widget> legend;
   final VoidCallback onShare;
@@ -251,13 +363,18 @@ class _ChartCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(
-              total,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-                letterSpacing: -0.5,
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: total),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeOut,
+              builder: (context, value, _) => Text(
+                value.real,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -281,22 +398,34 @@ class _LegendItem extends StatelessWidget {
     required this.color,
     required this.label,
     required this.value,
+    this.isHighlighted = false,
   });
 
   final Color color;
   final String label;
   final String value;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.symmetric(
+        vertical: 5,
+        horizontal: isHighlighted ? 8 : 0,
+      ),
+      decoration: BoxDecoration(
+        color:
+            isHighlighted ? color.withValues(alpha: 0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         children: [
-          Container(
-            width: 12,
-            height: 12,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: isHighlighted ? 14 : 12,
+            height: isHighlighted ? 14 : 12,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(3),
@@ -304,18 +433,24 @@ class _LegendItem extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 13, color: cs.onSurface),
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: isHighlighted ? 14 : 13,
+                fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
+                color: cs.onSurface,
+              ),
+              child: Text(label),
             ),
           ),
-          Text(
-            value,
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              fontSize: 13,
+              fontSize: isHighlighted ? 14 : 13,
               fontWeight: FontWeight.w600,
-              color: cs.onSurface,
+              color: isHighlighted ? color : cs.onSurface,
             ),
+            child: Text(value),
           ),
         ],
       ),
