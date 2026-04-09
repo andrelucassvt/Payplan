@@ -25,7 +25,7 @@ platform :ios do
 
   desc "Upload a new build to TestFlight"
   lane :prod do
-    sh "flutter clean && flutter pub get"
+    # sh "flutter clean && flutter pub get"
     sh "rm -f Podfile.lock && pod install"
     sh "flutter build ipa --release"
     app_store_connect_api_key(
