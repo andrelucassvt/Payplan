@@ -85,7 +85,7 @@ class _OrcamentoViewState extends State<OrcamentoView> {
                       : ListView.builder(
                           itemCount: state.orcamentos.length,
                           controller: widget.scrollController,
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 220),
                           itemBuilder: (context, index) {
                             return ValueListenableBuilder(
                               valueListenable: UserController.user,
