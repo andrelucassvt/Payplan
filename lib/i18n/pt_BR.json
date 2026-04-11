@@ -112,5 +112,9 @@
     "tipo-orcamento": "Tipo de orçamento",
     "orcamento-valor-fixo": "Valor fixo",
     "orcamento-com-subitens": "Com sub-itens",
-    "orcamento-com-subitens-desc": "O total será calculado pela soma dos sub-itens adicionados no card"
+    "orcamento-com-subitens-desc": "O total será calculado pela soma dos sub-itens adicionados no card",
+    "marcar-como-concluido": "Concluir",
+    "orcamento-concluido": "Orçamento concluído",
+    "em-andamento": "Em andamento",
+    "valor-total": "Valor total"
 }

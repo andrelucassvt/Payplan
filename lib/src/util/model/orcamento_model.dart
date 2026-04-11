@@ -6,6 +6,7 @@ class SubItemOrcamentoModel extends SubItemOrcamentoEntity {
     required super.id,
     required super.nome,
     required super.valor,
+    super.concluido = false,
   });
 
   factory SubItemOrcamentoModel.fromJson(Map<String, dynamic> json) {
@@ -13,6 +14,7 @@ class SubItemOrcamentoModel extends SubItemOrcamentoEntity {
       id: json['id'] as String,
       nome: json['nome'] as String,
       valor: (json['valor'] as num).toDouble(),
+      concluido: json['concluido'] as bool? ?? false,
     );
   }
 
@@ -21,6 +23,7 @@ class SubItemOrcamentoModel extends SubItemOrcamentoEntity {
       'id': id,
       'nome': nome,
       'valor': valor,
+      'concluido': concluido,
     };
   }
 
@@ -29,6 +32,7 @@ class SubItemOrcamentoModel extends SubItemOrcamentoEntity {
       id: entity.id,
       nome: entity.nome,
       valor: entity.valor,
+      concluido: entity.concluido,
     );
   }
 }
@@ -40,6 +44,7 @@ class OrcamentoModel extends OrcamentoEntity {
     required super.cor,
     required super.valor,
     super.subItens = const [],
+    super.concluido = false,
   });
 
   factory OrcamentoModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +53,7 @@ class OrcamentoModel extends OrcamentoEntity {
       nome: json['nome'] as String,
       cor: Color(json['cor'] as int),
       valor: (json['valor'] as num).toDouble(),
+      concluido: json['concluido'] as bool? ?? false,
       subItens: ((json['sub-itens'] as List<dynamic>?) ?? [])
           .map((e) => SubItemOrcamentoModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -60,6 +66,7 @@ class OrcamentoModel extends OrcamentoEntity {
       'nome': nome,
       'cor': cor.toARGB32(),
       'valor': valor,
+      'concluido': concluido,
       'sub-itens': subItens
           .map((s) => SubItemOrcamentoModel.fromEntity(s).toJson())
           .toList(),
@@ -72,6 +79,7 @@ class OrcamentoModel extends OrcamentoEntity {
       nome: entity.nome,
       cor: entity.cor,
       valor: entity.valor,
+      concluido: entity.concluido,
       subItens: entity.subItens,
     );
   }

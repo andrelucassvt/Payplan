@@ -112,5 +112,9 @@
     "tipo-orcamento": "Budget type",
     "orcamento-valor-fixo": "Fixed value",
     "orcamento-com-subitens": "With sub-items",
-    "orcamento-com-subitens-desc": "The total will be calculated from the sum of sub-items added on the card"
+    "orcamento-com-subitens-desc": "The total will be calculated from the sum of sub-items added on the card",
+    "marcar-como-concluido": "Done",
+    "orcamento-concluido": "Budget completed",
+    "em-andamento": "In progress",
+    "valor-total": "Total value"
 }

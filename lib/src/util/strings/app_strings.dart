@@ -120,6 +120,10 @@ class AppStrings {
   static var orcamentoValorFixo = 'orcamento-valor-fixo'.i18n();
   static var orcamentoComSubItens = 'orcamento-com-subitens'.i18n();
   static var orcamentoComSubItensDesc = 'orcamento-com-subitens-desc'.i18n();
+  static var marcarComoConcluido = 'marcar-como-concluido'.i18n();
+  static var orcamentoConcluido = 'orcamento-concluido'.i18n();
+  static var emAndamento = 'em-andamento'.i18n();
+  static var valorTotal = 'valor-total'.i18n();
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';

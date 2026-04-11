@@ -133,4 +133,30 @@ class OrcamentoCubit extends Cubit<OrcamentoState> {
       ),
     );
   }
+
+  Future<void> toggleSubItemConcluido(
+    OrcamentoEntity orcamento,
+    String subItemId,
+  ) async {
+    final updatedSubItens = orcamento.subItens.map((s) {
+      if (s.id == subItemId) return s.copyWith(concluido: !s.concluido);
+      return s;
+    }).toList();
+    await atualizarOrcamento(
+      orcamento.copyWith(subItens: updatedSubItens),
+    );
+  }
+
+  Future<void> toggleOrcamentoConcluido(OrcamentoEntity orcamento) async {
+    final novoConcluido = !orcamento.concluido;
+    final updatedSubItens = orcamento.subItens
+        .map((s) => s.copyWith(concluido: novoConcluido))
+        .toList();
+    await atualizarOrcamento(
+      orcamento.copyWith(
+        concluido: novoConcluido,
+        subItens: updatedSubItens,
+      ),
+    );
+  }
 }

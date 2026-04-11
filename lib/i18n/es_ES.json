@@ -112,5 +112,9 @@
     "tipo-orcamento": "Tipo de presupuesto",
     "orcamento-valor-fixo": "Valor fijo",
     "orcamento-com-subitens": "Con sub-ítems",
-    "orcamento-com-subitens-desc": "El total se calculará a partir de la suma de los sub-ítems agregados en la tarjeta"
+    "orcamento-com-subitens-desc": "El total se calculará a partir de la suma de los sub-ítems agregados en la tarjeta",
+    "marcar-como-concluido": "Hecho",
+    "orcamento-concluido": "Presupuesto completado",
+    "em-andamento": "En progreso",
+    "valor-total": "Valor total"
 }
