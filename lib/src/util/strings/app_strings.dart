@@ -53,6 +53,11 @@ class AppStrings {
   static var naoPaga = 'nao-paga'.i18n();
   static var dividaExterna = 'divida-externa'.i18n();
   static var saldoRestante = 'saldo-restante'.i18n();
+  static var salarioFixo = 'salario-fixo'.i18n();
+  static var configureSalarioDesc = 'configure-salario-desc'.i18n();
+  static var totalDividas = 'total-dividas'.i18n();
+  static var removerSalario = 'remover-salario'.i18n();
+  static var salvarSalario = 'salvar-salario'.i18n();
   static var valorDesseMes = 'valor-desse-mes'.i18n();
   static var salario = 'salario'.i18n();
   static var adicioneOValorTotalDescontado =

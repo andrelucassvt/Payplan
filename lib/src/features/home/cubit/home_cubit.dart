@@ -22,6 +22,7 @@ class HomeCubit extends Cubit<HomeState> {
             isDividas: true,
             dividas: [],
             totalGastos: 0,
+            salarioFixo: 0,
           ),
         );
 
@@ -57,6 +58,7 @@ class HomeCubit extends Cubit<HomeState> {
               isDividas: state.isDividas,
               dividas: state.dividas,
               totalGastos: state.totalGastos,
+              salarioFixo: state.salarioFixo,
             ),
           );
         }
@@ -74,6 +76,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -99,6 +102,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -129,6 +133,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -149,6 +154,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
@@ -163,6 +169,7 @@ class HomeCubit extends Cubit<HomeState> {
           soma + divida.totalNaoPagoDoMes(state.anoAtual, state.mesAtual.id),
     );
 
+    final salarioFixo = prefs.getDouble('salario_fixo') ?? 0.0;
     emit(
       HomeDividasSucesso(
         mesAtual: state.mesAtual,
@@ -170,6 +177,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: dividas.isEmpty ? state.dividas : dividas,
         totalGastos: somaGastos,
+        salarioFixo: salarioFixo,
       ),
     );
   }
@@ -182,6 +190,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: !state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
   }
@@ -194,6 +203,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     buscarDividas();
@@ -207,6 +217,7 @@ class HomeCubit extends Cubit<HomeState> {
         isDividas: state.isDividas,
         dividas: state.dividas,
         totalGastos: state.totalGastos,
+        salarioFixo: state.salarioFixo,
       ),
     );
     buscarDividas();
@@ -239,6 +250,21 @@ class HomeCubit extends Cubit<HomeState> {
       divida.copyWith(
         subDividas:
             divida.subDividas.where((s) => s.id != subDividaId).toList(),
+      ),
+    );
+  }
+
+  Future<void> salvarSalario(double valor) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('salario_fixo', valor);
+    emit(
+      HomeDividasSucesso(
+        mesAtual: state.mesAtual,
+        anoAtual: state.anoAtual,
+        isDividas: state.isDividas,
+        dividas: state.dividas,
+        totalGastos: state.totalGastos,
+        salarioFixo: valor,
       ),
     );
   }

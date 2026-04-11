@@ -153,6 +153,34 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget>
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
+                        if (state.salarioFixo > 0) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppStrings.saldoRestante,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                (state.salarioFixo - state.totalGastos).real,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      (state.salarioFixo - state.totalGastos) >=
+                                              0
+                                          ? const Color(0xFF10B981)
+                                          : const Color(0xFFEF4444),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -171,13 +199,13 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
-                                      Icons.remove_circle_outline,
+                                      Icons.account_balance_wallet_outlined,
                                       size: 16,
                                       color: _kAccent,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      AppStrings.desconto,
+                                      AppStrings.salario,
                                       style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
@@ -229,160 +257,264 @@ class _HomeTotalWidgetState extends State<HomeTotalWidget>
   }
 
   void _showModalDesconto(double valorDesseMes) {
-    final faturaTextController = MoneyMaskedTextController(initialValue: 0.00);
-    double valorDigitado = 0.0;
+    final faturaTextController =
+        MoneyMaskedTextController(initialValue: state.salarioFixo);
+    double valorDigitado = state.salarioFixo;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        final cs = Theme.of(context).colorScheme;
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: cs.outlineVariant,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final cs = Theme.of(context).colorScheme;
+            final saldo = valorDigitado - valorDesseMes;
+            final saldoPositivo = saldo >= 0;
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  AppStrings.adicioneOValorTotalDescontado,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  AppStrings.valorDesseMes,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    valorDesseMes.real,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  AppStrings.digiteOSaldoQueSeraDescontado,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: faturaTextController,
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(
-                          color: cs.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: AppStrings.salario,
-                          labelStyle: TextStyle(color: cs.onSurfaceVariant),
-                          filled: true,
-                          fillColor: cs.surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: _kAccent,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            final filtro1 = value.replaceAll('.', '');
-                            valorDigitado =
-                                double.parse(filtro1.replaceAll(',', '.'));
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () {
-                        final resultado = valorDigitado - valorDesseMes;
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            title: Text(AppStrings.saldoRestante),
-                            content: Text(
-                              (resultado * -1).real,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                color: Color(0xFF10B981),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                    Center(
                       child: Container(
-                        width: 52,
-                        height: 58,
+                        width: 36,
+                        height: 4,
                         decoration: BoxDecoration(
-                          color: _kAccent,
-                          borderRadius: BorderRadius.circular(12),
+                          color: cs.outlineVariant,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        child: const Icon(Icons.check, color: Colors.white),
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _kAccent.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet_outlined,
+                            color: _kAccent,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppStrings.salarioFixo,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                AppStrings.configureSalarioDesc,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    TextFormField(
+                      controller: faturaTextController,
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: AppStrings.salario,
+                        labelStyle: TextStyle(color: cs.onSurfaceVariant),
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(
+                            color: _kAccent,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 18,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          final filtro1 = value.replaceAll('.', '');
+                          valorDigitado =
+                              double.tryParse(filtro1.replaceAll(',', '.')) ??
+                                  0.0;
+                        } else {
+                          valorDigitado = 0.0;
+                        }
+                        setModalState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          _PreviewRow(
+                            label: AppStrings.salario,
+                            value: valorDigitado.real,
+                            valueColor: cs.onSurface,
+                          ),
+                          const SizedBox(height: 10),
+                          _PreviewRow(
+                            label: AppStrings.totalDividas,
+                            value: '- ${valorDesseMes.real}',
+                            valueColor: const Color(0xFFEF4444),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Divider(
+                              color: cs.outlineVariant,
+                              height: 1,
+                            ),
+                          ),
+                          _PreviewRow(
+                            label: AppStrings.saldoRestante,
+                            value: saldo.real,
+                            valueColor: saldoPositivo
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                            bold: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _cubit.salvarSalario(valorDigitado);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _kAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          AppStrings.salvarSalario,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (state.salarioFixo > 0) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: TextButton(
+                          onPressed: () {
+                            _cubit.salvarSalario(0.0);
+                            Navigator.pop(context);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFFEF4444),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            AppStrings.removerSalario,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
+    );
+  }
+}
+
+class _PreviewRow extends StatelessWidget {
+  const _PreviewRow({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.bold = false,
+  });
+
+  final String label;
+  final String value;
+  final Color valueColor;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: bold ? 14 : 13,
+            fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: bold ? 15 : 13,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }
