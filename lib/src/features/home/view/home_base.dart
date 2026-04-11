@@ -9,6 +9,9 @@ import 'package:notes_app/src/features/grafico/view/grafico_view.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/view/home_view.dart';
 import 'package:notes_app/src/features/nova_divida/view/nova_divida_view.dart';
+import 'package:notes_app/src/features/novo_orcamento/view/novo_orcamento_view.dart';
+import 'package:notes_app/src/features/orcamento/cubit/orcamento_cubit.dart';
+import 'package:notes_app/src/features/orcamento/view/orcamento_view.dart';
 import 'package:notes_app/src/util/helpers/devedores_helper.dart';
 import 'package:notes_app/src/util/service/notification_service.dart';
 import 'package:notes_app/src/util/service/ads/app_open_ad_service.dart';
@@ -28,11 +31,12 @@ class HomeBase extends StatefulWidget {
 class _HomeBaseState extends State<HomeBase> {
   final _homeCubit = HomeCubit();
   final _devedoresCubit = DevedoresCubit();
+  final _orcamentoCubit = OrcamentoCubit();
 
   int _selectedIndex = 0;
 
   final List<ScrollController> _scrollControllers =
-      List.generate(3, (index) => ScrollController());
+      List.generate(4, (index) => ScrollController());
 
   final screenshotDividasController = ScreenshotController();
   final screenshotDevedoresController = ScreenshotController();
@@ -44,6 +48,7 @@ class _HomeBaseState extends State<HomeBase> {
     _homeCubit.buscarIsPlus();
     _homeCubit.verificarVersao();
     _devedoresCubit.buscarDevedores();
+    _orcamentoCubit.buscarOrcamentos();
     _verificarPermissaoNotificacao();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppOpenAdService.instance.load();
@@ -98,6 +103,10 @@ class _HomeBaseState extends State<HomeBase> {
             devedoresCubit: _devedoresCubit,
             scrollController: _scrollControllers[1],
           ),
+          OrcamentoView(
+            cubit: _orcamentoCubit,
+            scrollController: _scrollControllers[2],
+          ),
           BlocBuilder<DevedoresCubit, DevedoresState>(
             bloc: _devedoresCubit,
             builder: (context, stateDevedores) {
@@ -127,7 +136,8 @@ class _HomeBaseState extends State<HomeBase> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) async {
           if (index == 1) _devedoresCubit.buscarDevedores();
-          if (index == 2) {
+          if (index == 2) _orcamentoCubit.buscarOrcamentos();
+          if (index == 3) {
             _devedoresCubit.buscarDevedores();
             _homeCubit.buscarDividas();
           }
@@ -145,6 +155,11 @@ class _HomeBaseState extends State<HomeBase> {
             label: AppStrings.devedores,
           ),
           NavigationDestination(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: const Icon(Icons.account_balance_wallet),
+            label: AppStrings.orcamentos,
+          ),
+          NavigationDestination(
             icon: const Icon(Icons.bar_chart_outlined),
             selectedIcon: const Icon(Icons.bar_chart),
             label: AppStrings.graficos,
@@ -155,7 +170,7 @@ class _HomeBaseState extends State<HomeBase> {
   }
 
   Widget _buildFab(BuildContext context) {
-    if (_selectedIndex == 2) {
+    if (_selectedIndex == 3) {
       return FloatingActionButton(
         onPressed: () => _shareScreenshots(context),
         backgroundColor: const Color(0xFF5C5FEF),
@@ -171,6 +186,14 @@ class _HomeBaseState extends State<HomeBase> {
             context,
             MaterialPageRoute(
               builder: (_) => NovaDividaView(homeCubit: _homeCubit),
+            ),
+          );
+        } else if (_selectedIndex == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  NovoOrcamentoView(orcamentoCubit: _orcamentoCubit),
             ),
           );
         } else {

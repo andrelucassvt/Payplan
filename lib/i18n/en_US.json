@@ -95,5 +95,22 @@
     "parcelar-devedor": "Split into installments",
     "quitado": "Paid off",
     "ver-mais": "See more (%s)",
-    "ver-menos": "See less"
+    "ver-menos": "See less",
+    "orcamentos": "Budgets",
+    "novo-orcamento": "New budget",
+    "nome-orcamento": "Budget name:",
+    "cor-do-orcamento": "Budget color",
+    "valor-do-orcamento": "Budget value:",
+    "total-orcamentos": "Total budgets",
+    "nenhum-orcamento": "No budgets added",
+    "adicione-um-orcamento": "Tap + to add your\nfirst budget",
+    "orcamento-sera-removido": "The budget will be permanently removed",
+    "editar-orcamento": "Edit budget",
+    "atualizar-orcamento": "Update budget",
+    "digite-o-nome-orcamento": "Enter budget name...",
+    "digite-o-valor-do-orcamento": "Enter budget value",
+    "tipo-orcamento": "Budget type",
+    "orcamento-valor-fixo": "Fixed value",
+    "orcamento-com-subitens": "With sub-items",
+    "orcamento-com-subitens-desc": "The total will be calculated from the sum of sub-items added on the card"
 }

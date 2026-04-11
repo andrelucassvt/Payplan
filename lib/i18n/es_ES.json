@@ -95,5 +95,22 @@
     "parcelar-devedor": "Dividir en cuotas",
     "quitado": "Liquidado",
     "ver-mais": "Ver más (%s)",
-    "ver-menos": "Ver menos"
+    "ver-menos": "Ver menos",
+    "orcamentos": "Presupuestos",
+    "novo-orcamento": "Nuevo presupuesto",
+    "nome-orcamento": "Nombre del presupuesto:",
+    "cor-do-orcamento": "Color del presupuesto",
+    "valor-do-orcamento": "Valor del presupuesto:",
+    "total-orcamentos": "Total de presupuestos",
+    "nenhum-orcamento": "Ningún presupuesto registrado",
+    "adicione-um-orcamento": "Toca + para agregar tu\nprimer presupuesto",
+    "orcamento-sera-removido": "El presupuesto será eliminado permanentemente",
+    "editar-orcamento": "Editar presupuesto",
+    "atualizar-orcamento": "Actualizar presupuesto",
+    "digite-o-nome-orcamento": "Ingrese el nombre del presupuesto...",
+    "digite-o-valor-do-orcamento": "Ingrese el valor del presupuesto",
+    "tipo-orcamento": "Tipo de presupuesto",
+    "orcamento-valor-fixo": "Valor fijo",
+    "orcamento-com-subitens": "Con sub-ítems",
+    "orcamento-com-subitens-desc": "El total se calculará a partir de la suma de los sub-ítems agregados en la tarjeta"
 }

@@ -103,6 +103,24 @@ class AppStrings {
   static var verMenos = 'ver-menos'.i18n();
   static String verMais(int count) => 'ver-mais'.i18n([count.toString()]);
 
+  static var orcamentos = 'orcamentos'.i18n();
+  static var novoOrcamento = 'novo-orcamento'.i18n();
+  static var nomeOrcamento = 'nome-orcamento'.i18n();
+  static var corDoOrcamento = 'cor-do-orcamento'.i18n();
+  static var valorDoOrcamento = 'valor-do-orcamento'.i18n();
+  static var totalOrcamentos = 'total-orcamentos'.i18n();
+  static var nenhumOrcamento = 'nenhum-orcamento'.i18n();
+  static var adicioneUmOrcamento = 'adicione-um-orcamento'.i18n();
+  static var orcamentoSeraRemovido = 'orcamento-sera-removido'.i18n();
+  static var editarOrcamento = 'editar-orcamento'.i18n();
+  static var atualizarOrcamento = 'atualizar-orcamento'.i18n();
+  static var digiteONomeOrcamento = 'digite-o-nome-orcamento'.i18n();
+  static var digiteOValorDoOrcamento = 'digite-o-valor-do-orcamento'.i18n();
+  static var tipoOrcamento = 'tipo-orcamento'.i18n();
+  static var orcamentoValorFixo = 'orcamento-valor-fixo'.i18n();
+  static var orcamentoComSubItens = 'orcamento-com-subitens'.i18n();
+  static var orcamentoComSubItensDesc = 'orcamento-com-subitens-desc'.i18n();
+
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';
   }

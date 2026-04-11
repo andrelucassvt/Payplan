@@ -95,5 +95,22 @@
     "parcelar-devedor": "Parcelar",
     "quitado": "Quitado",
     "ver-mais": "Ver mais (%s)",
-    "ver-menos": "Ver menos"
+    "ver-menos": "Ver menos",
+    "orcamentos": "Orçamentos",
+    "novo-orcamento": "Novo orçamento",
+    "nome-orcamento": "Nome do orçamento:",
+    "cor-do-orcamento": "Cor do orçamento",
+    "valor-do-orcamento": "Valor do orçamento:",
+    "total-orcamentos": "Total de orçamentos",
+    "nenhum-orcamento": "Nenhum orçamento cadastrado",
+    "adicione-um-orcamento": "Toque no + para adicionar seu\nprimeiro orçamento",
+    "orcamento-sera-removido": "O orçamento será removido permanentemente",
+    "editar-orcamento": "Editar orçamento",
+    "atualizar-orcamento": "Atualizar orçamento",
+    "digite-o-nome-orcamento": "Digite o nome do orçamento...",
+    "digite-o-valor-do-orcamento": "Digite o valor do orçamento",
+    "tipo-orcamento": "Tipo de orçamento",
+    "orcamento-valor-fixo": "Valor fixo",
+    "orcamento-com-subitens": "Com sub-itens",
+    "orcamento-com-subitens-desc": "O total será calculado pela soma dos sub-itens adicionados no card"
 }
