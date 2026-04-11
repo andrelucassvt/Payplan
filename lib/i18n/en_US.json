@@ -116,5 +116,8 @@
     "marcar-como-concluido": "Done",
     "orcamento-concluido": "Budget completed",
     "em-andamento": "In progress",
-    "valor-total": "Total value"
+    "valor-total": "Total value",
+    "fluxo-orcamento": "Budget flow",
+    "concluido": "Completed",
+    "pendente": "Pending"
 }

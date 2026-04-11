@@ -124,6 +124,9 @@ class AppStrings {
   static var orcamentoConcluido = 'orcamento-concluido'.i18n();
   static var emAndamento = 'em-andamento'.i18n();
   static var valorTotal = 'valor-total'.i18n();
+  static var fluxoOrcamento = 'fluxo-orcamento'.i18n();
+  static var concluido = 'concluido'.i18n();
+  static var pendente = 'pendente'.i18n();
 
   static String mensagemDivida(String nome, String valor) {
     return '${'voceTemUmaDividaCom'.i18n()} $nome ${'noValorDe'.i18n()} $valor';

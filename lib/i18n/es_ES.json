@@ -116,5 +116,8 @@
     "marcar-como-concluido": "Hecho",
     "orcamento-concluido": "Presupuesto completado",
     "em-andamento": "En progreso",
-    "valor-total": "Valor total"
+    "valor-total": "Valor total",
+    "fluxo-orcamento": "Flujo de presupuesto",
+    "concluido": "Completado",
+    "pendente": "Pendiente"
 }

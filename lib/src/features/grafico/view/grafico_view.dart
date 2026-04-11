@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/util/entity/devedores_entity.dart';
 import 'package:notes_app/src/util/entity/divida_entity.dart';
+import 'package:notes_app/src/util/entity/orcamento_entity.dart';
 import 'package:notes_app/src/util/extension/real_format_extension.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,15 +18,19 @@ class GraficosView extends StatefulWidget {
   const GraficosView({
     required this.dividas,
     required this.devedores,
+    required this.orcamentos,
     required this.homeCubit,
     required this.screenshotDividasController,
     required this.screenshotDevedoresController,
+    required this.screenshotOrcamentosController,
     super.key,
   });
   final List<DividaEntity> dividas;
   final List<DevedoresEntity> devedores;
+  final List<OrcamentoEntity> orcamentos;
   final ScreenshotController screenshotDividasController;
   final ScreenshotController screenshotDevedoresController;
+  final ScreenshotController screenshotOrcamentosController;
   final HomeCubit homeCubit;
 
   @override
@@ -39,9 +44,12 @@ class _GraficosViewState extends State<GraficosView>
   late final Animation<Offset> _slideCard1;
   late final Animation<double> _fadeCard2;
   late final Animation<Offset> _slideCard2;
+  late final Animation<double> _fadeCard3;
+  late final Animation<Offset> _slideCard3;
 
   int _touchedDividaIndex = -1;
   int _touchedDevedorIndex = -1;
+  int _touchedOrcamentoIndex = -1;
 
   HomeState get state => widget.homeCubit.state;
 
@@ -59,18 +67,26 @@ class _GraficosViewState extends State<GraficosView>
       .map((e) => e.valorPendente)
       .fold(0, (prev, el) => prev + el);
 
+  List<OrcamentoEntity> get orcamentosAtivos => widget.orcamentos
+      .where((e) => !e.concluido && e.totalOrcamento > 0)
+      .toList();
+
+  double get valorTotalOrcamentos => orcamentosAtivos
+      .map((e) => e.totalOrcamento)
+      .fold(0, (prev, el) => prev + el);
+
   @override
   void initState() {
     super.initState();
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 1200),
     );
 
     _fadeCard1 = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
       ),
     );
     _slideCard1 = Tween<Offset>(
@@ -79,13 +95,13 @@ class _GraficosViewState extends State<GraficosView>
     ).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
       ),
     );
     _fadeCard2 = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
+        curve: const Interval(0.25, 0.7, curve: Curves.easeOut),
       ),
     );
     _slideCard2 = Tween<Offset>(
@@ -94,7 +110,22 @@ class _GraficosViewState extends State<GraficosView>
     ).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
+        curve: const Interval(0.25, 0.7, curve: Curves.easeOut),
+      ),
+    );
+    _fadeCard3 = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      ),
+    );
+    _slideCard3 = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
       ),
     );
 
@@ -126,7 +157,9 @@ class _GraficosViewState extends State<GraficosView>
             IconThemeData(color: Theme.of(context).colorScheme.onSurface),
         title: Text(AppStrings.graficoGastos),
       ),
-      body: valorTotalFatura == 0 && valorTotalDevedores == 0
+      body: valorTotalFatura == 0 &&
+              valorTotalDevedores == 0 &&
+              valorTotalOrcamentos == 0
           ? const _EmptyState()
           : SafeArea(
               bottom: false,
@@ -267,6 +300,74 @@ class _GraficosViewState extends State<GraficosView>
                                     value: e.value.valorPendente.real,
                                     isHighlighted:
                                         _touchedDevedorIndex == e.key,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    if (valorTotalOrcamentos != 0) const SizedBox(height: 16),
+                    if (valorTotalOrcamentos != 0)
+                      FadeTransition(
+                        opacity: _fadeCard3,
+                        child: SlideTransition(
+                          position: _slideCard3,
+                          child: _ChartCard(
+                            title: AppStrings.fluxoOrcamento,
+                            total: valorTotalOrcamentos,
+                            onShare: () => _share(
+                              widget.screenshotOrcamentosController,
+                            ),
+                            screenshotController:
+                                widget.screenshotOrcamentosController,
+                            screenshotBackground:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            chart: PieChart(
+                              PieChartData(
+                                sectionsSpace: 3,
+                                centerSpaceRadius: 40,
+                                pieTouchData: PieTouchData(
+                                  touchCallback: (event, pieTouchResponse) {
+                                    setState(() {
+                                      if (!event.isInterestedForInteractions ||
+                                          pieTouchResponse == null ||
+                                          pieTouchResponse.touchedSection ==
+                                              null) {
+                                        _touchedOrcamentoIndex = -1;
+                                        return;
+                                      }
+                                      _touchedOrcamentoIndex = pieTouchResponse
+                                          .touchedSection!.touchedSectionIndex;
+                                    });
+                                  },
+                                ),
+                                sections: orcamentosAtivos
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) => PieChartSectionData(
+                                        radius:
+                                            _touchedOrcamentoIndex == entry.key
+                                                ? 96
+                                                : 80,
+                                        value: entry.value.totalOrcamento,
+                                        title: '',
+                                        color: entry.value.cor,
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                            legend: orcamentosAtivos
+                                .asMap()
+                                .entries
+                                .map(
+                                  (entry) => _LegendItem(
+                                    color: entry.value.cor,
+                                    label: entry.value.nome,
+                                    value: entry.value.totalOrcamento.real,
+                                    isHighlighted:
+                                        _touchedOrcamentoIndex == entry.key,
                                   ),
                                 )
                                 .toList(),

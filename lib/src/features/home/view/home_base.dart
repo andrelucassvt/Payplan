@@ -40,6 +40,7 @@ class _HomeBaseState extends State<HomeBase> {
 
   final screenshotDividasController = ScreenshotController();
   final screenshotDevedoresController = ScreenshotController();
+  final screenshotOrcamentosController = ScreenshotController();
 
   @override
   void initState() {
@@ -113,13 +114,22 @@ class _HomeBaseState extends State<HomeBase> {
               return BlocBuilder<HomeCubit, HomeState>(
                 bloc: _homeCubit,
                 builder: (context, state) {
-                  return GraficosView(
-                    dividas: state.dividas,
-                    devedores: stateDevedores.devedores,
-                    homeCubit: _homeCubit,
-                    screenshotDividasController: screenshotDividasController,
-                    screenshotDevedoresController:
-                        screenshotDevedoresController,
+                  return BlocBuilder<OrcamentoCubit, OrcamentoState>(
+                    bloc: _orcamentoCubit,
+                    builder: (context, stateOrcamento) {
+                      return GraficosView(
+                        dividas: state.dividas,
+                        devedores: stateDevedores.devedores,
+                        orcamentos: stateOrcamento.orcamentos,
+                        homeCubit: _homeCubit,
+                        screenshotDividasController:
+                            screenshotDividasController,
+                        screenshotDevedoresController:
+                            screenshotDevedoresController,
+                        screenshotOrcamentosController:
+                            screenshotOrcamentosController,
+                      );
+                    },
                   );
                 },
               );
@@ -140,6 +150,7 @@ class _HomeBaseState extends State<HomeBase> {
           if (index == 3) {
             _devedoresCubit.buscarDevedores();
             _homeCubit.buscarDividas();
+            _orcamentoCubit.buscarOrcamentos();
           }
           setState(() => _selectedIndex = index);
         },
@@ -222,6 +233,9 @@ class _HomeBaseState extends State<HomeBase> {
       final image2 = _devedoresCubit.temDevedores()
           ? await screenshotDevedoresController.capture()
           : null;
+      final image3 = _orcamentoCubit.temOrcamentos()
+          ? await screenshotOrcamentosController.capture()
+          : null;
 
       final List<XFile> filesToShare = [];
       final directory = await getApplicationDocumentsDirectory();
@@ -235,6 +249,11 @@ class _HomeBaseState extends State<HomeBase> {
         final imagePath2 = await File('${directory.path}/image2.png').create();
         await imagePath2.writeAsBytes(image2);
         filesToShare.add(XFile(imagePath2.path));
+      }
+      if (image3 != null) {
+        final imagePath3 = await File('${directory.path}/image3.png').create();
+        await imagePath3.writeAsBytes(image3);
+        filesToShare.add(XFile(imagePath3.path));
       }
       if (filesToShare.isNotEmpty) {
         await Share.shareXFiles(filesToShare, text: AppStrings.baixePayplan);
