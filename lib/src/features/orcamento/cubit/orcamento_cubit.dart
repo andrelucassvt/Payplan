@@ -134,6 +134,19 @@ class OrcamentoCubit extends Cubit<OrcamentoState> {
     );
   }
 
+  Future<void> atualizarSubItem(
+    OrcamentoEntity orcamento,
+    SubItemOrcamentoEntity subItemAtualizado,
+  ) async {
+    await atualizarOrcamento(
+      orcamento.copyWith(
+        subItens: orcamento.subItens
+            .map((s) => s.id == subItemAtualizado.id ? subItemAtualizado : s)
+            .toList(),
+      ),
+    );
+  }
+
   Future<void> toggleSubItemConcluido(
     OrcamentoEntity orcamento,
     String subItemId,

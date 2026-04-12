@@ -254,6 +254,20 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
+  Future<void> atualizarSubDivida(
+    DividaEntity divida,
+    SubDividaEntity subDividaAtualizada,
+  ) async {
+    await atualizarDivida(
+      divida.copyWith(
+        subDividas: divida.subDividas
+            .map(
+                (s) => s.id == subDividaAtualizada.id ? subDividaAtualizada : s)
+            .toList(),
+      ),
+    );
+  }
+
   Future<void> salvarSalario(double valor) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('salario_fixo', valor);

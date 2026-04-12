@@ -410,7 +410,6 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
 
   void _gerenciarSubDividasBottomSheet() {
     final nomeController = TextEditingController();
-    final scrollController = ScrollController();
     final valorController = MoneyMaskedTextController(initialValue: 0.0);
     bool isRecorrente = false;
 
@@ -471,70 +470,77 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
                       else
                         SizedBox(
                           height: 200,
-                          child: Scrollbar(
-                            thumbVisibility: true,
-                            controller: scrollController,
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemCount: subDividas.length,
-                              itemBuilder: (context, index) {
-                                final s = subDividas[index];
-                                return ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: Icon(
-                                    s.recorrente
-                                        ? Icons.repeat
-                                        : Icons.calendar_today_outlined,
-                                    color: _kAccent,
-                                    size: 18,
+                          child: ListView.builder(
+                            itemCount: subDividas.length,
+                            itemBuilder: (context, index) {
+                              final s = subDividas[index];
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Icon(
+                                  s.recorrente
+                                      ? Icons.repeat
+                                      : Icons.calendar_today_outlined,
+                                  color: _kAccent,
+                                  size: 18,
+                                ),
+                                title: Text(
+                                  s.nome,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurface,
                                   ),
-                                  title: Text(
-                                    s.nome,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onSurface,
-                                    ),
+                                ),
+                                subtitle: Text(
+                                  s.recorrente
+                                      ? AppStrings.recorrente
+                                      : '${MesesEnum.values.firstWhere((e) => e.id == s.mes).nome}/${s.ano}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: cs.onSurfaceVariant,
                                   ),
-                                  subtitle: Text(
-                                    s.recorrente
-                                        ? AppStrings.recorrente
-                                        : '${MesesEnum.values.firstWhere((e) => e.id == s.mes).nome}/${s.ano}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '\$${format.format(s.valor)}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          color: cs.onSurface,
-                                        ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '\$${format.format(s.valor)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: cs.onSurface,
                                       ),
-                                      const SizedBox(width: 8),
-                                      GestureDetector(
-                                        onTap: () {
-                                          widget.homeCubit.removerSubDivida(
-                                            widget.dividaEntity,
-                                            s.id,
-                                          );
-                                          Navigator.of(sheetContext).pop();
-                                        },
-                                        child: const Icon(
-                                          Icons.delete_outline,
-                                          color: Color(0xFFEF4444),
-                                          size: 20,
-                                        ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () => _editarSubDividaDialog(
+                                        sheetContext,
+                                        s,
                                       ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                                      child: const Icon(
+                                        Icons.edit_outlined,
+                                        color: _kAccent,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    GestureDetector(
+                                      onTap: () {
+                                        widget.homeCubit.removerSubDivida(
+                                          widget.dividaEntity,
+                                          s.id,
+                                        );
+                                        Navigator.of(sheetContext).pop();
+                                      },
+                                      child: const Icon(
+                                        Icons.delete_outline,
+                                        color: Color(0xFFEF4444),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       const Divider(height: 24),
@@ -668,6 +674,100 @@ class _HomeCardDividaState extends State<HomeCardDivida> {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _editarSubDividaDialog(
+    BuildContext sheetContext,
+    SubDividaEntity subDivida,
+  ) {
+    final nomeController = TextEditingController(text: subDivida.nome);
+    final valorController =
+        MoneyMaskedTextController(initialValue: subDivida.valor);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final cs = Theme.of(dialogContext).colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            AppStrings.editar,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nomeController,
+                style: TextStyle(color: cs.onSurface),
+                decoration: InputDecoration(
+                  labelText: AppStrings.nomeSubDivida,
+                  labelStyle: TextStyle(color: cs.onSurfaceVariant),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kAccent, width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: valorController,
+                keyboardType: TextInputType.number,
+                style: TextStyle(color: cs.onSurface),
+                decoration: InputDecoration(
+                  labelText: AppStrings.valor,
+                  labelStyle: TextStyle(color: cs.onSurfaceVariant),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kAccent, width: 1.5),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(AppStrings.cancelar),
+            ),
+            TextButton(
+              onPressed: () {
+                final nome = nomeController.text.trim();
+                final novoValor = valorController.numberValue;
+                if (nome.isEmpty || novoValor == 0.0) return;
+                widget.homeCubit.atualizarSubDivida(
+                  widget.dividaEntity,
+                  subDivida.copyWith(nome: nome, valor: novoValor),
+                );
+                Navigator.of(dialogContext).pop();
+                Navigator.of(sheetContext).pop();
+              },
+              child: Text(
+                AppStrings.salvar,
+                style: const TextStyle(
+                  color: _kAccent,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
