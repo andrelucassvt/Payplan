@@ -2,6 +2,7 @@
 name: flow-init
 description: Analisa o projeto inteiro e inicializa a pasta ./flow/ com um documento de estrutura geral do projeto e, opcionalmente, flows individuais de cada feature. Use sempre que o usuário pedir "inicializar flows", "criar flows do projeto", "mapear o projeto inteiro", "documentar a estrutura do projeto", "gerar todos os flows", "flow-init", "quero criar os flows do projeto", "criar mapa do projeto", "iniciar documentação de flows", "mapear features do projeto", ou qualquer pedido para ter uma visão documental completa de um projeto antes de começar a trabalhar nele. Prefira sempre esta skill sobre criar flows individuais manualmente quando o objetivo for ter uma base documental inicial do projeto.
 disable-model-invocation: true
+model: opus
 ---
 
 # Flow Init

@@ -47,8 +47,8 @@ lib/
 │       ├── view/<feature>_view.dart          # StatefulWidget + BlocBuilder
 │       ├── view_model/<feature>_cubit.dart   # lógica de estado
 │       ├── view_model/<feature>_state.dart   # sealed class de estados
-│       ├── widgets/                          # widgets reutilizáveis da feature
-│       └── content/                          # blocos de UI acoplados à View
+│       ├── widgets/                          # extraídos quando passam na regra de corte (reutilizáveis na feature)
+│       └── content/                          # blocos acoplados a uma View, só quando passam na regra de corte
 │
 ├── domain/
 │   ├── entities/<entity>_entity.dart         # modelos de negócio puros

@@ -2,7 +2,7 @@
 
 ## Leitura Rápida
 
-- **Quando extrair um widget**: bloco de UI maior que 20 linhas ou repetido em mais de um lugar.
+- **Quando extrair um widget**: bloco que passa na regra de corte (>45 linhas, repetido 2+ vezes, ou com estado próprio); caso contrário, deixe inline no `build()` da View.
 - **Quando usar StatelessWidget**: widget apenas renderiza dados recebidos, sem estado interno.
 - **Quando usar StatefulWidget**: widget tem controllers, timers ou animações internas.
 - **Quando definir parâmetros**: prefira passar a Entity completa em vez de campos individuais.
@@ -37,7 +37,7 @@ lib/
 | Auxiliar específico de uma View? | ❌ Não | ✅ Sim | ❌ Não |
 | Exemplo | `ProfileCard`, `HomeItemList` | `RecursosContent`, `HomeEmptySection` | `AppButton`, `AppCard` |
 
-**Regra:** se o bloco é específico de uma única View, comece em `content/`. Use `widgets/` quando houver identidade própria ou intenção real de reutilização dentro da feature. Use `common/widgets/` somente quando outra feature também precisar.
+**Antes de escolher a pasta, aplique a regra de corte** (ver `view.md`): se o bloco não passar — ≤45 linhas, usado 1x, sem estado — ele fica inline na View. **Somente se passar:** se o bloco é específico de uma única View, comece em `content/`. Use `widgets/` quando houver identidade própria ou intenção real de reutilização dentro da feature. Use `common/widgets/` somente quando outra feature também precisar.
 
 > Para entender **por que** não usar `Widget _buildXxx()` na View, ver `view.md`.
 
@@ -304,20 +304,26 @@ class ProfileSaveBar extends StatelessWidget {
 
 ## Quando Criar Widgets
 
-### ✅ CRIE quando:
-1. Bloco de UI tem mais de 20 linhas
-2. Código se repete em dois ou mais lugares
-3. Há separação lógica clara (cabeçalho, card, lista, formulário)
+### ✅ CRIE quando (regra de corte — qualquer um basta):
+1. Bloco tem **mais de 45 linhas** dentro do `build`
+2. Código se **repete em 2+ lugares**
+3. Bloco tem **estado próprio** (controller, timer, animação, `setState`)
+
+Caso contrário → mantenha inline no `build()` da View.
 
 ### ❌ NÃO crie quando:
-1. É muito simples (< 10 linhas)
-2. É usado apenas uma vez e é trivial
+1. O bloco não passa em nenhum dos 3 gatilhos acima
+2. É usado apenas uma vez e é trivial (≤45 linhas, sem estado)
 
 ---
 
 ## Decisão Rápida
 
 ```
+Passou na regra de corte (>45 linhas OU repetido 2+ vezes OU tem estado próprio)?
+  ├─ NÃO → inline no build() da View
+  └─ SIM → (continua abaixo)
+
 Precisa de controller/timer/animação?
   ├─ SIM → StatefulWidget
   └─ NÃO → StatelessWidget

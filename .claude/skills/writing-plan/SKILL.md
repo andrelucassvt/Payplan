@@ -1,6 +1,7 @@
 ---
 name: writing-plan
 description: Generates a structured Markdown implementation plan and saves it to the /plan folder. Use this skill whenever the user asks to "create a plan", "write a plan", "make a plan", "plan this feature", "draft a plan for", "gerar um plano", "criar um plano", "escrever um plano", or describes any multi-step task they want planned out — even if they just say "plan this" or "how should I approach X". Also triggers when the user shares a feature description, refactoring goal, or implementation request and wants a roadmap before coding. Always prefer this skill over ad-hoc bullet lists when the user wants a reusable, saveable plan document.
+model: opus
 ---
 
 # Writing Plan

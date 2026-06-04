@@ -245,20 +245,50 @@ Métodos `Widget _buildXxx()` não têm `Element` próprio — toda mudança de 
 
 ### Decisão obrigatória antes de criar UI auxiliar
 
-1. O bloco é pequeno, linear e continua legível dentro do `build`?
-   → deixe inline no `build`.
+**Extraia o bloco para arquivo próprio se QUALQUER um for verdadeiro:**
+1. O bloco tem **mais de 45 linhas** dentro do `build`.
+2. O bloco se **repete em 2+ lugares**.
+3. O bloco tem **estado próprio** (controller, timer, animação, `setState`).
 
-2. O bloco tem mais de ~20 linhas, várias responsabilidades visuais, ou seria um `Widget _buildXxx()`?
-   → extraia para arquivo próprio.
+Se **nenhum** for verdadeiro → mantenha o bloco **inline no `build()`**, direto na árvore de widgets. **Nunca** transforme um bloco inline em `Widget _buildXxx()` nem em classe privada — se ele incomoda inline, é porque passou na regra de corte e deve virar arquivo.
 
-3. O bloco é específico desta View e provavelmente não será reutilizado?
-   → crie em `lib/presentation/<feature>/content/<nome>_content.dart`.
+Ao extrair: `content/` se for específico de uma única View; `widgets/` se tiver identidade própria/reutilização na feature; `common/widgets/` se for usado entre features.
 
-4. O bloco tem identidade própria ou pode ser reutilizado dentro da feature?
-   → crie em `lib/presentation/<feature>/widgets/<nome>.dart`.
+### ✅ Bloco que FICA inline (não passa na regra de corte)
 
-5. O bloco será usado por várias features?
-   → crie em `lib/common/widgets/<nome>.dart`.
+```dart
+// ≤45 linhas, usado 1x, sem estado → permanece direto no build()
+ProfileLoaded(:final user) => Padding(
+  padding: const EdgeInsets.all(16),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(user.name, style: Theme.of(context).textTheme.titleLarge),
+      const SizedBox(height: 4),
+      Text(user.email),
+      const SizedBox(height: 12),
+      Text(l10n.profileBioLabel),
+      const SizedBox(height: 4),
+      Text(user.bio),
+      const SizedBox(height: 16),
+      ElevatedButton(
+        onPressed: () => context.read<ProfileCubit>().editProfile(),
+        child: Text(l10n.editButton),
+      ),
+    ],
+  ),
+),
+```
+
+### ❌ Extraído sem necessidade (bloco não passou na regra de corte)
+
+```dart
+// ❌ Extrair ~12 linhas para content/ polui a feature sem motivo
+ProfileLoaded(:final user) => ProfileInfoContent(user: user),
+
+// content/profile_info_content.dart  ← arquivo desnecessário
+class ProfileInfoContent extends StatelessWidget { ... }
+```
 
 ### Nome de arquivo da View
 
@@ -286,6 +316,7 @@ void _showOptionsBottomSheet() {
 
 | Tipo | Permitido na View? |
 |---|---|
+| Bloco ≤45 linhas, usado 1x, sem estado | ✅ Inline no build |
 | `void _showXxxDialog()` | ✅ Sim |
 | `void _showXxxBottomSheet()` | ✅ Sim |
 | `void _onTapXxx()` (handler) | ✅ Sim |
@@ -442,8 +473,8 @@ A distinção **não é reutilização entre features** — é sobre granularida
 - [ ] O arquivo da View se chama `<feature>_view.dart`
 - [ ] Não existe `Widget _buildXxx()` na View
 - [ ] Não existe classe privada de widget dentro do arquivo da View
-- [ ] Blocos pequenos ficaram inline no `build`
-- [ ] Blocos grandes específicos foram para `content/`
+- [ ] Apliquei a regra de corte (45 linhas / repetição / estado) antes de extrair qualquer bloco
+- [ ] Blocos que não passaram na regra ficaram inline no build
 - [ ] Widgets reutilizáveis foram para `widgets/`
 - [ ] Textos visíveis usam `context.l10n`
 - [ ] O conteúdo principal está em `SafeArea`

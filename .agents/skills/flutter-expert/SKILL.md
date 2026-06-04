@@ -57,8 +57,8 @@ Use os exemplos como referência rápida de código pronto e correto. Prefira co
 - **DI**: Cubits → `registerFactory`; todo o resto → `registerLazySingleton`
 - **Entities**: `@immutable`, `const`, `final`, `copyWith()`, `==`, `hashCode`
 - **Composição de View**: a View deve orquestrar estado, navegação e estrutura principal. NUNCA crie `Widget _buildXxx()` nem classes privadas de widget dentro da View.
-  - Se o bloco visual tiver até ~20 linhas e continuar legível, escreva diretamente no `build`.
-  - Se o bloco ficar grande, repetido, ou dificultar a leitura do `build`, extraia para arquivo próprio.
+  - Mantenha o bloco **inline no `build()`**; só extraia se passar na regra de corte: **>45 linhas OU repetido 2+ vezes OU tem estado próprio** (controller, timer, `setState`).
+  - Inline ≠ método auxiliar: bloco inline fica direto na árvore de widgets, nunca como `Widget _buildXxx()`.
   - Use `presentation/<feature>/content/` para blocos específicos de uma única View.
   - Use `presentation/<feature>/widgets/` para widgets reutilizáveis dentro da feature.
   - Use `common/widgets/` apenas quando for compartilhado entre features.

@@ -20,10 +20,12 @@ common/widgets/       ← compartilhado entre features
 └── app_button.dart
 ```
 
-**Regra de decisão rápida:**
-- Bloco > 20 linhas ou repetido? → extrair para `widgets/`
-- Auxiliar acoplado a uma única View? → mover para `content/`
-- Vai ser usado por outra feature? → mover para `common/widgets/`
+**Regra de decisão rápida (regra de corte):**
+- Bloco ≤45 linhas, 1x, sem estado? → inline no `build()` da View
+- Passa na regra de corte (>45 linhas OU repetido 2+ vezes OU tem estado)? → extrair
+  - Auxiliar acoplado a uma única View → `content/`
+  - Identidade própria ou reutilização na feature → `widgets/`
+  - Usado por outra feature → `common/widgets/`
 
 ---
 
