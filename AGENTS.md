@@ -1,138 +1,68 @@
-# Payplan — Agent Instructions
+# Payplan (`notes_app`)
 
-App Flutter de controle financeiro pessoal: gestão de dívidas, devedores, gráficos e plano premium.
-Flutter 3 / Dart ^3.5.4 · Versão 2.5.5+70 · Pacote: `notes_app`
-Plataformas: **iOS** (target 13.0) e **Android** (minSdk 24, targetSdk 35, compileSdk 36).
-Sem flavors — único `main.dart`. Localização: pt_BR, en_US, es_ES.
+App Flutter de controle financeiro pessoal (dívidas, devedores, orçamentos, gráficos e plano premium). iOS (target 13.0) e Android (minSdk 24 / targetSdk 35 / compileSdk 36). Versão 3.0.4+90. i18n: pt_BR, en_US, es_ES.
 
----
+## Antes de implementar (obrigatório)
 
-## Arquivos de instrução detalhados
+**SEMPRE** invoque a skill `brainstorming` antes de criar/alterar features, telas, widgets ou de refatorar — regra em `.claude/rules/brainstorming.instructions.md`. Não comece a implementar sem isso.
 
-Antes de gerar ou modificar código, leia o arquivo de arquitetura **sempre** e depois a skill correspondente à camada modificada:
+## Stack
 
-| Arquivo | Quando ler |
-|---|---|
-| `.agents/rules/architecture.instructions.md` | **Sempre** — regras gerais de arquitetura |
+- Flutter 3 / Dart `^3.5.4`, Material 3 (light/dark)
+- State management: **Cubit** (`flutter_bloc ^9.0.0`) — Cubit + State (via `part`)
+- Persistência: **`shared_preferences`** — entidades serializadas como `List<String>` JSON. **Não há banco** (sem ObjectBox/SQLite).
+- Gráficos: `fl_chart` · Ads: `google_mobile_ads` · IAP: `in_app_purchase` · Notificações: `flutter_local_notifications`
+- HTTP: `dio` (usado só para checagem de versão via GitHub raw)
+- Design system interno: `as_design_system` (git, branch main)
 
-## 🛠️ Skills especializadas
+## Estrutura
 
-Leia o arquivo da skill antes de executar a tarefa correspondente:
+- `lib/main.dart` — entry point; inicializa `AdService`, `ThemeController`, timezones e `NotificationService`
+- `lib/src/app_widget.dart` — `MaterialApp`, temas e locales; `home: HomeBase`
+- `lib/src/features/<feature>/` — feature-first: `cubit/`, `view/`, `widgets/`, `content/`
+  - features: `home` (também é o shell de navegação), `devedores`, `orcamento`, `grafico`, `nova_divida`, `novo_orcamento`, `plus`
+- `lib/src/util/` — compartilhado: `entity/`, `model/`, `enum/`, `extension/`, `helpers/`, `service/`, `widgets/`, `colors/`, `strings/`
+- `lib/i18n/` — `pt_BR.json`, `en_US.json`, `es_ES.json`
 
-| Skill | Arquivo | Quando usar |
-|---|---|---|
-| `implement-view` | `.agents/skills/implement-view/SKILL.md` | Ao criar ou modificar Views (StatefulWidget + Cubit + BlocBuilder) ou adicionar nova tela |
-| `implement-view-model` | `.agents/skills/implement-view-model/SKILL.md` | Ao criar ou modificar Cubits/States, adicionar método async, gerenciar estados de loading/error |
-| `implement-widget` | `.agents/skills/implement-widget/SKILL.md` | Ao criar ou modificar widgets em `features/**/widgets/` ou `util/widgets/` |
-| `implement-domain` | `.agents/skills/implement-domain/SKILL.md` | Ao criar entidades, interfaces de repositório ou modelar conceitos de negócio |
-| `implement-data` | `.agents/skills/implement-data/SKILL.md` | Ao implementar chamadas de API, serialização JSON, DataSources ou RepositoryImpl |
-| `configure-di` | `.agents/skills/configure-di/SKILL.md` | Ao registrar ou modificar dependências com GetIt |
-| `configure-navigation` | `.agents/skills/configure-navigation/SKILL.md` | Ao adicionar rotas, navegação entre telas ou deep links |
-| `custom-paint` | `.agents/skills/custom-paint/SKILL.md` | Ao desenhar formas, gráficos ou animações 2D com CustomPaint/CustomPainter |
-| `guideline-apple` | `.agents/skills/guideline-apple/SKILL.md` | Ao revisar, preparar ou auditar o app para submissão na App Store |
-| `implement-in-app-purchase` | `.agents/skills/implement-in-app-purchase/SKILL.md` | Ao implementar compras in-app, assinaturas ou paywall (`in_app_purchase ^3.2.3`) |
-| `implement-admob` | `.agents/skills/implement-admob/SKILL.md` | Ao implementar ou modificar anúncios AdMob (`google_mobile_ads ^6.0.0`) |
-| `implement-auth-token-flow` | `.agents/skills/implement-auth-token-flow/SKILL.md` | Ao implementar autenticação com Bearer token, login, refresh token ou logout |
-| `implement-firebase-notifications` | `.agents/skills/implement-firebase-notifications/SKILL.md` | Ao implementar ou auditar push notifications via Firebase Cloud Messaging (iOS + Android) |
-| `flutter-isolates` | `.agents/skills/flutter-isolates/SKILL.md` | Ao trabalhar com paralelismo, concorrência, performance de UI ou tarefas CPU-intensivas |
-| `flutter-animating-apps` | `.agents/skills/flutter-animating-apps/SKILL.md` | Ao implementar animações, transições, hero animations ou efeitos visuais |
-| `skill-creator` | `.agents/skills/skill-creator/SKILL.md` | Ao criar, modificar ou otimizar arquivos de skill |
+## Comandos
 
----
+- `flutter pub get` — dependências
+- `flutter run` — executar
+- `flutter analyze` — lint/análise estática (rodar antes de finalizar)
+- `flutter build ipa` / `flutter build apk` — builds
 
-## 📝 Prompts Disponíveis
+## Convenções (como o código realmente é)
 
-Prompt files em `.github/prompts/` para tarefas pré-definidas:
+- **Imports sempre absolutos**: `package:notes_app/...` — nunca relativos.
+- **Cubit instanciado na View**: o `StatefulWidget` cria o Cubit (`final _cubit = XCubit();`) e o repassa por construtor aos filhos. **Não há GetIt/DI por container.**
+- **Cubit assíncrono**: emita um estado `Loading` (copiando os campos do estado atual) → acesse `SharedPreferences` → emita `Sucesso`/`Erro`. Veja `HomeCubit`/`OrcamentoCubit`.
+- **Persistência no próprio Cubit**: lê/grava `prefs.getStringList(...)`, mapeia via Models (`fromJson`/`toJson`/`fromEntity`). Chaves usadas: `'dividas'`, `'devedores'`, `'orcamentos'`, `'salario_fixo'`, `'isPlus'`.
+- **Entities** (`util/entity/`): `@immutable`, `const`, `final`, `copyWith()`, `==`, `hashCode`. **Models** (`util/model/`) cuidam da serialização JSON.
+- **Estado do usuário (premium)**: `UserController` (`ValueNotifier<UserEntity>` em `util/entity/user_entity.dart`) — leia com `ValueListenableBuilder`. Tema idem via `ThemeController`.
+- **Navegação na View**: `Navigator.push` + `MaterialPageRoute` para telas de formulário; abas via `IndexedStack` + `NavigationBar` em `home/view/home_base.dart`. **Não há GoRouter.**
+- **Textos da UI**: localizados via `localization` (JSON em `lib/i18n/`). Constantes em `util/strings/app_strings.dart`.
+- **SafeArea** no conteúdo principal das Views.
+- **Sem `Widget _buildXxx()` reutilizável dentro da View** — extraia para `widgets/` (reutilizável) ou `content/` (auxiliar da tela); dialog/bottomSheet são exceção.
 
-| Prompt | Descrição |
-|---|---|
-| `.github/prompts/analyze_view.prompt.md` | Auditar/analisar arquivos de View |
-| `.github/prompts/commit.prompt.md` | Gerar mensagens de commit |
-| `.github/prompts/create.prompt.md` | Criar nova feature |
-| `.github/prompts/project_plan.prompt.md` | Gerar plano de projeto |
-| `.github/prompts/refactore.prompt.md` | Refatorar um módulo existente |
-| `.github/prompts/init.prompt.md` | Inicializar contexto do projeto |
-| `.github/prompts/setup-project-context.prompt.md` | Atualizar arquivos de contexto da IA |
+## Gotchas
 
----
+- **CLAUDE.md antigo descrevia uma arquitetura que não existe** (Clean Arch com `domain`/`data`, GetIt, GoRouter, `Result<T>`, ObjectBox). Ignore essa descrição: o código real é o descrito aqui e em `flow/project-structure.md`.
+- `dartz` está no `pubspec.yaml` mas **não é usado** (sem `Either`/`Result`). Tratamento de erro é `try/catch` direto + estados de erro do Cubit.
+- **Arquivo órfão**: `lib/objectbox-model.json` ainda existe, mas `objectbox` não está no `pubspec.yaml` e nada o usa — resquício de persistência removida (candidato a remoção, não confie nele).
+- **Sem testes**: não existe diretório `test/` com testes implementados.
+- `nova_divida` e `novo_orcamento` **não têm Cubit próprio** — reusam o Cubit da feature pai recebido por construtor.
 
-## ⚡ Regras Globais
+## Não fazer
 
-- **Arquitetura**: `presentation` → `domain` ← `data` (Clean Architecture)
-- **Imports**: SEMPRE absolutos — `package:notes_app/...` — NUNCA relativos
-- **State management**: Cubit (BLoC) — `flutter_bloc ^9.0.0`
-- **Error handling**: `Result<T>` (Ok/Error) — NUNCA relance exceções
-- **DI**: GetIt via `AppInjector` — Cubits → `registerFactory`; resto → `registerLazySingleton`
-- **Navegação**: GoRouter — SEMPRE na View ou `BlocListener`, NUNCA no Cubit
-- **Textos na UI**: SEMPRE `context.l10n.<chave>` — ZERO strings hardcoded (suporte: pt_BR, en_US, es_ES)
-- **Entities**: `@immutable`, `const`, `final`, `copyWith()`, `==`, `hashCode`
-- **SafeArea**: SEMPRE envolva o conteúdo principal da View com `SafeArea`
-- **Performance**: NUNCA crie `Widget _buildXxx()` nem classes privadas de widget dentro da View — extraia para `widgets/` (reutilizável) ou `content/` (auxiliar específico); dialog/bottomSheet são exceção
-- **Repositories**: SEMPRE envolva chamadas em `try/catch` e retorne `Result.error(...)`
-- **Cubit async**: SEMPRE emita `Loading` primeiro → chame o repository → use `result.when()`
-- **Nunca** crie arquivos `.md` para documentar mudanças de código
+- Não introduzir GetIt, GoRouter, `Result<T>`/`Either` ou um banco (ObjectBox/SQLite) sem alinhar antes — destoa de todo o código atual.
+- Não usar strings hardcoded na UI — use a localização (`lib/i18n/`).
+- Não criar arquivos `.md` para documentar mudanças de código.
+- Não rodar `flutter pub upgrade` sem perguntar.
 
-## 🧭 Fluxo para nova feature
+## 🛠️ Skills
 
-1. **Mínimo obrigatório**: View + Cubit + State + rota + DI
-2. **Dados locais**: injete `StorageService` diretamente no Cubit
-3. **API externa**: crie também Entity + Repository Interface + Model + DataSource + RepositoryImpl
-4. Siga a estrutura de pastas descrita em `.agents/rules/architecture.instructions.md`
+Leia a skill correspondente antes da tarefa: `flutter-expert` (guia geral de implementação), `implement-admob`, `implement-in-app-purchase`, `implement-firebase-notifications`, `implement-auth-token-flow`, `custom-paint`, `flutter-animating-apps`, `flutter-adaptive-ui`, `flutter-isolates`. (Lista completa em `.claude/skills/`.)
 
-## Estrutura do Projeto
+## 📖 Documentação de Flows
 
-```
-lib/
-├── main.dart                    # Entry point — inicializa MobileAds e NotificationService
-├── objectbox-model.json         # Modelo ObjectBox (gerado automaticamente)
-├── i18n/                        # Strings de localização (pt_BR, en_US, es_ES)
-└── src/
-    ├── app_widget.dart          # Widget raiz da aplicação
-    ├── features/
-    │   ├── home/                # Tela principal — cubit/, view/, widgets/
-    │   ├── devedores/           # Gerenciamento de devedores — cubit/, view/
-    │   ├── grafico/             # Gráficos financeiros — view/, widgets/
-    │   ├── nova_divida/         # Cadastro de nova dívida — view/
-    │   └── plus/                # Tela de recursos premium — view/
-    └── util/
-        ├── colors/              # Paleta de cores do app
-        ├── entity/              # Entidades de domínio
-        ├── enum/                # Enumerações
-        ├── extension/           # Extensions do Dart/Flutter
-        ├── helpers/             # Funções utilitárias
-        ├── service/             # NotificationService, AdMob helper
-        ├── strings/             # Constantes de strings
-        └── widgets/             # Widgets reutilizáveis globais
-```
-
-## Comandos Úteis
-
-```bash
-flutter pub get           # Instalar dependências
-flutter run               # Executar o app
-flutter build apk         # Build Android APK
-flutter build ipa         # Build iOS IPA
-flutter analyze           # Lint e análise estática
-flutter test              # Executar testes
-```
-
-## Dependências Externas
-
-| Categoria | Pacote | Versão |
-|---|---|---|
-| State Management | flutter_bloc | ^9.0.0 |
-| DI | get_it | ^8.0.2 |
-| Network | dio | ^5.9.0 |
-| Functional | dartz | ^0.10.1 |
-| Storage | shared_preferences | ^2.3.3 |
-| Storage | path_provider | ^2.0.15 |
-| i18n | flutter_localization | ^0.3.1 |
-| i18n | localization | ^2.1.0 |
-| i18n | intl | ^0.20.2 |
-| Ads | google_mobile_ads | ^6.0.0 |
-| Notifications | flutter_local_notifications | ^18.0.1 |
-| IAP | in_app_purchase | ^3.2.3 |
-| Charts | fl_chart | ^1.1.1 |
-| Design System | as_design_system | git (main) |
-| UI | flutter_masked_text2, cupertino_icons | vários |
-| Utilities | uuid, path, share_plus, screenshot, package_info_plus, url_launcher, permission_handler | vários |
+Para qualquer feature ou fluxo, verifique a pasta `./flow/`: leia os títulos dos arquivos `.md` disponíveis e, se algum for relevante para a tarefa atual, leia-o antes de implementar ou debugar. Use `/flow <nome>` para criar ou atualizar flows individuais.
