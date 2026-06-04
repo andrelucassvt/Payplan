@@ -23,11 +23,11 @@ class OrcamentoEntity {
   final bool concluido;
 
   /// Retorna o total do orçamento.
-  /// Se não houver sub-itens, retorna [valor].
+  /// Se não houver sub-itens, retorna [valor] (ou `0.0` se [concluido]).
   /// Se houver sub-itens, retorna a soma dos valores dos sub-itens
   /// que ainda não foram concluídos.
   double get totalOrcamento {
-    if (subItens.isEmpty) return valor;
+    if (subItens.isEmpty) return concluido ? 0.0 : valor;
     return subItens.fold(
       0.0,
       (soma, s) => soma + (s.concluido ? 0.0 : s.valor),
