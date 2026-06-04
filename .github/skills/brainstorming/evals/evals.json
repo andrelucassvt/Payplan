@@ -1,0 +1,20 @@
+{
+  "skill_name": "brainstorming",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Quero implementar autenticação biométrica (Face ID / Touch ID) na tela de login do app. O usuário deve poder ativar nas configurações e, quando ativo, ver o botão biométrico na tela de login.",
+      "expected_output": "Briefing com: entendimento do pedido, contexto do flow/login.md carregado (arquivos como login_cubit.dart, login_view.dart, storage_service.dart), pontos de atenção sobre o fluxo existente, e lista de flows a revisitar após implementação."
+    },
+    {
+      "id": 2,
+      "prompt": "Quero criar uma tela de configurações no app onde o usuário pode alterar notificações, tema e idioma.",
+      "expected_output": "Briefing com: entendimento do pedido, flows lidos (project-structure.md para contexto geral), confirmação de que não há flow específico para settings ainda, sugestão de criar o flow após implementação com /flow."
+    },
+    {
+      "id": 3,
+      "prompt": "Muda a cor do botão de login para azul (#2196F3).",
+      "expected_output": "Briefing conciso: pedido é puramente UI (cor de botão), arquivos afetados são apenas login_view.dart, nenhum flow precisa ser atualizar após a mudança."
+    }
+  ]
+}

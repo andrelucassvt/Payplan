@@ -170,6 +170,23 @@ Route createCustomRoute(Widget destination) {
 </details>
 
 
+## Anti-patterns
+
+Evite estes erros comuns ao implementar animações:
+
+| Anti-pattern | Por quê é ruim | Correto |
+|---|---|---|
+| Esquecer `controller.dispose()` no `dispose()` | Vazamento de memória — ticker continua rodando após widget ser desmontado | Sempre chame `controller.dispose()` em `dispose()` |
+| Criar `AnimationController` sem `vsync` | Animação continua consumindo recursos mesmo quando a tela não está visível | Use `SingleTickerProviderStateMixin` e passe `vsync: this` |
+| `TickerProviderStateMixin` com um único controller | Funciona, mas indica uso incorreto do mixin | Use `SingleTickerProviderStateMixin` para 1 controller; `TickerProviderStateMixin` para 2+ |
+| Usar `setState()` com `addListener()` para rebuildar UI | Reconstrói toda a subárvore — causa jank em árvores complexas | Use `AnimatedBuilder` que reconstrói apenas o builder |
+| Animar dentro de `build()` (`controller.forward()` no build) | Cria loop infinito de builds ou reinicia a animação a cada rebuild | Inicie animações em `initState()`, callbacks ou `BlocListener` |
+| `Duration.zero` ou duração extremamente curta | Animação imperceptível, transição brusca — igual a não animar | Use pelo menos `Duration(milliseconds: 150)` para feedback visual |
+| Animação implícita para sequências complexas | Sem controle de playback, sem stagger, sem reverse sincronizado | Use `AnimationController` + `Interval` para coreografar sequências |
+| `Hero` com tags duplicadas na mesma rota | Crash ou comportamento inesperado na transição | Garanta tags únicos por rota (use ID do dado, não string fixa) |
+| `AnimationController` com `duration` fixo para physics | Ignora velocidade real do gesto, movimento artificial | Omita `duration` e use `controller.animateWith(simulation)` |
+| Múltiplos `RepaintBoundary` desnecessários | Custo de memória para cada layer extra sem ganho real de performance | Use `RepaintBoundary` apenas em animações que causam repaint do pai |
+
 ---
 
-**Última atualização**: 28 de março de 2026
+**Última atualização**: 11 de abril de 2026

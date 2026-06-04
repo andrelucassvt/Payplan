@@ -1,0 +1,113 @@
+{
+  "skill_name": "writing-plan",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Cria um plano para implementar a tela de login no app Flutter. O usuário vai digitar email e senha, tem validação dos campos, e no sucesso vai para a HomeView. Usa Bearer token e o projeto já tem StorageService.",
+      "expected_output": "Arquivo ./plan/login-screen.md com estrutura completa: objetivo, contexto, tabela de arquivos afetados, fases com checkboxes (View, Cubit/State, rota, DI), critérios de sucesso e seção de riscos.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "has_objective_section",
+          "description": "O plano contém uma linha de objetivo clara (ex: '> **Objetivo:**') no início"
+        },
+        {
+          "id": "has_phases_with_checkboxes",
+          "description": "Existe pelo menos uma seção '### Fase' com itens de checkbox '- [ ]'"
+        },
+        {
+          "id": "has_success_criteria",
+          "description": "Seção de Critérios de Sucesso presente com pelo menos 2 checkboxes"
+        },
+        {
+          "id": "has_risks_section",
+          "description": "Seção de Riscos ou Mitigações presente"
+        },
+        {
+          "id": "has_file_saved",
+          "description": "Um arquivo .md foi salvo no diretório de outputs"
+        },
+        {
+          "id": "no_vague_placeholders",
+          "description": "Não contém termos vagos como 'TBD', 'ver depois', 'adicionar lógica aqui'"
+        },
+        {
+          "id": "steps_are_actionable",
+          "description": "Os passos referenciam arquivos, funções ou comandos específicos — não apenas descrições genéricas"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Preciso refatorar o repositório de usuários do projeto. Hoje ele faz chamadas HTTP direto no Cubit, preciso extrair para um UserRepository seguindo Clean Architecture com Entity, Interface no domain e RepositoryImpl no data layer.",
+      "expected_output": "Arquivo ./plan/refactor-user-repository.md com fases sequenciais seguras: primeiro tipos/interfaces, depois implementação, depois migração do Cubit, verificações entre fases, e seção de rollback.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "has_objective_section",
+          "description": "O plano contém uma linha de objetivo clara no início"
+        },
+        {
+          "id": "has_phases_with_checkboxes",
+          "description": "Existe pelo menos uma seção de fase com itens de checkbox"
+        },
+        {
+          "id": "phases_are_sequential",
+          "description": "As fases seguem ordem segura: tipos/interfaces antes de implementação"
+        },
+        {
+          "id": "has_rollback_section",
+          "description": "Seção de Rollback presente (pode ser N/A, mas deve existir)"
+        },
+        {
+          "id": "has_file_saved",
+          "description": "Um arquivo .md foi salvo no diretório de outputs"
+        },
+        {
+          "id": "no_vague_placeholders",
+          "description": "Não contém termos vagos como 'TBD', 'ver depois', 'adicionar lógica aqui'"
+        },
+        {
+          "id": "mentions_clean_architecture_layers",
+          "description": "O plano menciona domain, data e presentation explicitamente com seus artefatos"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Quero um plano para adicionar push notifications via Firebase no app. iOS e Android. Precisa pedir permissão, receber notificação em foreground e background, e ao tocar abrir a tela correta via deep link.",
+      "expected_output": "Arquivo ./plan/implement-push-notifications.md com fases cobrindo: configuração Firebase, NotificationService, permissões iOS/Android, handlers foreground/background, deep link navigation. Deve ter seção de riscos com APNs e permissões.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "has_objective_section",
+          "description": "O plano contém uma linha de objetivo clara no início"
+        },
+        {
+          "id": "has_phases_with_checkboxes",
+          "description": "Existe pelo menos duas fases com itens de checkbox"
+        },
+        {
+          "id": "covers_ios_and_android",
+          "description": "O plano menciona explicitamente iOS e Android (APNs, permissões, configuração)"
+        },
+        {
+          "id": "mentions_foreground_background",
+          "description": "O plano cobre handlers para foreground e background separadamente"
+        },
+        {
+          "id": "mentions_deep_link",
+          "description": "O plano cobre navegação via deep link ao tocar na notificação"
+        },
+        {
+          "id": "has_file_saved",
+          "description": "Um arquivo .md foi salvo no diretório de outputs"
+        },
+        {
+          "id": "has_risks_section",
+          "description": "Seção de Riscos presente, idealmente mencionando APNs ou permissões iOS"
+        }
+      ]
+    }
+  ]
+}

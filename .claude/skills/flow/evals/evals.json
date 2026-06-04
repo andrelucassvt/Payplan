@@ -1,0 +1,97 @@
+{
+  "skill_name": "flow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Crie um flow do login do app. Quero entender de ponta a ponta como funciona desde o usuário tocar em Entrar até o token ser salvo e ele ir para a Home.",
+      "expected_output": "Arquivo ./flow/login.md com Visão Geral em prosa, Passo a Passo numerado citando arquivos reais (View, Cubit, Repository, DataSource, StorageService), tabela de arquivos por camada, regras de negócio (validações, refresh token) e observações.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file_saved_in_flow_dir",
+          "description": "Um arquivo .md foi salvo dentro de ./flow/"
+        },
+        {
+          "id": "has_overview_section",
+          "description": "Existe uma seção 'Visão Geral' com prosa explicando o fluxo"
+        },
+        {
+          "id": "has_ordered_steps",
+          "description": "Existe um 'Passo a Passo' numerado (1., 2., 3., ...) representando a ordem de execução"
+        },
+        {
+          "id": "steps_reference_real_files",
+          "description": "Os passos citam caminhos de arquivos e nomes de classes/métodos reais (em backticks)"
+        },
+        {
+          "id": "has_files_table",
+          "description": "Existe uma tabela de 'Arquivos Envolvidos' agrupados por camada"
+        },
+        {
+          "id": "has_business_rules_section",
+          "description": "Existe uma seção 'Regras de Negócio Relevantes' (ou explicitamente declara que não há)"
+        },
+        {
+          "id": "no_vague_placeholders",
+          "description": "Não contém 'TBD', 'ver depois', 'adicionar aqui' ou similares"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mapeia o fluxo de checkout do projeto. Do clique em Finalizar Compra até a confirmação do pagamento e a navegação para a tela de sucesso.",
+      "expected_output": "Arquivo ./flow/checkout.md com fluxo completo, incluindo caminhos alternativos (erro de pagamento, cartão recusado), arquivos da camada de apresentação até o gateway de pagamento, e dependências externas listadas.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file_saved_in_flow_dir",
+          "description": "Arquivo .md salvo em ./flow/"
+        },
+        {
+          "id": "has_alternative_paths",
+          "description": "Existe uma subseção de 'Caminhos alternativos' cobrindo pelo menos um cenário de erro"
+        },
+        {
+          "id": "has_external_dependencies",
+          "description": "Lista dependências externas (gateway de pagamento, SDK, API) quando aplicável"
+        },
+        {
+          "id": "covers_multiple_layers",
+          "description": "A tabela de arquivos cobre pelo menos 3 camadas distintas (apresentação, dados, serviços, etc.)"
+        },
+        {
+          "id": "steps_reference_real_files",
+          "description": "Os passos citam arquivos reais em backticks"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Flow de criação de usuário — como funciona o cadastro novo no app, do formulário até o usuário ficar autenticado.",
+      "expected_output": "Arquivo ./flow/create-user.md mapeando formulário, validação, chamada de API de signup, possível auto-login, persistência de token e navegação final. Regras de negócio de validação devem aparecer.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "file_saved_in_flow_dir",
+          "description": "Arquivo .md salvo em ./flow/"
+        },
+        {
+          "id": "has_overview_section",
+          "description": "Possui Visão Geral em prosa"
+        },
+        {
+          "id": "has_ordered_steps",
+          "description": "Possui Passo a Passo numerado refletindo ordem de execução"
+        },
+        {
+          "id": "mentions_validation_rules",
+          "description": "Identifica regras de validação do formulário na seção de Regras de Negócio"
+        },
+        {
+          "id": "uses_project_layer_names",
+          "description": "Usa o vocabulário real do projeto (ex: Cubit/Repository/DataSource se for o caso) em vez de nomes genéricos inventados"
+        }
+      ]
+    }
+  ]
+}
