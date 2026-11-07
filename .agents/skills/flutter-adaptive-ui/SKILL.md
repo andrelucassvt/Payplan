@@ -3,7 +3,10 @@ name: flutter-adaptive-ui
 description: Build, fix, review, and validate adaptive or responsive Flutter UIs for mobile, tablet, desktop, web, large screens, foldables, and mixed input devices. Use when creating breakpoint-driven layouts, responsive navigation, adaptive dialogs/lists/grids, keyboard/mouse/touch behavior, window-size decisions with MediaQuery or LayoutBuilder, or Capability and Policy patterns for platform-specific behavior.
 metadata:
   author: Stanislav [MADTeacher] Chernyshev
-  version: "2.0"
+  version: "2.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.47"
+  example_prompt: "Adapte uma tela para compact, tablet e desktop com previews"
 ---
 
 # Flutter Adaptive UI
@@ -33,6 +36,9 @@ Default breakpoints:
 5. Branch by breakpoints or capabilities, not by device type. Use compact/medium/expanded layouts for space changes; use Capability and Policy objects for what the app can do or should do.
 6. Implement the smallest adaptive change that preserves state. Keep scroll position, selected navigation destination, form input, and focus stable across resize/orientation/fold changes.
 7. Validate on at least compact and expanded widths. Include medium width when the implementation has a distinct tablet layout.
+
+8. Add widget previews for adaptive components: compact (`Size(360, 800)`) and expanded (`Size(1200, 800)`),
+   plus medium when its composition differs. Use these previews for visual review; use widget tests for behavior.
 
 ## Resource Routing
 
@@ -67,6 +73,8 @@ Do not read every reference by default. Read only the routed material needed for
 
   Requires a `MediaQuery` ancestor (provided by `MaterialApp` or `WidgetsApp`).
 - Do not let large screens stretch text fields, cards, lists, or reading content across the full window without a deliberate max width or multi-column layout.
+- Never resolve an overflow at a single size. An overflow fix is complete only after it is re-checked at a narrow width (<600), an expanded width (>=840), and with `textScaler` raised to at least 1.5 — fixed heights that fit at 1.0 are the most common cause of overflow that only appears on real user devices.
+- Do not silence an overflow with `OverflowBox`, `ClipRect`, or a blanket `FittedBox`. They remove the warning stripe while the content stays clipped and unreachable. Fix the constraint instead: `Expanded`/`Flexible`, `Wrap`, a scroll view, or a max width.
 - Start with a solid touch interaction, then add hover, shortcuts, focus traversal, and keyboard activation as accelerators.
 - Use `GridView.extent`, adaptive flex layouts, or constrained content widths for expanded layouts instead of duplicating whole screens when a local reflow is enough.
 - Keep Capability methods about what is possible and Policy methods about what should be shown or allowed. Name methods by the decision, not by the platform.
@@ -79,8 +87,18 @@ After changing a Flutter project:
 1. Run `flutter analyze`.
 2. Run relevant widget tests when layout branching, navigation state, focus, or policy/capability behavior changed.
 3. Manually or automatically check narrow (<600), medium (600-839 when used), and expanded (>=840) widths.
-4. Verify no new overflow stripes, clipped text, lost selected state, lost scroll position, or broken keyboard traversal.
-5. If validation cannot run, report the blocker and the risk. Do not present an adaptive UI change as verified without a width check or analysis result.
+4. Check accessibility text scaling at 1.5x and 2.0x on any layout with fixed heights, dense text, or a `Row` of labels. In widget tests, wrap the app with `MediaQuery.withClampedTextScaling(minScaleFactor: 2.0, maxScaleFactor: 2.0, child: ...)`; in the running app, raise the system font size.
+5. Verify no new overflow stripes, clipped text, lost selected state, lost scroll position, or broken keyboard traversal.
+6. If validation cannot run, report the blocker and the risk. Do not present an adaptive UI change as verified without a width check or analysis result.
+
+### Task Progress
+
+- [ ] Mapear constraints e form factors suportados.
+- [ ] Escolher breakpoints por largura disponível.
+- [ ] Preservar estado, foco e scroll durante resize.
+- [ ] Cobrir compact/medium/expanded com widget tests quando houver branches.
+- [ ] Criar previews compact e expanded para revisão visual.
+- [ ] Rodar analyze/testes e informar ao usuário o que deve ser validado manualmente.
 
 ## Fallback
 

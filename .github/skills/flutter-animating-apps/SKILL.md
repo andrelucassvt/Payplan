@@ -1,6 +1,11 @@
 ---
 name: "flutter-animating-apps"
 description: "Implements animated effects, transitions, and motion in a Flutter app. Covers implicit animations (AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder), explicit animations (AnimationController, Tween, CurvedAnimation, AnimatedBuilder), Hero transitions, staggered animations, physics-based animations (SpringSimulation), page route transitions, and AnimatedList. Use when adding visual feedback, shared element transitions, physics-based animations, loading skeletons, shimmer effects, or animated onboarding flows. Activate even when the user says 'animate this widget', 'smooth transition between screens', 'fade in on load', 'slide from bottom', 'bouncy button effect', 'Hero animation between pages', 'make this feel more fluid', or 'animate a list item appearing' without explicitly mentioning AnimationController or Tween."
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.35"
+  example_prompt: "Anime a inserção e remoção de itens respeitando movimento reduzido"
 
 
 ---
@@ -75,6 +80,25 @@ Use this workflow for gesture-driven, natural motion.
   - [ ] Convert the pixel velocity to the coordinate space of the animating property.
   - [ ] Instantiate a `SpringSimulation` with mass, stiffness, damping, and the calculated velocity.
   - [ ] Drive the controller using `controller.animateWith(simulation)`.
+
+### Implementing List and State Transitions
+
+- [ ] **Task Progress:**
+  - [ ] Use `AnimatedList` with a `GlobalKey<AnimatedListState>` for insertion/removal of rows.
+  - [ ] On removal, pass a builder that keeps rendering the removed item while the animation runs.
+  - [ ] Use `AnimatedSwitcher` when one child changes state; provide a stable `ValueKey` per variant.
+  - [ ] Keep `AnimationController` in the View/widget `State`, never in the Cubit.
+  - [ ] Let the Cubit emit state; trigger `controller.forward()` from `BlocListener` when the View owns the motion.
+  - [ ] Respect reduced motion: use `MediaQuery.disableAnimationsOf(context)` and `Duration.zero` when requested.
+  - [ ] Run validator and a widget test for add/remove, empty list and reduced-motion behavior.
+
+## Placement na arquitetura
+
+- `AnimationController` vive no `State` da View ou do widget extraído e é descartado junto com ele.
+- Cubit emite estado; a View reage com `BlocListener` e inicia a animação.
+- Transições de rota ficam em `CustomTransitionPage` no `GoRoute.pageBuilder`, não em um Repository/Service.
+- Use `RepaintBoundary` apenas ao redor da subárvore que realmente repinta; não use animação para mascarar loading
+  ou erro sem estado explícito.
 
 ## Examples
 
@@ -181,12 +205,10 @@ Evite estes erros comuns ao implementar animações:
 | `TickerProviderStateMixin` com um único controller | Funciona, mas indica uso incorreto do mixin | Use `SingleTickerProviderStateMixin` para 1 controller; `TickerProviderStateMixin` para 2+ |
 | Usar `setState()` com `addListener()` para rebuildar UI | Reconstrói toda a subárvore — causa jank em árvores complexas | Use `AnimatedBuilder` que reconstrói apenas o builder |
 | Animar dentro de `build()` (`controller.forward()` no build) | Cria loop infinito de builds ou reinicia a animação a cada rebuild | Inicie animações em `initState()`, callbacks ou `BlocListener` |
-| `Duration.zero` ou duração extremamente curta | Animação imperceptível, transição brusca — igual a não animar | Use pelo menos `Duration(milliseconds: 150)` para feedback visual |
+| `Duration.zero` sempre | Remove feedback visual mesmo quando a pessoa não pediu redução de movimento | Use `Duration.zero` apenas quando `MediaQuery.disableAnimationsOf(context)` indicar movimento reduzido; caso contrário, duração perceptível |
 | Animação implícita para sequências complexas | Sem controle de playback, sem stagger, sem reverse sincronizado | Use `AnimationController` + `Interval` para coreografar sequências |
 | `Hero` com tags duplicadas na mesma rota | Crash ou comportamento inesperado na transição | Garanta tags únicos por rota (use ID do dado, não string fixa) |
 | `AnimationController` com `duration` fixo para physics | Ignora velocidade real do gesto, movimento artificial | Omita `duration` e use `controller.animateWith(simulation)` |
 | Múltiplos `RepaintBoundary` desnecessários | Custo de memória para cada layer extra sem ganho real de performance | Use `RepaintBoundary` apenas em animações que causam repaint do pai |
 
 ---
-
-**Última atualização**: 11 de abril de 2026

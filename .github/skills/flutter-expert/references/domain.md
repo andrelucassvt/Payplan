@@ -64,7 +64,6 @@ class UserEntity {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserEntity &&
-          runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
           email == other.email;
@@ -77,13 +76,19 @@ class UserEntity {
 }
 ```
 
+> **Não inclua `runtimeType == other.runtimeType` no `==`.** Models estendem Entities
+> (`class UserModel extends UserEntity`), então a checagem de `runtimeType` faz
+> `UserModel(id: '1') != UserEntity(id: '1')`. Como o Repository retorna Models tipados como
+> Entities, isso quebra qualquer asserção de teste que compare com uma Entity literal.
+> O `other is UserEntity` já garante a segurança de tipo necessária.
+
 ### Regras Obrigatórias para Entities
 
 1. `@immutable` — SEMPRE adicione
 2. `const` constructor
 3. `final` em todos os campos
 4. `copyWith()` — SEMPRE implemente
-5. `==` e `hashCode` — SEMPRE implemente
+5. `==` e `hashCode` — SEMPRE implemente, sempre sobre os mesmos campos
 6. `toString()` — recomendado para debugging
 
 ---
@@ -118,9 +123,17 @@ class HomeEntity {
           listEquals(items, other.items);  // ✅ Use listEquals
 
   @override
-  int get hashCode => Object.hash(message, items);
+  int get hashCode => Object.hash(message, Object.hashAll(items));  // ✅ Use hashAll
 }
 ```
+
+> **`Object.hash(message, items)` está errado** quando `items` é uma `List`. O `hashCode` de uma
+> lista é por identidade, então duas `HomeEntity` consideradas iguais por `listEquals` produziriam
+> hashes diferentes — violando o contrato `==`/`hashCode` e quebrando `Set`, chaves de `Map` e
+> `distinct()`. Sempre que o `==` usar `listEquals`, o `hashCode` precisa usar `Object.hashAll`.
+>
+> A mesma regra vale para `Map` e `Set` em campos: `mapEquals`/`setEquals` no `==` exigem
+> `Object.hashAll` sobre as entradas no `hashCode`.
 
 ## Entity com Composição
 
@@ -221,9 +234,10 @@ abstract class ProductRepository {
 - [ ] Construtor `const`
 - [ ] Propriedades `final`
 - [ ] `copyWith()`
-- [ ] `==` e `hashCode`
+- [ ] `==` e `hashCode` sobre os mesmos campos
 - [ ] `toString()` (recomendado)
-- [ ] `listEquals` para listas
+- [ ] `listEquals` no `==` **e** `Object.hashAll` no `hashCode` para listas
+- [ ] `==` sem `runtimeType` (Models estendem Entities)
 
 ### Repository Interface:
 - [ ] Arquivo em `lib/domain/interfaces/<nome>_repository.dart`
@@ -244,3 +258,6 @@ abstract class ProductRepository {
 | `Future<UserModel> getUser()` | `Future<Result<UserEntity>> getUser()` |
 | `import 'package:dio/dio.dart'` no domain | Apenas `flutter/foundation.dart` e imports do próprio projeto |
 | Repository sem `Result<T>` — lança exceções | `Future<Result<UserEntity>> getUser(String id)` |
+| `Object.hash(msg, items)` com `items` sendo `List` | `Object.hash(msg, Object.hashAll(items))` |
+| `runtimeType == other.runtimeType` no `==` | Só `other is UserEntity` — senão Model nunca é igual a Entity |
+| `==` compara 5 campos e `hashCode` usa 3 | Ambos sobre exatamente os mesmos campos |

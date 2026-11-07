@@ -2,9 +2,9 @@
 
 ## Leitura Rápida
 
-- **Quando criar um Model**: SEMPRE estenda a Entity correspondente, implemente `fromJson()` com defaults, `toJson()`, e `copyWith()` retornando o Model.
+- **Quando criar um Model**: SEMPRE estenda a Entity correspondente, implemente `fromJson()` (defaults só em campos opcionais), `toJson()`, e `copyWith()` retornando o Model.
 - **Quando criar um DataSource**: retorne dados brutos (`HttpResponse`/`Map`/`List`) e NUNCA trate erros — deixe o Repository tratá-los.
-- **Quando criar um RepositoryImpl**: SEMPRE envolva em `try/catch`, converta para Model e retorne `Result<T>` — nunca `throw`.
+- **Quando criar um RepositoryImpl**: `try/catch (error, stackTrace)`, `ensureSuccess(response)` antes do parsing, classifique em `AppException` e retorne `Result<T>` — nunca `throw`.
 - **Quando injetar dependências no DataSource**: receba `HttpService` (não Dio diretamente) via construtor.
 - **Quando houver lógica de negócio**: NÃO coloque no Data — Data apenas transforma e transporta.
 
@@ -42,11 +42,16 @@ class UserModel extends UserEntity {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-    );
+    return switch (json) {
+      {
+        'id': final String id,
+        'name': final String name,
+        'email': final String email,
+      } => UserModel(id: id, name: name, email: email),
+      _ => throw const ResponseParsingException(
+          'UserModel: campos obrigatórios ausentes ou inválidos',
+        ),
+    };
   }
 
   Map<String, dynamic> toJson() {
@@ -114,10 +119,41 @@ class UserModel extends UserEntity {
 ### Regras para Models
 
 1. **Sempre estende a Entity** — `class UserModel extends UserEntity`
-2. **`fromJson()` com valores default** — nunca `json['id']` sem `?? ''`
+2. **Defaults apenas em campos opcionais** — ver a ressalva abaixo
 3. **`toJson()` implementado**
 4. **`copyWith()` override retornando Model** (não Entity)
 5. **`fromEntity()` quando necessário**
+
+### ⚠️ Defaults não podem mascarar resposta inválida
+
+`json['id'] as String? ?? ''` protege contra campo ausente — e também transforma um corpo de erro
+em objeto vazio. Um `500` cujo body é `{"error": "..."}` vira `UserModel(id: '', name: '', email: '')`
+e o Repository devolve `Result.ok`. A tela mostra conteúdo em branco em vez do erro.
+
+Separe os dois casos:
+
+```dart
+factory UserModel.fromJson(Map<String, dynamic> json) {
+  return switch (json) {
+    {
+      'id': final String id,
+      'name': final String name,
+      'email': final String email,
+    } => UserModel(
+        id: id,
+        name: name,
+        email: email,
+        nickname: json['nickname'] as String?, // opcional, fora do contrato mínimo
+      ),
+    _ => throw const ResponseParsingException(
+        'UserModel: campos obrigatórios ausentes ou inválidos',
+      ),
+  };
+}
+```
+
+Regra prática: **identidade e campos sem os quais a tela não funciona → lance**; campos de exibição
+que podem faltar legitimamente → default. Nunca use default para disfarçar que a resposta veio errada.
 
 ---
 
@@ -193,18 +229,107 @@ class UserLocalDataSource {
 
 ---
 
+## Erros tipados
+
+`Result.error(Exception('Failed to get user: $e'))` destrói a informação: o Cubit recebe uma string
+e não consegue distinguir sem-rede de `404` de `401`. Sem isso não dá para escolher a mensagem certa
+para o usuário, nem disparar refresh de token, nem decidir se cabe um botão de "tentar de novo".
+
+Defina a hierarquia uma vez em `lib/config/error/app_exception.dart`:
+
+```dart
+import 'dart:async';
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
+@immutable
+sealed class AppException implements Exception {
+  const AppException(this.message, {this.cause, this.stackTrace});
+
+  final String message;
+  final Object? cause;
+  final StackTrace? stackTrace;
+
+  @override
+  String toString() => 'AppException(message: $message)';
+}
+
+/// Sem conexão, DNS, timeout — a requisição não chegou a ser respondida.
+class NetworkException extends AppException {
+  const NetworkException(super.message, {super.cause, super.stackTrace});
+}
+
+/// 401/403 — a View deve levar ao login ou pedir novo consentimento.
+class UnauthorizedException extends AppException {
+  const UnauthorizedException(super.message, {super.cause, super.stackTrace});
+}
+
+/// 404 — recurso inexistente; normalmente vira estado vazio, não erro.
+class NotFoundException extends AppException {
+  const NotFoundException(super.message, {super.cause, super.stackTrace});
+}
+
+/// 5xx — falha do servidor; "tentar de novo" faz sentido.
+class ServerException extends AppException {
+  const ServerException(super.message, {super.cause, super.stackTrace, this.statusCode});
+  final int? statusCode;
+}
+
+/// Resposta 2xx com corpo fora do contrato esperado.
+class ResponseParsingException extends AppException {
+  const ResponseParsingException(super.message, {super.cause, super.stackTrace});
+}
+
+/// Qualquer coisa não classificada.
+class UnknownException extends AppException {
+  const UnknownException(super.message, {super.cause, super.stackTrace});
+}
+```
+
+O Cubit passa a escolher a mensagem pelo tipo, sem inspecionar strings:
+
+```dart
+result.when(
+  ok: (user) => emit(ProfileLoaded(user: user)),
+  error: (e) => emit(
+    ProfileError(
+      switch (e) {
+        NetworkException() => ProfileErrorKind.offline,
+        UnauthorizedException() => ProfileErrorKind.sessionExpired,
+        NotFoundException() => ProfileErrorKind.notFound,
+        _ => ProfileErrorKind.generic,
+      },
+      error: e,
+    ),
+  ),
+);
+```
+
+> O Cubit não tem `BuildContext`, então ele emite a **causa** (enum ou chave), não o texto.
+> A View traduz com `context.l10n` ao renderizar o State de erro.
+
+---
+
 ## Criando Repository Implementations
+
+O RepositoryImpl é o único lugar que converte falha em `Result.error`. Ele precisa fazer três coisas
+que o template ingênuo esquece: **checar o status HTTP**, **preservar o erro original e o stack trace**
+e **classificar** a falha.
 
 ### Template Base
 
 ```dart
+import 'package:base_app/config/error/app_exception.dart';
 import 'package:base_app/config/error/result_pattern.dart';
-import 'package:base_app/domain/entities/user_entity.dart';
-import 'package:base_app/domain/interfaces/user_repository.dart';
 import 'package:base_app/data/datasources/user_remote_datasource.dart';
 import 'package:base_app/data/models/user_model.dart';
+import 'package:base_app/domain/entities/user_entity.dart';
+import 'package:base_app/domain/interfaces/user_repository.dart';
 
-class UserRepositoryImpl implements UserRepository {
+class UserRepositoryImpl with RepositoryErrorMapper implements UserRepository {
   const UserRepositoryImpl(this._remoteDataSource);
 
   final UserRemoteDataSource _remoteDataSource;
@@ -213,10 +338,11 @@ class UserRepositoryImpl implements UserRepository {
   Future<Result<UserEntity>> getUserById(String id) async {
     try {
       final response = await _remoteDataSource.getUserById(id);
+      ensureSuccess(response); // ✅ 4xx/5xx nunca chega ao fromJson
       final model = UserModel.fromJson(response.data as Map<String, dynamic>);
       return Result.ok(model);
-    } catch (e) {
-      return Result.error(Exception('Failed to get user: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 
@@ -224,12 +350,13 @@ class UserRepositoryImpl implements UserRepository {
   Future<Result<List<UserEntity>>> getAllUsers() async {
     try {
       final response = await _remoteDataSource.getUsers();
+      ensureSuccess(response);
       final users = (response.data as List<dynamic>)
           .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
           .toList();
       return Result.ok(users);
-    } catch (e) {
-      return Result.error(Exception('Failed to get users: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 
@@ -238,24 +365,91 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final userData = UserModel.fromEntity(user).toJson();
       final response = await _remoteDataSource.createUser(userData);
+      ensureSuccess(response);
       final model = UserModel.fromJson(response.data as Map<String, dynamic>);
       return Result.ok(model);
-    } catch (e) {
-      return Result.error(Exception('Failed to create user: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 
   @override
   Future<Result<void>> deleteUser(String id) async {
     try {
-      await _remoteDataSource.deleteUser(id);
+      final response = await _remoteDataSource.deleteUser(id);
+      ensureSuccess(response);
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(Exception('Failed to delete user: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 }
 ```
+
+### Checagem de status e classificação
+
+Os dois helpers são idênticos em todo RepositoryImpl — mantenha-os num mixin compartilhado:
+
+```dart
+mixin RepositoryErrorMapper {
+  /// Status fora de 2xx vira exceção tipada antes de qualquer parsing.
+  void ensureSuccess(HttpResponse response) {
+    final status = response.statusCode;
+    if (status >= 200 && status < 300) return;
+
+    throw switch (status) {
+      401 || 403 => UnauthorizedException('Não autorizado ($status)'),
+      404 => const NotFoundException('Recurso não encontrado'),
+      >= 500 => ServerException('Erro no servidor', statusCode: status),
+      _ => UnknownException('Resposta inesperada ($status)'),
+    };
+  }
+
+  /// Preserva a causa e o stack trace originais em toda conversão.
+  AppException toAppException(Object error, StackTrace stackTrace) {
+    if (error is AppException) return error;
+
+    // Adapte à exceção do cliente HTTP do projeto (DioException, SocketException, ...).
+    if (error is SocketException || error is TimeoutException) {
+      return NetworkException('Falha de conexão', cause: error, stackTrace: stackTrace);
+    }
+
+    if (error is DioException) {
+      return switch (error.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.connectionError => NetworkException(
+            'Falha de conexão',
+            cause: error,
+            stackTrace: stackTrace,
+          ),
+        DioExceptionType.badResponse => UnknownException(
+            'Resposta HTTP inválida',
+            cause: error,
+            stackTrace: stackTrace,
+          ),
+        _ => UnknownException(
+            'Falha inesperada',
+            cause: error,
+            stackTrace: stackTrace,
+          ),
+      };
+    }
+
+    return UnknownException('Falha inesperada', cause: error, stackTrace: stackTrace);
+  }
+}
+```
+
+> **`catch (e)` sozinho perde o stack trace.** Use sempre `catch (error, stackTrace)` e propague os
+> dois — é o que permite ao State de erro registrar a causa real no `BlocObserver` (ver `view-model.md`).
+
+### Parsing grande no DataSource
+
+Quando a resposta contém milhares de itens, faça o parsing fora da thread da UI no próprio DataSource,
+usando uma função top-level com `compute()`. Não mova essa decisão para o Cubit ou para a View: o Data Layer
+é o ponto que conhece o formato da resposta. Veja o padrão completo em [flutter-isolates](../../flutter-isolates/SKILL.md).
 
 ### Repository com Cache (Remote + Local)
 
@@ -264,28 +458,42 @@ class UserRepositoryImpl implements UserRepository {
 Future<Result<UserEntity>> getUserById(String id) async {
   try {
     final response = await _remoteDataSource.getUserById(id);
+    ensureSuccess(response);
     final model = UserModel.fromJson(response.data as Map<String, dynamic>);
     await _localDataSource.saveUser(model.toJson());
     return Result.ok(model);
-  } catch (e) {
+  } catch (error, stackTrace) {
+    final failure = toAppException(error, stackTrace);
+
+    // ✅ Cache só substitui falha de rede. Um 401 ou um corpo inválido
+    //    precisam chegar à UI — servir cache aqui esconderia o problema.
+    if (failure is! NetworkException) return Result.error(failure);
+
     try {
       final cachedData = await _localDataSource.getUser();
-      if (cachedData != null) {
-        return Result.ok(UserModel.fromJson(cachedData));
-      }
-    } catch (_) {}
-    return Result.error(Exception('Failed to get user: $e'));
+      if (cachedData != null) return Result.ok(UserModel.fromJson(cachedData));
+    } catch (cacheError, cacheStackTrace) {
+      // ✅ Falha de cache não sobrescreve a falha original, mas também não some.
+      log('Cache indisponível para user $id', error: cacheError, stackTrace: cacheStackTrace);
+    }
+
+    return Result.error(failure);
   }
 }
 ```
+
+> `catch (_) {}` vazio é o pior desfecho possível: o app fica sem cache **e** sem registro de por quê.
+> Se o erro não muda o fluxo, ele ainda precisa ser logado.
 
 ### Regras para Repository Implementations
 
 1. **Implementa a interface do domínio** — `implements UserRepository`
 2. **Recebe DataSources via construtor**
-3. **SEMPRE envolve em `try/catch`**
-4. **Retorna `Result<T>`** — nunca lança exceções
-5. **Converte HttpResponse/Map em Model**
+3. **SEMPRE envolve em `try/catch (error, stackTrace)`** — nunca `catch (e)` sozinho
+4. **Checa o status HTTP antes de fazer parsing** — `ensureSuccess(response)`
+5. **Retorna `Result<T>`** — nunca lança exceções
+6. **Classifica a falha em `AppException`** preservando causa e stack trace
+7. **Converte HttpResponse/Map em Model**
 
 ---
 
@@ -294,7 +502,7 @@ Future<Result<UserEntity>> getUserById(String id) async {
 ### Model:
 - [ ] Arquivo em `lib/data/models/<nome>_model.dart`
 - [ ] Extende a Entity correspondente
-- [ ] `fromJson()` com defaults (`?? ''`, `?? []`, `?? 0`)
+- [ ] `fromJson()` com defaults só em campos opcionais; campo de identidade ausente lança
 - [ ] `toJson()` implementado
 - [ ] `copyWith()` override retornando Model
 - [ ] `fromEntity()` se necessário
@@ -309,7 +517,9 @@ Future<Result<UserEntity>> getUserById(String id) async {
 ### Repository Implementation:
 - [ ] Arquivo em `lib/data/repositories/<nome>_repository_impl.dart`
 - [ ] Implementa a interface do domínio
-- [ ] Todos os métodos têm `try/catch`
+- [ ] Todos os métodos têm `try/catch (error, stackTrace)`
+- [ ] `ensureSuccess(response)` antes de qualquer `fromJson`
+- [ ] Falha classificada em `AppException`, com `cause` e `stackTrace` preservados
 - [ ] Retorna `Result<T>` sempre
 - [ ] Convertido para Model em cada método
 
@@ -319,7 +529,12 @@ Future<Result<UserEntity>> getUserById(String id) async {
 
 | Erro | Correto |
 |---|---|
-| `json['id']` sem cast/default | `json['id'] as String? ?? ''` |
+| `json['id']` sem cast | `json['id'] as String?` e lançar se ausente |
+| Default `?? ''` em campo de identidade | Lançar `ResponseParsingException` — default mascara resposta inválida |
+| `fromJson` direto, sem olhar o status | `ensureSuccess(response)` antes do parsing |
 | DataSource com `try/catch` | DataSource apenas retorna, Repository trata |
-| Repository sem `try/catch` | SEMPRE envolva em `try/catch` |
+| Repository sem `try/catch` | SEMPRE envolva em `try/catch (error, stackTrace)` |
+| `catch (e)` sem stack trace | `catch (error, stackTrace)` e propague os dois |
+| `Result.error(Exception('falhou: $e'))` | `Result.error(toAppException(error, stackTrace))` |
+| `catch (_) {}` vazio no fallback de cache | Logar o erro mesmo quando ele não muda o fluxo |
 | `Future<UserEntity>` no Repository | `Future<Result<UserEntity>>` |

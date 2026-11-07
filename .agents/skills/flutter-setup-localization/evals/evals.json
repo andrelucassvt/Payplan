@@ -1,0 +1,38 @@
+{
+  "skill_name": "flutter-setup-localization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Configure a localização de um app Flutter em português e inglês, usando l10n.yaml com geração no source e uma extensão context.l10n.",
+      "expected_output": "Configuração completa de dependências, generate: true, l10n.yaml, ARBs, AppLocalizations e delegates.",
+      "files": [],
+      "expectations": [
+        "Inclui flutter_localizations, intl e flutter generate: true",
+        "Usa synthetic-package: false e importa AppLocalizations do source",
+        "Registra localizationsDelegates e supportedLocales"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Troque o texto hardcoded 'Você tem 3 itens' por uma mensagem localizada com plural para zero, um e muitos itens.",
+      "expected_output": "ARB com plural e placeholder tipado, uso da chave gerada na View e comando de geração.",
+      "files": [],
+      "expectations": [
+        "Usa ICU plural em vez de concatenação manual",
+        "Declara o placeholder count com tipo int",
+        "Indica flutter gen-l10n e uso via context.l10n"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "flutter gen-l10n falha porque uma tradução não tem o placeholder {name} e o código importa package:flutter_gen. Corrija a configuração.",
+      "expected_output": "Diagnóstico que corrige ARB, synthetic-package, generate: true e o import gerado.",
+      "files": [],
+      "expectations": [
+        "Identifica placeholder divergente entre ARBs",
+        "Remove o uso de package:flutter_gen",
+        "Propõe regenerar antes de continuar"
+      ]
+    }
+  ]
+}

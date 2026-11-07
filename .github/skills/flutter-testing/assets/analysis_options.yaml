@@ -1,0 +1,66 @@
+# Análise estática rígida para projetos Flutter.
+# Objetivo: transformar em erro de build tudo que, em código gerado por agente,
+# costuma virar crash em produção.
+
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  errors:
+    # Future sem await: bug silencioso mais comum em código gerado
+    unawaited_futures: error
+    discarded_futures: error
+    # context usado depois de await sem checar mounted
+    use_build_context_synchronously: error
+    # só quebra em runtime, no dispositivo do usuário
+    avoid_dynamic_calls: error
+    # em Flutter, warning aqui vira crash
+    missing_required_param: error
+    missing_return: error
+    invalid_use_of_protected_member: error
+    invalid_use_of_visible_for_testing_member: error
+    # higiene
+    unused_import: error
+    unused_local_variable: error
+    dead_code: error
+    # ruído aceitável durante desenvolvimento
+    todo: ignore
+
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+    - "**/generated_plugin_registrant.dart"
+    - "build/**"
+
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_print
+    - avoid_slow_async_io
+    - cancel_subscriptions
+    - close_sinks
+    - prefer_const_constructors
+    - prefer_final_locals
+    - require_trailing_commas
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_await_in_return
+
+# Opcional: exige dart_code_metrics no dev_dependencies
+dart_code_metrics:
+  metrics:
+    cyclomatic-complexity: 15
+    number-of-parameters: 5
+    maximum-nesting-level: 4
+    source-lines-of-code: 100
+  metrics-exclude:
+    - test/**
+  rules:
+    - avoid-unused-parameters
+    - no-empty-block
+    - prefer-conditional-expressions

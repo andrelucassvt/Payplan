@@ -27,30 +27,56 @@ import 'package:flutter/foundation.dart';
 @immutable
 sealed class LoginState {
   const LoginState();
+
+  @override
+  String toString();
 }
 
 class LoginInitial extends LoginState {
   const LoginInitial();
+
+  @override
+  String toString() => 'LoginInitial';
 }
 
 class LoginSubmitting extends LoginState {
   const LoginSubmitting();
+
+  @override
+  String toString() => 'LoginSubmitting';
 }
 
 class LoginSuccess extends LoginState {
   const LoginSuccess();
+
+  @override
+  String toString() => 'LoginSuccess';
 }
 
 class LoginError extends LoginState {
-  const LoginError(this.message);
-  final String message;
+  const LoginError(this.kind, {this.error});
+  final LoginErrorKind kind;
+  final Object? error;
+
+  @override
+  String toString() => 'LoginError(kind: $kind, error: $error)';
 }
 
 class LoginFieldError extends LoginState {
   const LoginFieldError({this.emailError, this.passwordError});
-  final String? emailError;
-  final String? passwordError;
+  final FieldErrorKind? emailError;
+  final FieldErrorKind? passwordError;
+
+  @override
+  String toString() =>
+      'LoginFieldError(emailError: $emailError, passwordError: $passwordError)';
 }
+
+enum LoginErrorKind { invalidCredentials, offline, generic }
+
+/// Erro de validação também é causa, não texto: o `errorText` do
+/// TextFormField é resolvido na View com context.l10n.
+enum FieldErrorKind { required, invalidEmail, tooShort }
 ```
 
 ---
@@ -90,19 +116,29 @@ class LoginCubit extends Cubit<LoginState> {
 
     result.when(
       ok: (_) => emit(const LoginSuccess()),
-      error: (e) => emit(LoginError('Email ou senha inválidos')),
+      error: (e) => emit(
+        LoginError(
+          switch (e) {
+            NetworkException() => LoginErrorKind.offline,
+            UnauthorizedException() => LoginErrorKind.invalidCredentials,
+            _ => LoginErrorKind.generic,
+          },
+          error: e,
+        ),
+      ),
     );
   }
 
-  String? _validateEmail(String email) {
-    if (email.isEmpty) return 'Email obrigatório';
-    if (!email.contains('@')) return 'Email inválido';
+  // ✅ Validadores devolvem a causa; a View traduz.
+  FieldErrorKind? _validateEmail(String email) {
+    if (email.isEmpty) return FieldErrorKind.required;
+    if (!email.contains('@')) return FieldErrorKind.invalidEmail;
     return null;
   }
 
-  String? _validatePassword(String password) {
-    if (password.isEmpty) return 'Senha obrigatória';
-    if (password.length < 6) return 'Mínimo 6 caracteres';
+  FieldErrorKind? _validatePassword(String password) {
+    if (password.isEmpty) return FieldErrorKind.required;
+    if (password.length < 6) return FieldErrorKind.tooShort;
     return null;
   }
 }
@@ -173,7 +209,8 @@ class _LoginFormState extends State<LoginForm> {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: l10n.emailLabel,
-              errorText: widget.fieldError?.emailError,
+              // ✅ traduz a causa aqui, onde o l10n existe
+              errorText: _fieldErrorText(l10n, widget.fieldError?.emailError),
             ),
             onSubmitted: (_) => _handleSubmit(),
           ),
@@ -183,7 +220,7 @@ class _LoginFormState extends State<LoginForm> {
             obscureText: true,
             decoration: InputDecoration(
               labelText: l10n.passwordLabel,
-              errorText: widget.fieldError?.passwordError,
+              errorText: _fieldErrorText(l10n, widget.fieldError?.passwordError),
             ),
             onSubmitted: (_) => _handleSubmit(),
           ),
@@ -202,6 +239,16 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
+  /// Traduz a causa vinda do Cubit. Retorna String, não Widget —
+  /// não é um `Widget _buildXxx()`, então é permitido no arquivo.
+  String? _fieldErrorText(AppLocalizations l10n, FieldErrorKind? kind) =>
+      switch (kind) {
+        null => null,
+        FieldErrorKind.required => l10n.fieldRequired,
+        FieldErrorKind.invalidEmail => l10n.fieldInvalidEmail,
+        FieldErrorKind.tooShort => l10n.fieldTooShort,
+      };
 }
 ```
 
@@ -246,8 +293,15 @@ class _LoginViewState extends State<LoginView> {
                 context.go(AppRoutes.home);
               }
               if (state is LoginError) {
+                final l10n = context.l10n;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message)),
+                  SnackBar(
+                    content: Text(switch (state.kind) {
+                      LoginErrorKind.invalidCredentials => l10n.loginInvalidCredentials,
+                      LoginErrorKind.offline => l10n.errorOffline,
+                      LoginErrorKind.generic => l10n.errorGeneric,
+                    }),
+                  ),
                 );
               }
             },
@@ -297,5 +351,5 @@ inject.registerFactory<LoginCubit>(() => LoginCubit(inject()));
 | Controllers | No widget `LoginForm` (StatefulWidget) — não na View |
 | Submit loader | `isSubmitting: state is LoginSubmitting` passado como parâmetro |
 | Navegação pós-login | `BlocConsumer` listener reage ao `LoginSuccess` |
-| Erro de API | `BlocConsumer` listener exibe SnackBar com `LoginError.message` |
+| Erro de API | `BlocConsumer` listener traduz `LoginError.kind` via `context.l10n` |
 | Context no Cubit | ❌ Nunca — Cubit emite estado, View navega |

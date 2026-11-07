@@ -2,6 +2,11 @@
 name: custom-paint
 description: "Implements Flutter CustomPaint and CustomPainter for drawing 2D graphics on canvas. Use when: the user asks to draw shapes, arcs, paths, gradients, charts, progress indicators, wave animations, custom clipping, or any pixel-level painting on screen. Also covers shouldRepaint optimization, RepaintBoundary, AnimationController integration with CustomPainter, blend modes, canvas transformations, Path operations, image rendering, shadows, SVG path conversion, and canvas hit testing. DO NOT USE FOR: standard widget composition (Row, Stack, Container), image loading/caching, or SVG rendering via flutter_svg. Activate even when the user says 'draw a custom shape', 'create a chart widget', 'animated wave background', 'progress ring', 'gauge meter', 'clip image in a custom shape', or 'pixel-perfect custom design' without explicitly mentioning CustomPaint or CustomPainter."
 argument-hint: "Describe what you want to draw (e.g. animated wave, donut chart, custom progress bar, gauge, particle system)"
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.47"
+  example_prompt: "Crie um ProgressRing com preview e golden test"
 ---
 
 # CustomPaint — Flutter 2D Canvas Drawing
@@ -25,6 +30,41 @@ Abrir esta skill quando o usuário pedir:
 - Animação ao longo de paths (PathMetrics)
 - Efeitos de composição (saveLayer + BlendMode)
 - Elementos de UI que não podem ser compostos com widgets padrão
+
+## Preview e golden
+
+Para um painter reutilizável, crie um preview ao lado do widget quando o projeto usa Flutter 3.47+:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
+
+@Preview(name: 'ProgressRing — 75%', group: 'Paint', size: Size(120, 120))
+Widget progressRingPreview() => const MaterialApp(
+      home: Scaffold(
+        body: Center(child: ProgressRing(progress: 0.75)),
+      ),
+    );
+```
+
+Adicione golden para os valores que representam contratos visuais, sem atualizar o arquivo automaticamente:
+
+```dart
+testWidgets('ProgressRing golden', (tester) async {
+  await tester.pumpWidget(
+    const MaterialApp(
+      home: Center(child: ProgressRing(progress: 0.75)),
+    ),
+  );
+  await expectLater(
+    find.byType(ProgressRing),
+    matchesGoldenFile('goldens/progress_ring_75.png'),
+  );
+});
+```
+
+O usuário revisa o preview e o diff do golden. O agente não inicia o app nem usa `--update-goldens` para
+silenciar uma regressão.
 
 ## Decisão: CustomPaint vs Alternativas
 
@@ -569,5 +609,3 @@ Antes de concluir a implementação:
 - [Flutter Path API](https://api.flutter.dev/flutter/dart-ui/Path-class.html)
 
 ---
-
-**Última atualização**: 11 de abril de 2026

@@ -4,12 +4,16 @@
     {
       "id": 1,
       "prompt": "Crie um flow do login do app. Quero entender de ponta a ponta como funciona desde o usuário tocar em Entrar até o token ser salvo e ele ir para a Home.",
-      "expected_output": "Arquivo ./flow/login.md com Visão Geral em prosa, Passo a Passo numerado citando arquivos reais (View, Cubit, Repository, DataSource, StorageService), tabela de arquivos por camada, regras de negócio (validações, refresh token) e observações.",
+      "expected_output": "Arquivo ./docs/flow/login.md com metadados de rastreabilidade, Visão Geral em prosa, Passo a Passo numerado citando arquivos reais (View, Cubit, Repository, DataSource, StorageService), tabela de arquivos por camada, regras de negócio (validações, refresh token), observações e status coerente com a autorrevisão.",
       "files": [],
       "assertions": [
         {
           "id": "file_saved_in_flow_dir",
-          "description": "Um arquivo .md foi salvo dentro de ./flow/"
+          "description": "Um arquivo .md foi salvo dentro de ./docs/flow/"
+        },
+        {
+          "id": "has_traceability_metadata",
+          "description": "O frontmatter registra generated_at, source_commit, source_state, verified_at e status"
         },
         {
           "id": "has_overview_section",
@@ -34,18 +38,26 @@
         {
           "id": "no_vague_placeholders",
           "description": "Não contém 'TBD', 'ver depois', 'adicionar aqui' ou similares"
+        },
+        {
+          "id": "status_matches_verification",
+          "description": "Usa status current somente quando as referências foram confrontadas com o código; limitações usam possibly-stale"
         }
       ]
     },
     {
       "id": 2,
       "prompt": "Mapeia o fluxo de checkout do projeto. Do clique em Finalizar Compra até a confirmação do pagamento e a navegação para a tela de sucesso.",
-      "expected_output": "Arquivo ./flow/checkout.md com fluxo completo, incluindo caminhos alternativos (erro de pagamento, cartão recusado), arquivos da camada de apresentação até o gateway de pagamento, e dependências externas listadas.",
+      "expected_output": "Arquivo ./docs/flow/checkout.md rastreável e autorrevisado, com fluxo completo, caminhos alternativos (erro de pagamento, cartão recusado), arquivos da camada de apresentação até o gateway de pagamento e dependências externas listadas.",
       "files": [],
       "assertions": [
         {
           "id": "file_saved_in_flow_dir",
-          "description": "Arquivo .md salvo em ./flow/"
+          "description": "Arquivo .md salvo em ./docs/flow/"
+        },
+        {
+          "id": "has_traceability_metadata",
+          "description": "O frontmatter registra commit, estado clean/dirty, datas e status de verificação"
         },
         {
           "id": "has_alternative_paths",
@@ -68,12 +80,16 @@
     {
       "id": 3,
       "prompt": "Flow de criação de usuário — como funciona o cadastro novo no app, do formulário até o usuário ficar autenticado.",
-      "expected_output": "Arquivo ./flow/create-user.md mapeando formulário, validação, chamada de API de signup, possível auto-login, persistência de token e navegação final. Regras de negócio de validação devem aparecer.",
+      "expected_output": "Arquivo ./docs/flow/create-user.md com origem e status verificáveis, mapeando formulário, validação, chamada de API de signup, possível auto-login, persistência de token e navegação final. Regras de negócio de validação devem aparecer.",
       "files": [],
       "assertions": [
         {
           "id": "file_saved_in_flow_dir",
-          "description": "Arquivo .md salvo em ./flow/"
+          "description": "Arquivo .md salvo em ./docs/flow/"
+        },
+        {
+          "id": "has_traceability_metadata",
+          "description": "O frontmatter permite identificar quando e contra qual estado do código o flow foi verificado"
         },
         {
           "id": "has_overview_section",

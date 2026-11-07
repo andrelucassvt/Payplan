@@ -1,6 +1,11 @@
 ---
 name: flutter-isolates
 description: Guia especializado em Isolates no Flutter. Use este skill sempre que o usuário perguntar sobre paralelismo, concorrência, performance de UI, jank, tarefas pesadas em Flutter, ou mencionar qualquer uma das APIs — compute(), Isolate.spawn, Isolate.run, SendPort, ReceivePort. Também deve ser ativado quando o usuário perguntar se deve usar Isolate para determinada tarefa — o skill inclui critérios claros de decisão. Ative mesmo que o usuário não mencione Isolate explicitamente, mas descreva um problema de performance ou travamento de UI em Flutter. Activate even when the user says 'the UI is freezing while processing data', 'the app lags during heavy computation', 'parsing large JSON is blocking the thread', 'how to run this without blocking the UI', or 'the scroll is janky during data processing' without explicitly mentioning Isolate or compute().
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.32"
+  example_prompt: "Parseie uma resposta JSON grande no DataSource sem bloquear a UI"
 ---
 
 # Flutter Isolates — Skill Especializado
@@ -75,6 +80,33 @@ final produtos = await compute(_parsearProdutos, responseBody);
 ```
 
 **Quando preferir:** tarefa pontual, sem necessidade de progresso ou múltiplas mensagens.
+
+### Placement na arquitetura
+
+Quando o trabalho pesado é parsing de uma resposta remota, mantenha a decisão no Data Layer. O DataSource
+busca a resposta; uma função top-level converte o corpo em Models; o Repository continua responsável por
+status HTTP e `Result<T>`. O Cubit recebe dados já transformados e não sabe se houve Isolate.
+
+```dart
+// lib/data/datasources/product_remote_datasource.dart
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+Future<List<ProductModel>> fetchAll() async {
+  final response = await _dio.get<String>('/products');
+  ensureSuccess(response);
+  return compute(_parseProducts, response.data!);
+}
+
+List<ProductModel> _parseProducts(String body) =>
+    (jsonDecode(body) as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(ProductModel.fromJson)
+        .toList();
+```
+
+Esse exemplo é um fragmento: adapte `Dio`, `ensureSuccess` e o retorno bruto à convenção do projeto.
 
 ---
 
@@ -252,5 +284,3 @@ class ProcessamentoService {
 
 
 ---
-
-**Última atualização**: 28 de março de 2026

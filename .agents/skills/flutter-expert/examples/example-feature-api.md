@@ -64,7 +64,6 @@ class ProductEntity {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ProductEntity &&
-          runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
           price == other.price &&
@@ -101,6 +100,7 @@ abstract class ProductRepository {
 
 ```dart
 // lib/data/models/product_model.dart
+import 'package:base_app/config/error/app_exception.dart';
 import 'package:base_app/domain/entities/product_entity.dart';
 
 class ProductModel extends ProductEntity {
@@ -112,12 +112,22 @@ class ProductModel extends ProductEntity {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    return ProductModel(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: json['image_url'] as String? ?? '',
-    );
+    return switch (json) {
+      {
+        'id': final String id,
+        'name': final String name,
+        'price': final num price,
+        'image_url': final String imageUrl,
+      } => ProductModel(
+          id: id,
+          name: name,
+          price: price.toDouble(),
+          imageUrl: imageUrl,
+        ),
+      _ => throw const ResponseParsingException(
+          'ProductModel: campos obrigatórios ausentes ou inválidos',
+        ),
+    };
   }
 
   Map<String, dynamic> toJson() {
@@ -188,13 +198,15 @@ class ProductRemoteDataSource {
 
 ```dart
 // lib/data/repositories/product_repository_impl.dart
+import 'package:base_app/config/error/app_exception.dart';
+import 'package:base_app/config/error/repository_error_mapper.dart';
 import 'package:base_app/config/error/result_pattern.dart';
 import 'package:base_app/data/datasources/product_remote_datasource.dart';
 import 'package:base_app/data/models/product_model.dart';
 import 'package:base_app/domain/entities/product_entity.dart';
 import 'package:base_app/domain/interfaces/product_repository.dart';
 
-class ProductRepositoryImpl implements ProductRepository {
+class ProductRepositoryImpl with RepositoryErrorMapper implements ProductRepository {
   const ProductRepositoryImpl(this._dataSource);
 
   final ProductRemoteDataSource _dataSource;
@@ -203,12 +215,13 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Result<List<ProductEntity>>> getAll() async {
     try {
       final response = await _dataSource.getAll();
+      ensureSuccess(response);
       final products = (response.data as List<dynamic>)
           .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
       return Result.ok(products);
-    } catch (e) {
-      return Result.error(Exception('Erro ao buscar produtos: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 
@@ -217,26 +230,31 @@ class ProductRepositoryImpl implements ProductRepository {
     try {
       final data = ProductModel.fromEntity(product).toJson();
       final response = await _dataSource.create(data);
+      ensureSuccess(response);
       final model = ProductModel.fromJson(
         response.data as Map<String, dynamic>,
       );
       return Result.ok(model);
-    } catch (e) {
-      return Result.error(Exception('Erro ao criar produto: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 
   @override
   Future<Result<void>> delete(String id) async {
     try {
-      await _dataSource.delete(id);
+      final response = await _dataSource.delete(id);
+      ensureSuccess(response);
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(Exception('Erro ao deletar produto: $e'));
+    } catch (error, stackTrace) {
+      return Result.error(toAppException(error, stackTrace));
     }
   }
 }
 ```
+
+> `ensureSuccess` e `toAppException` vêm do mixin `RepositoryErrorMapper` — ver `references/data.md`.
+> Sem eles, um `500` com corpo de erro passaria pelo `fromJson` e viraria `Result.ok` com objeto vazio.
 
 ---
 
@@ -250,33 +268,59 @@ import 'package:flutter/foundation.dart';
 @immutable
 sealed class ProductsState {
   const ProductsState();
+
+  @override
+  String toString();
 }
 
 class ProductsInitial extends ProductsState {
   const ProductsInitial();
+
+  @override
+  String toString() => 'ProductsInitial';
 }
 
 class ProductsLoading extends ProductsState {
   const ProductsLoading();
+
+  @override
+  String toString() => 'ProductsLoading';
 }
 
 class ProductsLoaded extends ProductsState {
   const ProductsLoaded({required this.products});
   final List<ProductEntity> products;
+
+  @override
+  String toString() => 'ProductsLoaded(products: $products)';
 }
 
 class ProductsCreating extends ProductsState {
   const ProductsCreating();
+
+  @override
+  String toString() => 'ProductsCreating';
 }
 
 class ProductsDeleting extends ProductsState {
   const ProductsDeleting();
+
+  @override
+  String toString() => 'ProductsDeleting';
 }
 
 class ProductsError extends ProductsState {
-  const ProductsError(this.message);
-  final String message;
+  const ProductsError(this.kind, {this.error});
+
+  /// Causa, não texto — o Cubit não tem context.l10n.
+  final ProductsErrorKind kind;
+  final Object? error;
+
+  @override
+  String toString() => 'ProductsError(kind: $kind, error: $error)';
 }
+
+enum ProductsErrorKind { load, create, delete, offline }
 ```
 
 ---
@@ -285,6 +329,7 @@ class ProductsError extends ProductsState {
 
 ```dart
 // lib/presentation/products/view_model/products_cubit.dart
+import 'package:base_app/config/error/app_exception.dart';
 import 'package:base_app/domain/entities/product_entity.dart';
 import 'package:base_app/domain/interfaces/product_repository.dart';
 import 'package:base_app/presentation/products/view_model/products_state.dart';
@@ -300,7 +345,7 @@ class ProductsCubit extends Cubit<ProductsState> {
     final result = await _repository.getAll();
     result.when(
       ok: (data) => emit(ProductsLoaded(products: data)),
-      error: (e) => emit(ProductsError('Erro ao carregar produtos')),
+      error: (e) => emit(ProductsError(_kindOf(e, ProductsErrorKind.load), error: e)),
     );
   }
 
@@ -309,7 +354,7 @@ class ProductsCubit extends Cubit<ProductsState> {
     final result = await _repository.create(product);
     result.when(
       ok: (_) => loadAll(),
-      error: (e) => emit(ProductsError('Erro ao criar produto')),
+      error: (e) => emit(ProductsError(_kindOf(e, ProductsErrorKind.create), error: e)),
     );
   }
 
@@ -318,9 +363,12 @@ class ProductsCubit extends Cubit<ProductsState> {
     final result = await _repository.delete(id);
     result.when(
       ok: (_) => loadAll(),
-      error: (e) => emit(ProductsError('Erro ao deletar produto')),
+      error: (e) => emit(ProductsError(_kindOf(e, ProductsErrorKind.delete), error: e)),
     );
   }
+
+  ProductsErrorKind _kindOf(Object error, ProductsErrorKind operation) =>
+      error is NetworkException ? ProductsErrorKind.offline : operation;
 }
 ```
 
@@ -395,6 +443,7 @@ class _ProductsViewState extends State<ProductsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
@@ -402,20 +451,32 @@ class _ProductsViewState extends State<ProductsView> {
         body: SafeArea(
           top: false,
           child: BlocBuilder<ProductsCubit, ProductsState>(
-            builder: (context, state) => switch (state) {
-              ProductsInitial() => const SizedBox.shrink(),
-              ProductsLoading() ||
-              ProductsCreating() ||
-              ProductsDeleting() =>
-                const Center(child: CircularProgressIndicator()),
-              ProductsError(:final message) =>
-                Center(child: Text(message)),
-              ProductsLoaded(:final products) when products.isEmpty =>
-                Center(child: Text(context.l10n.emptyProductsLabel)),
-              ProductsLoaded(:final products) => ListView.builder(
-                  itemCount: products.length,
+            builder: (context, state) {
+              if (state is ProductsLoading ||
+                  state is ProductsCreating ||
+                  state is ProductsDeleting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is ProductsError) {
+                // ✅ A View é o único lugar com acesso ao l10n
+                return Center(
+                  child: Text(switch (state.kind) {
+                    ProductsErrorKind.offline => l10n.errorOffline,
+                    ProductsErrorKind.load => l10n.errorLoadProducts,
+                    ProductsErrorKind.create => l10n.errorCreateProduct,
+                    ProductsErrorKind.delete => l10n.errorDeleteProduct,
+                  }),
+                );
+              }
+              if (state is ProductsLoaded) {
+                // empty-check primeiro (if aninhado) evita bug de ordem
+                if (state.products.isEmpty) {
+                  return Center(child: Text(context.l10n.emptyProductsLabel));
+                }
+                return ListView.builder(
+                  itemCount: state.products.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
+                    final product = state.products[index];
                     return ProductListItem(
                       key: ValueKey(product.id),
                       product: product,
@@ -423,7 +484,10 @@ class _ProductsViewState extends State<ProductsView> {
                           context.read<ProductsCubit>().delete(product.id),
                     );
                   },
-                ),
+                );
+              }
+              // ProductsInitial e estados futuros: branch padrão
+              return const SizedBox.shrink();
             },
           ),
         ),

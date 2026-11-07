@@ -1,0 +1,29 @@
+{
+  "name": "functions",
+  "description": "Cloud Function de verificação de compras (App Store / Google Play)",
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "test": "vitest run",
+    "deploy": "firebase deploy --only functions:verifyPurchase",
+    "logs": "firebase functions:log --only verifyPurchase"
+  },
+  "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0",
+    "google-auth-library": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  },
+  "private": true
+}

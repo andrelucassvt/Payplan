@@ -1,40 +1,52 @@
 ---
 name: flutter-expert
 description: >
-  Flutter Clean Architecture implementation guide (Presentation → Domain ← Data with BLoC + GetIt + GoRouter).
-  Use before implementing any Flutter feature, screen, widget, service, or layer. Provides: decision flow for
-  what to create (API vs local vs simple UI), layer-specific references (View, Cubit/State, Domain, Data,
-  Service, DI, Navigation, Testing, Apple Guidelines), ready-to-use code examples (simple screen, API feature,
-  service, widget, navigation, form), global rules for all layers, development cycle with recovery steps,
-  advanced layout/theming guidance, and troubleshooting for common BLoC + GetIt + GoRouter errors.
+  Guia de implementação Flutter em Clean Architecture (Presentation → Domain ← Data, com BLoC/Cubit + GetIt +
+  GoRouter). Use antes de implementar qualquer feature, tela, widget, service, rota, repositório ou camada em
+  Flutter, e ao decidir o que criar (UI simples vs dados locais vs API). Cobre View, Cubit/State, Domain, Data,
+  Services, DI, localização, previews, deep links, navegação, testes, layout/theming, diretrizes Apple e
+  troubleshooting de BLoC + GetIt + GoRouter.
+metadata:
+  version: "2.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.47"
+  example_prompt: "Implemente uma feature Flutter com API, rota protegida, l10n e preview dos widgets"
 ---
 
 # Flutter Expert
 
-> **Importante**: Os padrões desta skill são baseados em uma **proposta de arquitetura de referência**.
-> Cada projeto pode ter sua própria estrutura. Leia `references/architecture.md` ao trabalhar em um projeto desconhecido e adapte-se ao que já existe.
+Os padrões aqui descritos são uma **proposta de arquitetura de referência**, não uma regra universal.
 
-## Arquivos de Referência
+**Em projeto desconhecido, explore antes de gerar código.** Se o projeto já tem convenção própria de pastas,
+nomenclatura ou tratamento de erro, siga a do projeto — `references/architecture.md` explica como identificá-la
+e onde a proposta continua valendo mesmo em estruturas diferentes.
 
-Leia o arquivo correspondente à camada antes de gerar código. Não leia todos — apenas o que a tarefa exige.
+## Referências
+
+Leia apenas o que a tarefa exigir.
 
 | Referência | Quando ler |
 |---|---|
-| `references/architecture.md` | **Sempre que iniciar em um projeto desconhecido** — entender a proposta de arquitetura e como explorar a estrutura real do projeto |
-| `references/view.md` | Criar ou modificar Views (tela, StatefulWidget, BlocBuilder, SafeArea, BlocConsumer) |
-| `references/view-model.md` | Criar ou modificar Cubits e States (async, Result<T>, debounce, formulário, paginação) |
-| `references/widget.md` | Criar ou extrair widgets reutilizáveis (`widgets/`, `content/`, `common/widgets/`) |
-| `references/domain.md` | Criar Entities ou Repository Interfaces (`lib/domain/**`) |
-| `references/data.md` | Criar Models, DataSources ou RepositoryImpl (`lib/data/**`) |
-| `references/service.md` | Criar Services em `common/services/` (flags, contadores, gating, onboarding, premium) |
-| `references/di.md` | Registrar dependências no AppInjector (`lib/config/inject/**`) |
-| `references/navigation.md` | Adicionar rotas, guards, deep links ou navegar entre telas (`lib/config/routes/**`) |
-| `references/apple-guidelines.md` | Submissão na App Store, auditoria de conformidade Apple, rejeição pela Apple, `NSUsageDescription`, ATT, IAP obrigatório, Sign in with Apple, HIG, ATS |
-| `references/testing.md` | Escrever testes de Cubit (`blocTest`), RepositoryImpl (fakes), e widgets (`MockCubit`) |
+| `references/architecture.md` | Projeto desconhecido — entender a proposta e mapear a estrutura real |
+| `references/view.md` | Views (tela, StatefulWidget, BlocBuilder, BlocConsumer, SafeArea) |
+| `references/view-model.md` | Cubits e States (async, `Result<T>`, debounce, formulário, paginação, logs no BlocObserver) |
+| `references/widget.md` | Criar ou extrair widgets (`widgets/`, `content/`, `common/widgets/`) |
+| `references/domain.md` | Entities e Repository Interfaces (`lib/domain/**`) |
+| `references/data.md` | Models, DataSources e RepositoryImpl (`lib/data/**`) |
+| `references/service.md` | Services em `common/services/` (flags, contadores, gating, onboarding, premium) |
+| `references/di.md` | Registro de dependências no AppInjector (`lib/config/inject/**`) |
+| `references/navigation.md` | Rotas, guards, deep links, navegação (`lib/config/routes/**`) |
+| `references/deep-linking.md` | Configuração nativa de Universal Links/App Links e validação por plataforma |
+| `references/widget-preview.md` | `@Preview`, estados visuais e validação sem iniciar o app completo |
+| `references/testing.md` | Testes de Cubit (`blocTest`), RepositoryImpl (fakes) e widget (`MockCubit`) |
+| `references/layout-theming.md` | Layout adaptativo, `Stack`/`OverlayPortal`, `ThemeExtension`, `WidgetStateProperty`, component themes |
+| `references/troubleshooting.md` | Erro em runtime/build durante a implementação |
+| `references/apple-guidelines.md` | Submissão na App Store, rejeição Apple, `NSUsageDescription`, ATT, IAP obrigatório, Sign in with Apple, HIG, ATS |
+| `flutter-setup-localization` | Criar e configurar `l10n.yaml`, `.arb`, delegates e `context.l10n` |
 
-## Exemplos de Código
+## Exemplos
 
-Use os exemplos como referência rápida de código pronto e correto. Prefira consultar o exemplo do cenário mais próximo ao invés de gerar do zero.
+Código pronto e correto. Prefira partir do cenário mais próximo a gerar do zero.
 
 | Exemplo | Cenário |
 |---|---|
@@ -42,166 +54,109 @@ Use os exemplos como referência rápida de código pronto e correto. Prefira co
 | `examples/example-feature-api.md` | Feature completa com API REST — todas as camadas |
 | `examples/example-service.md` | Common Services — onboarding, feature gate, premium, review prompt |
 | `examples/example-widgets.md` | Extração de widgets — StatelessWidget, StatefulWidget, content vs widgets |
-| `examples/example-navegacao.md` | Navegação — push/go/pop, parâmetros, guard, ShellRoute |
+| `examples/example-navegacao.md` | Navegação — push/go/pop, parâmetros, guard, StatefulShellRoute |
 | `examples/example-formulario.md` | Formulário com validação de campos e submit assíncrono |
 
 ---
 
-## Regras Globais (aplicam-se a TODAS as camadas)
+## Convenções do time
 
-- **Imports**: SEMPRE absolutos — `package:base_app/...` — NUNCA relativos
-- **Textos na UI**: SEMPRE `context.l10n.<chave>` — ZERO strings hardcoded visíveis ao usuário
-- **SafeArea**: SEMPRE envolva o conteúdo principal da View com `SafeArea`
-- **Navegação**: SEMPRE na View ou `BlocListener` — NUNCA passe `BuildContext` ao Cubit
-- **Error handling**: SEMPRE `Result<T>` (Ok/Error) no Repository — NUNCA relance exceções
-- **DI**: Cubits → `registerFactory`; todo o resto → `registerLazySingleton`
-- **Entities**: `@immutable`, `const`, `final`, `copyWith()`, `==`, `hashCode`
-- **Composição de View**: a View deve orquestrar estado, navegação e estrutura principal. NUNCA crie `Widget _buildXxx()` nem classes privadas de widget dentro da View.
-  - Mantenha o bloco **inline no `build()`**; só extraia se passar na regra de corte: **>45 linhas OU repetido 2+ vezes OU tem estado próprio** (controller, timer, `setState`).
-  - Inline ≠ método auxiliar: bloco inline fica direto na árvore de widgets, nunca como `Widget _buildXxx()`.
-  - Use `presentation/<feature>/content/` para blocos específicos de uma única View.
-  - Use `presentation/<feature>/widgets/` para widgets reutilizáveis dentro da feature.
-  - Use `common/widgets/` apenas quando for compartilhado entre features.
-  - Dialogs, bottom sheets e handlers privados (`void _showXxx()`, `void _onXxx()`) podem ficar na View.
-- **Nome de View**: SEMPRE use `snake_case` com sufixo `_view.dart`, seguindo o nome real da feature. Nunca use hífen (`view-teste.dart`) nem nomes genéricos como `teste`, `nova_view` ou `screen1`.
-- **Storage**: NUNCA acesse `SharedPreferences` diretamente no Cubit — use `StorageService`
-- **Cubit async**: SEMPRE emita `Loading` antes da operação → chame o repository → use `result.when()`
-- **Arquivos `.md`**: NUNCA crie para documentar mudanças de código
+Valem em todas as camadas. Onde o projeto já tiver convenção conflitante, siga o projeto.
+
+- **Imports absolutos** — `package:<app>/...`, nunca relativos.
+- **Textos da UI via `context.l10n.<chave>`** — nenhuma string visível ao usuário hardcoded.
+- **`SafeArea`** envolvendo o conteúdo principal da View.
+- **Navegação fica na View ou em `BlocListener`** — o Cubit não recebe `BuildContext`.
+- **Erros viram `Result<T>` (Ok/Error) no Repository** — o Repository não relança exceção para cima.
+  Ele checa o status HTTP antes do parsing e classifica a falha em `AppException`, preservando causa
+  e stack trace. O Cubit escolhe a mensagem pelo **tipo** da falha, nunca por string.
+- **DI**: Cubits em `registerFactory`; o restante em `registerLazySingleton`.
+- **Entities**: `@immutable`, `const`, campos `final`, `copyWith()`, `==` e `hashCode` sobre os mesmos
+  campos — `listEquals` no `==` exige `Object.hashAll` no `hashCode`, e `==` não checa `runtimeType`.
+- **Cubit async**: emite `Loading` → chama o repository → resolve com `result.when()`.
+- **Persistência local passa por `StorageService`** — o Cubit não fala com `SharedPreferences`.
+- **Widgets extraídos têm preview** — use `@Preview` em `widgets/` e `common/widgets/` quando o projeto estiver em Flutter 3.47+.
+- **`toString()` legível em todo State**, para o log do `BlocObserver`: declare o método na `sealed class` e
+  implemente com nome explícito em cada State concreto. States com payload mostram os campos relevantes; States
+  de erro incluem ao menos a mensagem e, quando houver, erro técnico/stack trace. Nunca exponha senha, token ou
+  outro segredo; resuma payloads grandes.
+- **Nome de View**: `snake_case` com sufixo `_view.dart` derivado do nome real da feature — não `view-teste.dart`,
+  `nova_view` ou `screen1`.
+- **Não crie arquivos `.md`** para documentar mudanças de código.
+
+### Composição de View
+
+A View orquestra estado, navegação e estrutura principal. Blocos de UI ficam **inline no `build()`** — nunca como
+`Widget _buildXxx()` nem como classe privada dentro do arquivo da View.
+
+Extraia para arquivo próprio só quando o bloco passar na regra de corte: **>45 linhas, ou repetido 2+ vezes, ou
+com estado próprio** (controller, timer, `setState`). Destino da extração:
+
+| Escopo | Pasta |
+|---|---|
+| Bloco de uma única View | `presentation/<feature>/content/` |
+| Reutilizado dentro da feature | `presentation/<feature>/widgets/` |
+| Compartilhado entre features | `common/widgets/` |
+
+Dialogs, bottom sheets e handlers privados (`void _showXxx()`, `void _onXxx()`) podem permanecer na View.
 
 ---
 
-## Fluxo de Decisão: o que criar em uma nova feature?
+## O que criar em uma nova feature
 
 ```
-Feature precisa de API ou banco externo?
-  ├─ SIM → criar Data Layer completo:
-  │         Entity + Repository Interface   → references/domain.md
-  │         Model + DataSource + RepositoryImpl → references/data.md
-  │         + registrar no AppInjector      → references/di.md
+Precisa de API ou banco externo?
+  ├─ SIM → Entity + Repository Interface (domain.md)
+  │        + Model + DataSource + RepositoryImpl (data.md)
+  │        + registro no AppInjector (di.md)
   │
-  └─ NÃO ─ precisa persistir dados localmente?
-              ├─ SIM → injetar StorageService no Cubit (sem Data Layer)
-              │         → references/view-model.md (Opção A2)
-              └─ NÃO → apenas View + Cubit + State + rota + DI
+  └─ NÃO ─ precisa persistir localmente?
+             ├─ SIM → StorageService injetado no Cubit, sem Data Layer
+             │        (view-model.md, Opção A2)
+             └─ NÃO → View + Cubit + State + rota + DI
 ```
 
 | Situação | O que criar | Referência |
 |---|---|---|
 | Tela simples / UI local | View + Cubit + State | `view.md` + `view-model.md` |
-| + rota nova | AppRoutes + GoRoute | `navigation.md` |
-| + DI novo Cubit | registerFactory | `di.md` |
-| + dados locais | StorageService no Cubit | `view-model.md` (Opção A2) |
-| + API externa | Entity + Interface + Model + DataSource + RepositoryImpl | `domain.md` + `data.md` |
-| Widget reutilizável na feature | `presentation/<feature>/widgets/` | `widget.md` |
-| Widget reutilizável entre features | `common/widgets/` | `widget.md` |
-| Auxiliar de UI específico de uma View | `presentation/<feature>/content/` | `widget.md` |
+| Rota nova | AppRoutes + GoRoute | `navigation.md` |
+| Cubit novo | `registerFactory` | `di.md` |
+| Dados locais | StorageService no Cubit | `view-model.md` (Opção A2) |
+| API externa | Entity + Interface + Model + DataSource + RepositoryImpl | `domain.md` + `data.md` |
 | Flag, contador, gating, onboarding | `common/services/` | `service.md` |
+| Widget novo | ver "Composição de View" acima | `widget.md` |
 
 ---
 
-## Ciclo de Desenvolvimento
+## Workflow: implementar uma feature
 
-Siga esta ordem ao implementar uma feature. Cada etapa inclui o que fazer se algo falhar.
+Copie este checklist para a resposta e marque conforme avançar. Leia só as referências necessárias.
 
-1. **Estrutura** — Defina o fluxo (Fluxo de Decisão acima), crie os arquivos nos diretórios corretos
-   - Se errou a camada: mova o arquivo para o diretório correto antes de continuar; imports absolutos facilitam o refactor
-2. **Domain** — Crie Entity + Repository Interface
-   - Se `flutter analyze` acusar erro: verifique se faltam `@immutable`, `==`/`hashCode`, `copyWith()` ou se há import relativo
-3. **Data** — Crie Model + DataSource + RepositoryImpl
-   - Se `Result` nunca entra no caso `ok`: o RepositoryImpl tem `try/catch`? O DataSource está lançando exceção ao invés de retornar?
-4. **DI** — Registre no AppInjector
-   - Cubits → `registerFactory`; todo o resto → `registerLazySingleton`
-   - Se GetIt lança `StateError: Object/factory not found`: o tipo está registrado? As dependências do construtor também estão?
-5. **Presentation** — Crie Cubit + State + View + widgets
-   - Se `BlocProvider.of` lança erro: o Cubit está acima do widget na árvore? A rota provê o BlocProvider?
-   - Se hot reload não reflete mudanças de estado: use hot restart (`R` no terminal)
-6. **Rota** — Adicione em AppRoutes + AppRouter
-   - Se redirect loop: logue o estado antes do `redirect`; verifique se o provider de autenticação já foi inicializado
-7. **L10n** — Adicione as chaves nos arquivos `.arb` e rode `flutter gen-l10n`
-   - Se chave não encontrada em `context.l10n.<chave>`: a chave existe em todos os arquivos `.arb`? Rodou `flutter gen-l10n`?
+- [ ] 1. Explorar a estrutura real (`find lib/ -type d | sort`) e decidir: proposta ou convenção existente (`architecture.md`).
+- [ ] 2. **Se precisa de API/banco:** Entity + Interface → Model + DataSource + RepositoryImpl (`domain.md`, `data.md`).
+- [ ] 3. **Se só persiste localmente:** `StorageService` direto no Cubit (`view-model.md`, Opção A2); não crie Data Layer sem necessidade.
+- [ ] 4. Registrar dependências: Cubit em `registerFactory`, restante em `registerLazySingleton` (`di.md`).
+- [ ] 5. Implementar State sealed + Cubit (`Loading → repository → result.when()`), com `isClosed` após cada `await` relevante.
+- [ ] 6. Implementar View com `SafeArea`; extrair apenas por identidade própria, repetição ou estado (`view.md`, `widget.md`).
+- [ ] 7. Adicionar rota/guard e deep link quando aplicável (`navigation.md`, `deep-linking.md`).
+- [ ] 8. Criar chaves `.arb`, configurar `flutter gen-l10n` e usar `context.l10n` (`flutter-setup-localization`).
+- [ ] 9. Adicionar `@Preview` aos widgets extraídos e aos estados relevantes (`widget-preview.md`).
+- [ ] 10. Escrever `blocTest` + testes do RepositoryImpl com fake (`flutter-testing`).
+- [ ] 11. **Feedback loop:** `dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos --fatal-warnings && flutter test` → revisar → corrigir → repetir até exit 0.
+- [ ] 12. Informar ao usuário o que deve ser testado manualmente; o agente não inicia o app.
 
----
-
-## Estrutura de Pastas Obrigatória
-
-```
-lib/
-├── presentation/
-│   └── <feature>/
-│       ├── view/<feature>_view.dart
-│       ├── view_model/<feature>_cubit.dart
-│       ├── view_model/<feature>_state.dart
-│       ├── widgets/          # reutilizáveis dentro da feature
-│       └── content/          # auxiliares de UI específicos (não reutilizáveis)
-│
-├── domain/
-│   ├── entities/<entity>_entity.dart
-│   └── interfaces/<feature>_repository.dart
-│
-├── data/
-│   ├── models/<entity>_model.dart
-│   ├── datasources/<feature>_remote_datasource.dart
-│   └── repositories/<feature>_repository_impl.dart
-│
-├── common/
-│   ├── widgets/
-│   └── services/
-│
-└── config/
-    ├── inject/app_injector.dart
-    └── routes/app_router.dart + app_routes.dart
-```
-
-**Proibido:**
-- Criar widgets fora de `presentation/` (exceto `common/widgets/`)
-- Acessar DataSources diretamente do Cubit
-- Importar classes de `data/` dentro de `domain/`
-- Criar arquivos barrel/export
+Comece pelo primeiro passo que a feature realmente exige: tela sem dados externos pula Domain e Data.
+Quando algo falhar no caminho, consulte `references/troubleshooting.md`.
 
 ---
 
-## Layout Avançado
+## Limites da arquitetura
 
-| Widget | Quando usar |
-|---|---|
-| `Expanded` | Preencher todo o espaço restante no eixo principal |
-| `Flexible` | Ocupar no máximo o espaço disponível, mas pode ser menor |
-| `Wrap` | Itens que podem quebrar linha quando ultrapassam a largura |
-| `LayoutBuilder` | Decisões de layout baseadas no espaço disponível do pai |
+Independentemente da estrutura de pastas do projeto, evite:
 
-- **Stack + Positioned**: ancora widgets nas bordas com coordenadas exatas; use `Align` para alinhamento semântico (`center`, `bottomRight`) sem coordenadas fixas
-- **OverlayPortal**: use para dropdowns e tooltips customizados que precisam renderizar acima da árvore de widgets
-- **LayoutBuilder**: envolva seções que adaptam layout ao espaço do pai; evite no widget raiz da tela (prefira `MediaQuery`)
+- Cubit acessando DataSource diretamente, sem passar por repositório ou serviço
+- `domain/` importando qualquer coisa de `data/`
+- Widgets fora de `presentation/` ou `common/widgets/`
+- Arquivos barrel/export
 
----
-
-## Theming Avançado
-
-### ThemeExtension
-- Crie `ThemeExtension<T>` com `copyWith` e `lerp` para design tokens customizados (cores, espaçamentos, tipografia)
-- Registre em `ThemeData.extensions`
-- Acesse via `Theme.of(context).extension<MyColors>()!`
-
-### WidgetStateProperty
-- `WidgetStateProperty.resolveWith` para variar propriedades por estado (pressed, disabled, hovered, focused)
-- `WidgetStateProperty.all(value)` como atalho quando o valor é o mesmo para todos os estados
-
-### Component Themes
-- Customize `appBarTheme`, `elevatedButtonTheme`, `cardTheme`, `inputDecorationTheme` dentro de `ThemeData`
-- NUNCA use `.copyWith` inline em cada widget para estilo compartilhado
-
-
----
-
-## Troubleshooting
-
-| Sintoma | Causa Provável | Recovery |
-|---|---|---|
-| `StateError: Object/factory not found for type XxxCubit` | Cubit não registrado ou registrado como `LazySingleton` em vez de `Factory` | Adicionar `registerFactory(() => XxxCubit(...))` no AppInjector; verificar que as dependências do construtor também estão registradas |
-| `BlocProvider.of<XxxCubit>` lança erro em runtime | Cubit não está acima do widget na árvore | Verificar se a rota provê o Cubit via `BlocProvider`; usar `context.read<XxxCubit>()` somente abaixo do provider |
-| `flutter analyze` com erros de import | Import relativo usado em vez de absoluto | Substituir `import '../...'` por `import 'package:base_app/...'` |
-| Chave l10n não encontrada / erro de compilação em `context.l10n.<chave>` | Chave ausente em algum arquivo `.arb` | Adicionar a chave em todos os `.arb` e rodar `flutter gen-l10n` |
-| Redirect loop no GoRouter | Condição do guard nunca satisfeita | Logar o estado antes do `redirect`; verificar se o provider de autenticação já foi inicializado antes da avaliação da rota |
-| `Result` nunca entra no caso `ok` | DataSource lança exceção sem `try/catch` no RepositoryImpl | Verificar que o RepositoryImpl envolve a chamada em `try/catch` e retorna `Result.error` no `catch` |
-| Hot reload não reflete mudanças de estado | Estado persiste no Cubit em memória | Usar hot restart (`R` no terminal) para reiniciar o app completo |
-| Jank / frames perdidos | `build()` pesado, falta de `const`, rebuilds excessivos | Adicionar `const` em widgets estáticos; extrair subárvores para `content/` ou `widgets/`; usar `BlocSelector` para reduzir escopo de rebuild |
+A estrutura de pastas completa da proposta está em `references/architecture.md`.

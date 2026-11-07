@@ -2,11 +2,13 @@
 
 ## Leitura Rápida
 
-- **Quando extrair um widget**: bloco que passa na regra de corte (>45 linhas, repetido 2+ vezes, ou com estado próprio); caso contrário, deixe inline no `build()` da View.
+- **Quando extrair um widget da View**: bloco que passa na regra de corte (>45 linhas, repetido 2+ vezes, ou com estado próprio); caso contrário, deixe inline no `build()` da View. Dentro de um arquivo já extraído, divida somente por identidade — não por tamanho.
 - **Quando usar StatelessWidget**: widget apenas renderiza dados recebidos, sem estado interno.
 - **Quando usar StatefulWidget**: widget tem controllers, timers ou animações internas.
 - **Quando definir parâmetros**: prefira passar a Entity completa em vez de campos individuais.
 - **Quando adicionar texto visível**: SEMPRE use `context.l10n` — nunca string hardcoded.
+- **Quando o widget for extraído**: em Flutter 3.47+, crie um `<nome>_preview.dart` ao lado com `@Preview`;
+  cubra pelo menos o estado padrão e os estados vazio/erro quando existirem. Leia `widget-preview.md`.
 - **Quando tiver controllers/timers**: SEMPRE faça `dispose()` deles.
 
 ---
@@ -304,6 +306,8 @@ class ProfileSaveBar extends StatelessWidget {
 
 ## Quando Criar Widgets
 
+> **Contexto**: Esta regra de corte se aplica quando você está decidindo se um bloco **sai da View**. Para decidir se um arquivo já extraído deve ser subdividido, veja "Estrutura interna de um arquivo extraído".
+
 ### ✅ CRIE quando (regra de corte — qualquer um basta):
 1. Bloco tem **mais de 45 linhas** dentro do `build`
 2. Código se **repete em 2+ lugares**
@@ -318,6 +322,8 @@ Caso contrário → mantenha inline no `build()` da View.
 ---
 
 ## Decisão Rápida
+
+### Extraindo da View
 
 ```
 Passou na regra de corte (>45 linhas OU repetido 2+ vezes OU tem estado próprio)?
@@ -339,6 +345,41 @@ Tem entity relacionada?
   └─ NÃO → passe parâmetros primitivos
 ```
 
+### Dentro de um arquivo content/ ou widgets/
+
+```
+O arquivo já é terminal por padrão — pode ser longo sem que isso seja problema.
+Existe um sub-bloco com identidade própria?
+  (você o nomearia sozinho, ele se repete em lista, ou é unidade interativa autocontida)
+  ├─ NÃO → mantenha tudo no mesmo arquivo (default: não dividir)
+  └─ SIM → arquivo irmão em widgets/ ou content/
+              (nunca _buildXxx() nem classe privada — invariante universal)
+```
+
+---
+
+## Estrutura interna de um arquivo extraído
+
+Um arquivo em `content/` ou `widgets/` já é uma unidade coesa — ele *já foi extraído*. Por padrão, é **terminal**: um card ou form coeso com 80 linhas está correto, não é cheiro.
+
+- **Não** reaplicar o gatilho de 45 linhas.
+- **Nunca** criar `Widget _buildXxx()` ou classe privada de widget — invariante universal (vale também aqui, não só na View).
+- Subdividir **somente** quando houver um sub-bloco com **identidade própria**: algo que você nomearia independentemente (`PriceTag`, `QuantityStepper`, `AvatarBadge`), que se repete em lista, ou é uma unidade interativa autocontida.
+- Ao subdividir → **arquivo irmão** em `widgets/` ou `content/`, nunca método privado.
+
+Tamanho vira **sinal fraco**: um `build()` muito longo é uma *dica* para procurar identidade escondida — mas extrai-se pela identidade encontrada, não por bater num número.
+
+```dart
+// ✅ componente coeso — pode ser longo
+class ProfileContent extends StatelessWidget { /* header + bio + stats inline */ }
+
+// ✅ só divide quando há identidade própria de verdade
+class ProfileContent extends StatelessWidget { /* ... usa QuantityStepper(...) */ }
+class QuantityStepper extends StatefulWidget { /* tem estado/identidade próprios */ }
+```
+
+**Default = não dividir.** Divisão extra = minoria genuína (identidade).
+
 ---
 
 ## Checklist
@@ -347,7 +388,8 @@ Tem entity relacionada?
 - [ ] Entity completa como parâmetro (não campos individuais)
 - [ ] Textos via `context.l10n.<chave>`
 - [ ] `dispose()` implementado para controllers/timers
-- [ ] Localização: `presentation/<feature>/widgets/` ou `common/widgets/`
+- [ ] Localização: `presentation/<feature>/content/`, `presentation/<feature>/widgets/` ou `common/widgets/`
+- [ ] Preview em arquivo irmão quando o projeto usa Flutter 3.47+
 
 ---
 

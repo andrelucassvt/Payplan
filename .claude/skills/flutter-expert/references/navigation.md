@@ -4,9 +4,13 @@
 
 - **Quando adicionar uma nova rota**: defina constante em `app_routes.dart` e adicione `GoRoute` em `app_router.dart`.
 - **Quando navegar para outra tela**: use `context.push/go/pop/replace` — SEMPRE na View, nunca no Cubit.
-- **Quando o Cubit precisa disparar navegação**: emita um estado (ex: `LoginNavigateToHome`) e reaja via `BlocListener` na View.
+- **Quando o Cubit precisa disparar navegação**: emita um estado (ex: `LoginNavigateToHome`) e reaja via `BlocListener` na View — **apenas se a View for descartada** (`go`/`replace`). Se ela sobrevive (`push`), navegue direto na View; senão o estado de navegação substitui o de conteúdo e a tela fica em branco.
 - **Quando usar parâmetros de path**: defina como `:id` na rota e acesse via `state.pathParameters['id']!`.
 - **Quando passar objetos complexos**: use `extra` no `context.push` e recupere em `state.extra as T`.
+- **Quando houver tabs principais**: prefira `StatefulShellRoute.indexedStack` para preservar o estado de cada branch.
+- **Quando o auth puder mudar fora da rota**: ligue `refreshListenable` a um `Listenable` de autenticação; `redirect`
+  sozinho não reavalia por mudança de estado.
+- **Quando uma rota não existir**: forneça `errorBuilder`/`errorPageBuilder` com uma tela traduzida de erro.
 
 ---
 
@@ -161,28 +165,91 @@ ElevatedButton(
 
 ### ✅ CORRETO — Opção 2: Estado de navegação + BlocListener
 
+**Só use quando a View de origem é descartada na navegação** — login → home, splash → home,
+logout → login. Isto é, quando a transição usa `go`/`replace` e ninguém volta para a tela anterior.
+
 ```dart
 // State
-class HomeNavigateToDetails extends HomeState {
-  const HomeNavigateToDetails(this.productId);
-  final String productId;
+class LoginNavigateToHome extends LoginState {
+  const LoginNavigateToHome();
+
+  @override
+  String toString() => 'LoginNavigateToHome';
 }
 
 // Cubit
-void selectProduct(String id) => emit(HomeNavigateToDetails(id));
+result.when(
+  ok: (_) => emit(const LoginNavigateToHome()),
+  error: (e) => emit(LoginError(LoginErrorKind.invalidCredentials, error: e)),
+);
 
 // View
-BlocListener<HomeCubit, HomeState>(
+BlocConsumer<LoginCubit, LoginState>(
   listener: (context, state) {
-    if (state is HomeNavigateToDetails) {
-      context.push('/products/${state.productId}');
-    }
+    if (state is LoginNavigateToHome) context.go(AppRoutes.home);
   },
-  child: BlocBuilder<HomeCubit, HomeState>(
-    builder: (context, state) { /* ... */ },
-  ),
+  builder: (context, state) { /* ... */ },
 )
 ```
+
+### ⚠️ Estado de navegação apaga a tela quando ela sobrevive
+
+O State é **um só**. Emitir `HomeNavigateToDetails` substitui `HomeLoaded`, e o `BlocBuilder` da
+mesma View passa a receber um estado que ele não sabe renderizar — cai no `SizedBox.shrink()` final
+e a tela fica em branco. Ao voltar do `push`, o estado continua sendo o de navegação: a lista não
+reaparece.
+
+```dart
+// ❌ ERRADO — a Home some ao empilhar os detalhes e não volta
+void selectProduct(String id) => emit(HomeNavigateToDetails(id));
+```
+
+Para navegação de onde o usuário **volta** (`push`), navegue direto na View:
+
+```dart
+// ✅ CORRETO — o estado da Home permanece HomeLoaded
+onTap: () {
+  context.read<HomeCubit>().registerVisit(product.id); // efeito no Cubit, se houver
+  context.push('/products/${product.id}');             // navegação na View
+}
+```
+
+Se a navegação depende de uma decisão assíncrona do Cubit (checar permissão, salvar antes de sair),
+mantenha o conteúdo no estado e carregue o destino como um campo consumível:
+
+```dart
+class HomeLoaded extends HomeState {
+  const HomeLoaded({required this.products, this.navigateToId});
+
+  final List<ProductEntity> products;
+  final String? navigateToId; // ✅ intenção de navegação sem perder o conteúdo
+
+  @override
+  String toString() =>
+      'HomeLoaded(products: ${products.length}, navigateToId: $navigateToId)';
+}
+
+// Cubit — emite com a intenção, depois limpa
+void selectProduct(String id) {
+  final current = state;
+  if (current is! HomeLoaded) return;
+  emit(HomeLoaded(products: current.products, navigateToId: id));
+  emit(HomeLoaded(products: current.products)); // ✅ consome a intenção
+}
+
+// View
+listener: (context, state) {
+  if (state is HomeLoaded && state.navigateToId != null) {
+    context.push('/products/${state.navigateToId}');
+  }
+},
+```
+
+| Transição | Padrão |
+|---|---|
+| `push` — usuário volta para esta tela | Navegue na View (Opção 1) |
+| `go`/`replace` — a View é descartada | Estado de navegação (Opção 2) |
+| Decisão assíncrona no Cubit, View sobrevive | Campo consumível dentro do estado de conteúdo |
 
 ### Navegação após ação assíncrona
 
@@ -222,34 +289,100 @@ GoRoute(
 ```dart
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
+  refreshListenable: AppInjector.inject<AuthService>().authState,
   redirect: (context, state) {
-    final isLoggedIn = _checkIfLoggedIn();
-    final isGoingToLogin = state.matchedLocation == AppRoutes.login;
+    final loggedIn = AppInjector.inject<AuthService>().isLoggedIn;
+    final goingToLogin = state.matchedLocation == AppRoutes.login;
 
-    if (!isLoggedIn && !isGoingToLogin) return AppRoutes.login;
-    if (isLoggedIn && isGoingToLogin) return AppRoutes.home;
+    if (!loggedIn && !goingToLogin) return AppRoutes.login;
+    if (loggedIn && goingToLogin) return AppRoutes.home;
     return null;
   },
+  errorBuilder: (context, state) => NotFoundView(error: state.error),
   routes: [ /* ... */ ],
 );
 ```
 
-### Bottom Navigation Bar com ShellRoute
+O `AuthService.authState` pode ser um `ValueNotifier<bool>` ou outro `Listenable` estável. Atualize-o sempre
+que login/logout mudar; não crie um notifier novo dentro do `redirect`.
+
+### Bottom Navigation com StatefulShellRoute
 
 ```dart
 final GoRouter appRouter = GoRouter(
   routes: [
-    ShellRoute(
-      builder: (context, state, child) => MainScaffold(child: child),
-      routes: [
-        GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeView()),
-        GoRoute(path: AppRoutes.products, builder: (_, __) => const ProductsView()),
-        GoRoute(path: AppRoutes.profile, builder: (_, __) => const ProfileView()),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) => MainScaffold(
+        navigationShell: navigationShell,
+      ),
+      branches: [
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeView())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.products, builder: (_, _) => const ProductsView())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.profile, builder: (_, _) => const ProfileView())],
+        ),
       ],
     ),
   ],
 );
+
+// MainScaffold — preserva a árvore e o scroll de cada aba.
+class MainScaffold extends StatelessWidget {
+  const MainScaffold({required this.navigationShell, super.key});
+
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: navigationShell.goBranch,
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home),
+            label: context.l10n.homeTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.list),
+            label: context.l10n.productsTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person),
+            label: context.l10n.profileTab,
+          ),
+        ],
+      ),
+    );
+  }
+}
 ```
+
+### Confirmar saída com PopScope
+
+Use `PopScope` para preservar o gesto de voltar preditivo do Android. `WillPopScope` não deve ser usado em
+novas telas.
+
+```dart
+PopScope(
+  canPop: !state.hasUnsavedChanges,
+  onPopInvokedWithResult: (didPop, _) {
+    if (!didPop) _confirmDiscard(context);
+  },
+  child: const EditProfileContent(),
+)
+```
+
+### Web
+
+Em um app web que usa URLs limpas, configure `usePathUrlStrategy()` no bootstrap antes de `runApp` e configure
+o fallback do servidor para `index.html`. Deep links nativos de Android/iOS ficam em
+[`deep-linking.md`](deep-linking.md).
 
 ---
 

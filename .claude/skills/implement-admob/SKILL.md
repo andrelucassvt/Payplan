@@ -1,6 +1,11 @@
 ---
 name: implement-admob
 description: Implements Google AdMob ads (banner, native, interstitial) in Flutter following the project architecture. Use whenever adding or modifying ad-related files, integrating the AdMob SDK, adding monetization via ads, creating banner or native ad widgets, managing interstitial ad lifecycle, or centralizing ad unit IDs. Covers AdConfig centralized IDs, AdService SDK init, InterstitialAdService lifecycle, AdBannerWidget, AdNativeWidget, DI registration, and anti-patterns. Activate even when the user says 'add ads to my app', 'show a banner ad', 'monetize with AdMob', 'integrate Google ads', 'show a native ad', or 'display an interstitial' without explicitly mentioning AdConfig or AdService.
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.35"
+  example_prompt: "Adicione um banner do AdMob com consentimento e IDs de teste"
 ---
 
 # Implement AdMob — Flutter
@@ -12,8 +17,13 @@ description: Implements Google AdMob ads (banner, native, interstitial) in Flutt
 - **InterstitialAdService**: gerencia o ciclo de vida de anúncios intersticiais — injete na View via DI, nunca no Cubit.
 - **AdBannerWidget**: widget autogerenciado para banner ads — recebe apenas `adUnitId`, carrega e descarta sozinho.
 - **AdNativeWidget**: widget autogerenciado para native ads — recebe `adUnitId` e `templateType`.
-- **Quando exibir intersticial**: chame `load()` no `initState()` e `show()` com `Future.delayed` após o conteúdo estar visível.
+- **Quando exibir intersticial**: chame `load()` no `initState()` e `show()` depois que o conteúdo estiver visível;
+  não use um atraso fixo como mecanismo de sincronização.
 - **Registro no DI**: `AdService` e `InterstitialAdService` → `registerLazySingleton`.
+- **Consentimento**: atualize UMP em cada abertura, mostre o formulário exigido e só peça anúncios quando
+  `canRequestAds()` for verdadeiro.
+- **ATT**: em iOS, configure `NSUserTrackingUsageDescription` e solicite autorização antes de rastreamento.
+- **Debug**: use IDs oficiais de teste sempre que `kDebugMode` for verdadeiro; nunca arrisque tráfego real.
 - **Nunca** passe `BuildContext` para os services de anúncio.
 - **Nunca** chame `MobileAds.instance.initialize()` diretamente fora de `AdService`.
 
@@ -23,8 +33,24 @@ description: Implements Google AdMob ads (banner, native, interstitial) in Flutt
 
 ```yaml
 dependencies:
-  google_mobile_ads: ^5.x.x
+  google_mobile_ads: ^9.1.0
 ```
+
+Além da dependência, configure o App ID do Google Mobile Ads em `AndroidManifest.xml` e `Info.plist` conforme
+o guia do SDK. App ID e ad unit ID são valores diferentes; não os troque.
+
+## Workflow: adicionar um slot de anúncio
+
+- [ ] 1. Definir formato, telas, frequência e comportamento quando o anúncio não carregar.
+- [ ] 2. Adicionar `google_mobile_ads` e os App IDs por plataforma.
+- [ ] 3. Configurar UMP/consentimento antes de `MobileAds.instance.initialize()`.
+- [ ] 4. Configurar ATT e `NSUserTrackingUsageDescription` no iOS quando houver rastreamento.
+- [ ] 5. Centralizar IDs reais e IDs de teste em `AdConfig`.
+- [ ] 6. Implementar o Service/Widget com ciclo de vida e `dispose()` corretos.
+- [ ] 7. Registrar no DI e inicializar uma única vez no bootstrap.
+- [ ] 8. Testar serviço com dependências substituíveis e widget sem rede; não use anúncio real em teste.
+- [ ] 9. Rodar `dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos --fatal-warnings && flutter test`.
+- [ ] 10. Listar os testes manuais: consentimento, anúncio indisponível, background/foreground e device físico.
 
 ---
 
@@ -65,25 +91,38 @@ class AppInitializer {
 
 ```dart
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
-class AdConfig {
+abstract final class AdConfig {
   const AdConfig._();
 
-  static String get nativeBanner1 {
-    if (Platform.isAndroid) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-    if (Platform.isIOS) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-    throw UnsupportedError('Plataforma não suportada para anúncios');
-  }
-
-  static String get banner2 {
-    if (Platform.isAndroid) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-    if (Platform.isIOS) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static String get banner {
+    if (kDebugMode) {
+      if (Platform.isAndroid) return 'ca-app-pub-3940256099942544/6300978111';
+      if (Platform.isIOS) return 'ca-app-pub-3940256099942544/2934735716425904';
+    }
+    if (Platform.isAndroid) return 'ca-app-pub-XXX/android-banner';
+    if (Platform.isIOS) return 'ca-app-pub-XXX/ios-banner';
     throw UnsupportedError('Plataforma não suportada para anúncios');
   }
 
   static String get interstitial {
-    if (Platform.isAndroid) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-    if (Platform.isIOS) return 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+    if (kDebugMode) {
+      if (Platform.isAndroid) return 'ca-app-pub-3940256099942544/1033173712';
+      if (Platform.isIOS) return 'ca-app-pub-3940256099942544/4411468910';
+    }
+    if (Platform.isAndroid) return 'ca-app-pub-XXX/android-interstitial';
+    if (Platform.isIOS) return 'ca-app-pub-XXX/ios-interstitial';
+    throw UnsupportedError('Plataforma não suportada para anúncios');
+  }
+
+  static String get native {
+    if (kDebugMode) {
+      if (Platform.isAndroid) return 'ca-app-pub-3940256099942544/2247696110';
+      if (Platform.isIOS) return 'ca-app-pub-3940256099942544/3986624511';
+    }
+    if (Platform.isAndroid) return 'ca-app-pub-XXX/android-native';
+    if (Platform.isIOS) return 'ca-app-pub-XXX/ios-native';
     throw UnsupportedError('Plataforma não suportada para anúncios');
   }
 }
@@ -91,6 +130,7 @@ class AdConfig {
 
 **Regras:**
 - ✅ SEMPRE use `Platform.isAndroid` / `Platform.isIOS` com IDs separados
+- ✅ Em debug, use apenas IDs oficiais de teste; substitua os placeholders de produção antes do release
 - ✅ Lance `UnsupportedError` para plataformas não suportadas
 - ✅ Construtor privado `const AdConfig._()` — não instanciável
 - ❌ NUNCA coloque IDs hardcoded fora de `AdConfig`
@@ -98,26 +138,72 @@ class AdConfig {
 
 ---
 
-## AdService — Inicialização do SDK
+## AdService — Consentimento e inicialização do SDK
 
 ```dart
+import 'dart:async';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdService {
+  AdService({Future<bool> Function()? consentEvaluator})
+      : _consentEvaluator = consentEvaluator;
+
+  final Future<bool> Function()? _consentEvaluator;
   bool _initialized = false;
+  bool get isInitialized => _initialized;
 
   Future<void> initialize() async {
     if (_initialized) return;
+
+    final canRequestAds = await (_consentEvaluator?.call() ?? _updateConsent());
+    if (!canRequestAds) {
+      log('AdService: ads blocked until consent is available');
+      return;
+    }
+
     await MobileAds.instance.initialize();
     _initialized = true;
     log('AdService: Google Mobile Ads initialized');
+  }
+
+  Future<bool> _updateConsent() {
+    final completer = Completer<bool>();
+    final params = ConsentRequestParameters(
+      consentDebugSettings: kDebugMode
+          ? const ConsentDebugSettings(
+              testIdentifiers: ['TEST-DEVICE-HASHED-ID'],
+            )
+          : null,
+    );
+
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+      () {
+        ConsentForm.loadAndShowConsentFormIfRequired((error) async {
+          if (error != null) log('AdService: UMP form — $error');
+          completer.complete(await ConsentInformation.instance.canRequestAds());
+        });
+      },
+      (error) async {
+        log('AdService: UMP update — $error');
+        // A previous valid consent may still allow ads after a transient failure.
+        completer.complete(await ConsentInformation.instance.canRequestAds());
+      },
+    );
+
+    return completer.future;
   }
 }
 ```
 
 **Regras:**
 - ✅ Guard `if (_initialized) return` para evitar inicialização dupla
+- ✅ Chame `requestConsentInfoUpdate()` a cada abertura do app
+- ✅ Chame `loadAndShowConsentFormIfRequired()` após atualizar o consentimento
+- ✅ Verifique `canRequestAds()` antes de inicializar o SDK ou carregar um anúncio
+- ✅ Remova `TEST-DEVICE-HASHED-ID` antes do release; use o identificador do dispositivo apenas em debug
 - ✅ Use `log()` do `dart:developer` — nunca `print()`
 - ✅ Registrar como `registerLazySingleton`
 
@@ -361,11 +447,11 @@ inject.registerLazySingleton<InterstitialAdService>(InterstitialAdService.new);
 // Native ad
 Padding(
   padding: const EdgeInsets.symmetric(horizontal: 16),
-  child: AdNativeWidget(adUnitId: AdConfig.nativeBanner1),
+  child: AdNativeWidget(adUnitId: AdConfig.native),
 )
 
 // Banner padrão
-AdBannerWidget(adUnitId: AdConfig.banner2)
+AdBannerWidget(adUnitId: AdConfig.banner)
 ```
 
 ### Intersticial
@@ -378,7 +464,7 @@ class _MyViewState extends State<MyView> {
   void initState() {
     super.initState();
     _interstitialAdService.load();
-    Future.delayed(const Duration(seconds: 3), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _interstitialAdService.show();
     });
   }
@@ -393,7 +479,7 @@ class _MyViewState extends State<MyView> {
 
 **Regras de uso na View:**
 - ✅ `load()` no `initState()` — pré-carrega
-- ✅ `show()` com `Future.delayed` — nunca imediatamente
+- ✅ `show()` depois do primeiro frame/conteúdo visível — nunca dentro de `build()`
 - ✅ Verifique `mounted` antes de `show()`
 - ❌ NUNCA chame `dispose()` do service na View — é singleton
 - ❌ NUNCA exiba intersticial dentro de `build()`
@@ -408,7 +494,7 @@ Anúncio inline no conteúdo (lista, feed)?
   └─ Banner compacto no rodapé → AdBannerWidget (AdSize.banner)
 
 Anúncio de tela cheia ao abrir conteúdo?
-  └─ InterstitialAdService: load() no initState + show() com delay
+  └─ InterstitialAdService: load() no initState + show() após o primeiro frame
 
 Novo slot de anúncio?
   └─ Adicione getter estático em AdConfig com IDs Android + iOS
@@ -425,10 +511,10 @@ AdBannerWidget(adUnitId: 'ca-app-pub-XXX/YYY')
 // ❌ Inicializar o SDK diretamente
 await MobileAds.instance.initialize(); // fora de AdService
 
-// ❌ Exibir intersticial sem delay
+// ❌ Exibir intersticial dentro de build/initState sem o conteúdo visível
 void initState() {
   super.initState();
-  _adService.show(); // ERRADO
+  _adService.show(); // ERRADO: agende após o primeiro frame
 }
 
 // ❌ InterstitialAdService no Cubit
@@ -445,4 +531,28 @@ void dispose() {
 
 ---
 
-**Última atualização**: 28 de março de 2026
+## Testes e conformidade
+
+O Service precisa de uma costura substituível (`consentEvaluator`, gateway ou equivalente) para que o teste
+não dependa de `MobileAds.instance`:
+
+```dart
+test('não inicializa anúncios quando consentimento não permite', () async {
+  final service = AdService(consentEvaluator: () async => false);
+
+  await service.initialize();
+
+  expect(service.isInitialized, isFalse);
+});
+```
+
+- [ ] UMP atualiza consentimento a cada abertura e só libera anúncios após `canRequestAds()`.
+- [ ] IDs de teste são usados em debug/testes e removidos da configuração de release.
+- [ ] iOS tem `NSUserTrackingUsageDescription` e ATT conforme o caso.
+- [ ] `AdService`, loader e widgets podem ser testados sem rede real.
+- [ ] `flutter analyze` e `flutter test` passam.
+
+O usuário deve testar manualmente consentimento aceito/recusado, formulário de opções de privacidade,
+falha de rede, background/foreground e anúncios em dispositivo físico.
+
+**Última atualização**: 20 de setembro de 2026

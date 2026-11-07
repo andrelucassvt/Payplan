@@ -135,27 +135,38 @@ ElevatedButton(
 // State
 class LoginNavigateToHome extends LoginState {
   const LoginNavigateToHome();
+
+  @override
+  String toString() => 'LoginNavigateToHome';
 }
 
 // Cubit
 result.when(
   ok: (_) => emit(const LoginNavigateToHome()),
-  error: (e) => emit(LoginError('Credenciais inválidas')),
+  error: (e) => emit(LoginError(LoginErrorKind.invalidCredentials, error: e)),
 );
 
 // View
-BlocListener<LoginCubit, LoginState>(
+BlocConsumer<LoginCubit, LoginState>(
   listener: (context, state) {
     if (state is LoginNavigateToHome) context.go(AppRoutes.home);
     if (state is LoginError) {
-      AppSnackbar.showError(context, message: state.message);
+      AppSnackbar.showError(
+        context,
+        message: switch (state.kind) {
+          LoginErrorKind.invalidCredentials => context.l10n.loginInvalidCredentials,
+          LoginErrorKind.offline => context.l10n.errorOffline,
+          LoginErrorKind.generic => context.l10n.errorGeneric,
+        },
+      );
     }
   },
-  child: BlocBuilder<LoginCubit, LoginState>(
-    builder: (context, state) { /* ... */ },
-  ),
+  builder: (context, state) { /* ... */ },
 )
 ```
+
+> Estado de navegação é seguro aqui porque a transição é `go` — a `LoginView` é descartada
+> e ninguém volta para ela. Com `push`, ver a ressalva em `references/navigation.md`.
 
 ---
 
@@ -205,56 +216,53 @@ final GoRouter appRouter = GoRouter(
 
 ---
 
-## Bottom Navigation Bar com ShellRoute
+## Bottom Navigation com StatefulShellRoute
 
 ```dart
 final GoRouter appRouter = GoRouter(
   routes: [
-    ShellRoute(
-      builder: (context, state, child) => MainScaffold(child: child),
-      routes: [
-        GoRoute(
-          path: AppRoutes.home,
-          builder: (_, __) => const HomeView(),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) => MainScaffold(
+        navigationShell: navigationShell,
+      ),
+      branches: [
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeView())],
         ),
-        GoRoute(
-          path: AppRoutes.products,
-          builder: (_, __) => const ProductsView(),
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.products, builder: (_, _) => const ProductsView())],
         ),
-        GoRoute(
-          path: AppRoutes.profile,
-          builder: (_, __) => const ProfileView(),
+        StatefulShellBranch(
+          routes: [GoRoute(path: AppRoutes.profile, builder: (_, _) => const ProfileView())],
         ),
       ],
     ),
   ],
 );
 
-// MainScaffold — mantém BottomNavigationBar persistente
+// MainScaffold — preserva a árvore e o scroll de cada aba
 class MainScaffold extends StatelessWidget {
-  const MainScaffold({required this.child, super.key});
+  const MainScaffold({required this.navigationShell, super.key});
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-
     return Scaffold(
-      body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _indexFromLocation(location),
-        onTap: (index) => _navigate(context, index),
-        items: [
-          BottomNavigationBarItem(
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => navigationShell.goBranch(index),
+        destinations: [
+          NavigationDestination(
             icon: const Icon(Icons.home),
             label: context.l10n.homeTab,
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: const Icon(Icons.list),
             label: context.l10n.productsTab,
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: const Icon(Icons.person),
             label: context.l10n.profileTab,
           ),
@@ -263,19 +271,6 @@ class MainScaffold extends StatelessWidget {
     );
   }
 
-  int _indexFromLocation(String location) {
-    if (location.startsWith(AppRoutes.products)) return 1;
-    if (location.startsWith(AppRoutes.profile)) return 2;
-    return 0;
-  }
-
-  void _navigate(BuildContext context, int index) {
-    switch (index) {
-      case 0: context.go(AppRoutes.home);
-      case 1: context.go(AppRoutes.products);
-      case 2: context.go(AppRoutes.profile);
-    }
-  }
 }
 ```
 

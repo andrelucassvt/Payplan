@@ -26,15 +26,24 @@ import 'package:flutter/foundation.dart';
 @immutable
 sealed class CounterState {
   const CounterState();
+
+  @override
+  String toString();
 }
 
 class CounterInitial extends CounterState {
   const CounterInitial();
+
+  @override
+  String toString() => 'CounterInitial';
 }
 
 class CounterLoaded extends CounterState {
   const CounterLoaded({required this.count});
   final int count;
+
+  @override
+  String toString() => 'CounterLoaded(count: $count)';
 }
 ```
 
@@ -87,14 +96,10 @@ class _CounterViewState extends State<CounterView> {
         body: SafeArea(
           top: false,
           child: BlocBuilder<CounterCubit, CounterState>(
-            builder: (context, state) => switch (state) {
-              CounterInitial() => Center(
-                  child: ElevatedButton(
-                    onPressed: () => _cubit.increment(0),
-                    child: Text(context.l10n.startButton),
-                  ),
-                ),
-              CounterLoaded(:final count) => Center(
+            builder: (context, state) {
+              if (state is CounterLoaded) {
+                final count = state.count;
+                return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -116,7 +121,15 @@ class _CounterViewState extends State<CounterView> {
                       ),
                     ],
                   ),
+                );
+              }
+              // CounterInitial e estados futuros: branch padrão
+              return Center(
+                child: ElevatedButton(
+                  onPressed: () => _cubit.increment(0),
+                  child: Text(context.l10n.startButton),
                 ),
+              );
             },
           ),
         ),
@@ -160,7 +173,7 @@ inject.registerFactory<CounterCubit>(() => CounterCubit());
 
 ## Checklist
 
-- [x] State: `sealed class` + `@immutable` + `const`
+- [x] State: `sealed class` + `@immutable` + `const` + `toString()` legível
 - [x] Cubit: herda `Cubit<CounterState>`, estado inicial no construtor
 - [x] View: `StatefulWidget`, `AppInjector`, `BlocProvider.value`, `SafeArea`, `dispose()`
 - [x] Rota: constante em `app_routes.dart` + `GoRoute` em `app_router.dart`

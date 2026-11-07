@@ -1,0 +1,55 @@
+# .github/workflows/ci.yml
+# Marque este job como obrigatório nas branch protection rules —
+# gauntlet que não bloqueia merge é decoração.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  FLUTTER_VERSION: '3.35.0'   # fixe a versão; 'master' quebra a suíte sozinho
+
+jobs:
+  gauntlet:
+    runs-on: ubuntu-latest     # golden tests rodam em UM SO só
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Instalar lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Gauntlet
+        run: ./scripts/check.sh
+
+      - name: Artefatos de golden que falharam
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: golden-failures
+          path: '**/failures/**'
+
+  integration:
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'   # lento demais para todo PR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - uses: futureware-tech/simulator-action@bfa03d93ec9de6dacb0c5553bbf8da8afc6c2ee9 # v3
+        with:
+          model: 'iPhone 15'
+      - run: flutter test integration_test

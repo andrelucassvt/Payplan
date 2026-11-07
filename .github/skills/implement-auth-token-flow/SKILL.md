@@ -1,6 +1,11 @@
 ---
 name: implement-auth-token-flow
 description: Implements the complete Bearer token authentication flow following the project architecture. Covers login → save token, automatic token injection via AuthInterceptor, refresh token before expiration, and redirect to login on 401 (expired token). Generates AuthService, AuthRepository, Login feature (Cubit/State/View), token refresh interceptor, and DI registration. Use whenever the user asks to add authentication, login, token management, user sessions, protected routes, or auto-login to the app. Activate even when the user says 'protect this screen', 'user needs to be logged in', 'handle expired session', 'add JWT auth', 'redirect to login when token expires', 'remember me', or 'keep user logged in' without explicitly mentioning Bearer token or AuthInterceptor.
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.35"
+  example_prompt: "Implemente login JWT com refresh concorrente e tokens no Keychain/Keystore"
 ---
 
 # Implement Auth Token Flow — Flutter
@@ -10,14 +15,23 @@ Implementa o fluxo completo de autenticação com Bearer token seguindo a arquit
 ## Leitura Rápida
 
 - **Primeiro passo obrigatório**: faça TODAS as perguntas ao usuário (Passo 1) antes de gerar qualquer código.
-- **AuthService**: gerencia tokens no `StorageService` — NUNCA faz chamadas HTTP; chaves fixas: `auth_token`, `refresh_token`, `token_expires_at`.
+- **AuthService**: gerencia tokens no `SecureStorageService` — NUNCA faz chamadas HTTP; chaves fixas: `auth_token`, `refresh_token`, `token_expires_at`.
 - **TokenRefreshInterceptor**: usa um `Dio` separado (sem interceptors) para o refresh — isso evita loop infinito.
 - **Flag `_isRefreshing`**: evita múltiplos refreshes simultâneos — verifique antes de iniciar qualquer refresh.
 - **Rotas públicas**: o interceptor ignora `/auth/login`, `/auth/refresh`, etc. — nunca tente refresh nessas rotas.
 - **Splash**: sempre verifique `authService.isAuthenticated()` no início e redirecione para Home ou Login.
 - **Navegação**: SEMPRE via `appRouter.go()` no interceptor — nunca receba `BuildContext` fora da View.
-- **Ordem de DI**: `StorageService` → `AuthService` → `Dio` → `HttpService` → DataSources → Repos → Cubits.
+- **Ordem de DI**: `SecureStorageService` → `AuthService` → `Dio` → `HttpService` → DataSources → Repos → Cubits.
 - **Segurança**: NUNCA armazene a senha do usuário; NUNCA logue tokens em produção; use HTTPS.
+
+Dependência de produção para o adaptador seguro:
+
+```yaml
+dependencies:
+  flutter_secure_storage: ^11.2.0
+```
+
+Fixe uma versão compatível com o SDK do projeto e revise as notas de migração Android/iOS antes de atualizar.
 
 ---
 
@@ -33,9 +47,9 @@ Implementa o fluxo completo de autenticação com Bearer token seguindo a arquit
      ↓                                  ↓
   AuthRepository ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘
      ↓
-  StorageService.setString('auth_token', accessToken)
-  StorageService.setString('refresh_token', refreshToken)
-  StorageService.setString('token_expires_at', expiresAt)
+  SecureStorageService.write('auth_token', accessToken)
+  SecureStorageService.write('refresh_token', refreshToken)
+  SecureStorageService.write('token_expires_at', expiresAt)
      ↓
   Navega para Home
 ```
@@ -46,7 +60,7 @@ Implementa o fluxo completo de autenticação com Bearer token seguindo a arquit
 View → Cubit → Repository → HttpService → Dio
                                             ↓
                                     AuthInterceptor
-                                    (injeta Bearer token do StorageService)
+                                    (injeta Bearer token do SecureStorageService)
                                             ↓
                                     TokenRefreshInterceptor
                                     (se token ≈ expirar → refresh silencioso)
@@ -99,7 +113,7 @@ Guarde as respostas para guiar toda a implementação.
 lib/
 ├── common/
 │   └── services/
-│       └── auth_service.dart              ← Gerencia tokens no StorageService
+│       └── auth_service.dart              ← Gerencia tokens no SecureStorageService
 │
 ├── config/
 │   └── network/
@@ -362,39 +376,57 @@ class AuthRepositoryImpl implements AuthRepository {
 }
 ```
 
-### 3.6 — AuthService (Common)
+### 3.6 — SecureStorageService e AuthService (Common)
 
-Serviço responsável por gerenciar tokens no `StorageService`. NÃO faz chamadas HTTP — apenas persiste e recupera dados locais.
+Adicione `flutter_secure_storage` (versão publicada e compatível com o SDK do projeto) e implemente uma
+interface própria para que o AuthService seja testável. Tokens e datas de expiração são dados sensíveis:
+**Keychain/Keystore por padrão**. `SharedPreferences`/`StorageService` fica reservado a flags não sensíveis.
+
+```dart
+abstract interface class SecureStorageService {
+  Future<void> write(String key, String value);
+  Future<String?> read(String key);
+  Future<void> delete(String key);
+}
+```
+
+O adaptador concreto usa `FlutterSecureStorage`; testes usam um fake em memória. Não passe o plugin para o
+Cubit nem para a camada Domain.
 
 ```dart
 // lib/common/services/auth_service.dart
-import 'package:base_app/common/services/storage_service.dart';
+import 'package:base_app/common/services/secure_storage_service.dart';
 import 'package:base_app/domain/entities/auth_entity.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
-  const AuthService(this._storage);
-  final StorageService _storage;
+  AuthService(this._storage);
+  final SecureStorageService _storage;
+  final ValueNotifier<bool> authState = ValueNotifier(false);
+
+  bool get isLoggedIn => authState.value;
 
   static const String _accessTokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _expiresAtKey = 'token_expires_at';
 
-  /// Salva os dados de autenticação no storage local
+  /// Salva os dados de autenticação no armazenamento seguro
   Future<void> saveAuth(AuthEntity auth) async {
-    await _storage.setString(_accessTokenKey, auth.accessToken);
-    await _storage.setString(_refreshTokenKey, auth.refreshToken);
-    await _storage.setString(
+    await _storage.write(_accessTokenKey, auth.accessToken);
+    await _storage.write(_refreshTokenKey, auth.refreshToken);
+    await _storage.write(
       _expiresAtKey,
       auth.expiresAt.toIso8601String(),
     );
+    authState.value = true;
   }
 
   /// Recupera os dados de autenticação salvos
   /// Retorna null se não houver token salvo
   Future<AuthEntity?> getAuth() async {
-    final accessToken = await _storage.getString(_accessTokenKey);
-    final refreshToken = await _storage.getString(_refreshTokenKey);
-    final expiresAtStr = await _storage.getString(_expiresAtKey);
+    final accessToken = await _storage.read(_accessTokenKey);
+    final refreshToken = await _storage.read(_refreshTokenKey);
+    final expiresAtStr = await _storage.read(_expiresAtKey);
 
     if (accessToken == null || refreshToken == null) return null;
 
@@ -414,7 +446,9 @@ class AuthService {
   /// Verifica se existe um token salvo e válido (não expirado)
   Future<bool> isAuthenticated() async {
     final auth = await getAuth();
-    return auth != null && !auth.isExpired;
+    final authenticated = auth != null && !auth.isExpired;
+    authState.value = authenticated;
+    return authenticated;
   }
 
   /// Verifica se o token está prestes a expirar
@@ -428,9 +462,10 @@ class AuthService {
 
   /// Remove todos os dados de autenticação
   Future<void> clearAuth() async {
-    await _storage.remove(_accessTokenKey);
-    await _storage.remove(_refreshTokenKey);
-    await _storage.remove(_expiresAtKey);
+    await _storage.delete(_accessTokenKey);
+    await _storage.delete(_refreshTokenKey);
+    await _storage.delete(_expiresAtKey);
+    authState.value = false;
   }
 }
 ```
@@ -446,6 +481,7 @@ Interceptor que faz refresh proativo do token quando está prestes a expirar, e 
 import 'dart:developer';
 
 import 'package:base_app/common/services/auth_service.dart';
+import 'package:base_app/common/services/secure_storage_service.dart';
 import 'package:base_app/config/routes/app_router.dart';
 import 'package:base_app/config/routes/app_routes.dart';
 import 'package:base_app/data/models/auth_model.dart';
@@ -597,14 +633,13 @@ Adicionar o `TokenRefreshInterceptor` ao Dio:
 ```dart
 // lib/config/network/dio_client.dart
 import 'package:base_app/common/services/auth_service.dart';
-import 'package:base_app/common/services/storage_service.dart';
 import 'package:base_app/config/network/auth_interceptor.dart';
 import 'package:base_app/config/network/error_interceptor.dart';
 import 'package:base_app/config/network/token_refresh_interceptor.dart';
 import 'package:dio/dio.dart';
 
 Dio makeDio({
-  required StorageService storageService,
+  required SecureStorageService storageService,
   required AuthService authService,
   String baseUrl = 'https://api.example.com',
   bool enableLogs = false,
@@ -842,7 +877,10 @@ class _LoginViewState extends State<LoginView> {
 Adicionar ao `setupDependencies`:
 
 ```dart
-// AuthService (usa StorageService já registrado)
+// SecureStorageService e AuthService
+..registerLazySingleton<SecureStorageService>(
+  () => FlutterSecureStorageService(),
+)
 ..registerLazySingleton<AuthService>(
   () => AuthService(inject()),
 )
@@ -869,7 +907,7 @@ Adicionar ao `setupDependencies`:
 )
 ```
 
-**Ordem de registro importa:** `StorageService` → `AuthService` → `Dio` → `HttpService` → DataSources → Repositories → Cubits.
+**Ordem de registro importa:** `SecureStorageService` → `AuthService` → `Dio` → `HttpService` → DataSources → Repositories → Cubits.
 
 ### 3.13 — Rotas
 
@@ -883,6 +921,25 @@ GoRoute(
   builder: (context, state) => const LoginView(),
 ),
 ```
+
+O guard precisa reavaliar quando `authState` muda; um `redirect` que apenas lê um bool não é reativo:
+
+```dart
+final router = GoRouter(
+  refreshListenable: authService.authState,
+  redirect: (context, state) {
+    final isLogin = state.matchedLocation == AppRoutes.login;
+    if (!authService.isLoggedIn && !isLogin) return AppRoutes.login;
+    if (authService.isLoggedIn && isLogin) return AppRoutes.home;
+    return null;
+  },
+  errorBuilder: (context, state) => NotFoundView(error: state.error),
+  routes: routes,
+);
+```
+
+O `ValueNotifier` deve ser uma instância estável do `AuthService` registrada no DI, não um objeto criado
+dentro do `redirect`. Para deep links de plataforma, leia [`flutter-expert/references/deep-linking.md`](../flutter-expert/references/deep-linking.md).
 
 ### 3.14 — SplashView: verificar autenticação
 
@@ -990,7 +1047,7 @@ class TokenExpirationInterceptor extends Interceptor {
 - [ ] Converte response para `AuthModel.fromJson()`
 
 ### AuthService
-- [ ] Usa `StorageService` (nunca `SharedPreferences` direto)
+- [ ] Usa `SecureStorageService` para tokens (nunca `SharedPreferences` direto)
 - [ ] Chaves constantes: `auth_token`, `refresh_token`, `token_expires_at`
 - [ ] `saveAuth()`, `getAuth()`, `clearAuth()`, `isAuthenticated()`
 - [ ] `isTokenAboutToExpire()` com margem configurável
@@ -1004,7 +1061,7 @@ class TokenExpirationInterceptor extends Interceptor {
 - [ ] Usa `appRouter.go()` para navegação (não `context`)
 
 ### AuthInterceptor (já existe)
-- [ ] Lê token do `StorageService` a cada request
+- [ ] Lê token do `SecureStorageService` a cada request
 - [ ] Não precisa de alteração se o `AuthService` já salva na mesma chave
 
 ### LoginCubit
@@ -1028,7 +1085,7 @@ class TokenExpirationInterceptor extends Interceptor {
 - [ ] `AuthRemoteDataSource` → `registerLazySingleton`
 - [ ] `AuthRepository` → `registerLazySingleton`
 - [ ] `LoginCubit` → `registerFactory`
-- [ ] Ordem: StorageService → AuthService → Dio → HttpService → ...
+- [ ] Ordem: SecureStorageService → AuthService → Dio → HttpService → ...
 
 ### Rotas
 - [ ] `AppRoutes.login` definida
@@ -1040,6 +1097,18 @@ class TokenExpirationInterceptor extends Interceptor {
 - [ ] Zero strings hardcoded na View
 
 ---
+
+## Passo 5.1 — Testes obrigatórios
+
+Antes do feedback loop, teste as costuras sem plugin nativo ou rede real:
+
+- [ ] `FakeSecureStorageService` prova save/read/clear sem `SharedPreferences`.
+- [ ] Login salva access token, refresh token e expiração no storage seguro.
+- [ ] Refresh concorrente de várias requisições executa uma única chamada ao endpoint.
+- [ ] 401 após refresh falho limpa tokens e sinaliza navegação para login.
+- [ ] Rota pública não injeta token nem tenta refresh.
+- [ ] `AuthService.authState` muda em login/logout e o `refreshListenable` reavalia o guard.
+- [ ] Rode `dart format --set-exit-if-changed lib test && flutter analyze --fatal-infos --fatal-warnings && flutter test`.
 
 ## Passo 6 — Segurança
 
@@ -1055,7 +1124,7 @@ class TokenExpirationInterceptor extends Interceptor {
 
 ### Recomendado
 
-- Considere usar `flutter_secure_storage` em vez de `SharedPreferences` para tokens sensíveis (armazenamento criptografado no Keychain/Keystore)
+- Use `flutter_secure_storage` por meio de `SecureStorageService` para tokens sensíveis (Keychain/Keystore)
 - Implemente rate limiting no login para evitar brute force
 - Adicione biometria como segundo fator se o app exigir alta segurança
 
@@ -1064,7 +1133,7 @@ class TokenExpirationInterceptor extends Interceptor {
 ## Anti-patterns a evitar
 
 - ❌ NÃO receba `BuildContext` no Cubit — navegação SEMPRE na View/BlocListener
-- ❌ NÃO salve tokens diretamente com `SharedPreferences` — use `StorageService`
+- ❌ NÃO salve tokens com `SharedPreferences` — use `SecureStorageService`
 - ❌ NÃO faça refresh usando o mesmo `Dio` com interceptors — cria loop infinito
 - ❌ NÃO ignore o `dispose()` do Cubit na View
 - ❌ NÃO crie `Widget _buildXxx()` na View — extraia para `widgets/` ou `content/`
@@ -1075,5 +1144,3 @@ class TokenExpirationInterceptor extends Interceptor {
 - ❌ NÃO desbloqueie funcionalidades protegidas sem validar o token primeiro
 
 ---
-
-**Última atualização**: 28 de março de 2026

@@ -37,7 +37,6 @@ Para cada permissão usada no app, verificar se a chave e descrição existem em
 | Siri | `NSSiriUsageDescription` | 🔴 Bloqueante |
 | Reconhecimento de fala | `NSSpeechRecognitionUsageDescription` | 🔴 Bloqueante |
 | Rede local | `NSLocalNetworkUsageDescription` | 🔴 Bloqueante |
-| Notificações locais | `NSUserNotificationsUsageDescription` | 🟡 Recomendado |
 
 **Regras para as descrições:**
 - ✅ Explicar claramente o propósito (ex: "Para tirar fotos do seu perfil")
@@ -55,6 +54,7 @@ Para cada permissão usada no app, verificar se a chave e descrição existem em
 
 - [ ] Apps com APIs sensíveis (UserDefaults, FileTimestamp, etc.) devem incluir `PrivacyInfo.xcprivacy` em `ios/Runner/`
 - [ ] SDKs de terceiros com privacy manifests devem ser aggregated pelo Xcode
+- [ ] App com criação de conta oferece exclusão de conta dentro do próprio app
 
 ---
 
@@ -107,7 +107,9 @@ Scaffold(
 
 - [ ] Sem larguras em pixels absolutos
 - [ ] Se suporta iPad: `UISupportedInterfaceOrientations~ipad` no `Info.plist`
-- [ ] Sem overflow em iPhone SE ou iPad
+- [ ] Sem overflow em iPhone SE (320×568) **e** em iPad (≥840 de largura) — não basta o simulador padrão
+- [ ] Sem overflow com Dynamic Type ampliado (`textScaler` 2.0) — altura fixa dimensionada para 1.0 é a causa mais comum
+- [ ] Sem overflow em landscape, se a tela permite rotação
 
 ---
 
@@ -157,8 +159,9 @@ Scaffold(
 
 ## 9. Login / Sign in with Apple (Diretriz 4.8)
 
-- [ ] Se o app oferece login com redes sociais (Google, Facebook) → **deve oferecer "Sign in with Apple"**
-- [ ] Sign in with Apple com destaque equivalente às outras opções
+- [ ] Se o app oferece login de terceiros, oferecer Sign in with Apple ou outra opção equivalente que limite coleta,
+      permita ocultar o e-mail e não use os dados para rastreamento publicitário
+- [ ] Se Sign in with Apple for usado, dar destaque equivalente às outras opções
 - [ ] Verificar `sign_in_with_apple` no `pubspec.yaml`
 
 ---

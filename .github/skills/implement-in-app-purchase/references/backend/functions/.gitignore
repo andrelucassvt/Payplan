@@ -1,0 +1,4 @@
+node_modules/
+lib/
+credentials/*
+!credentials/config.example.json

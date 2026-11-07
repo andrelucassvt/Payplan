@@ -180,8 +180,8 @@ if (flavor == AppFlavor.development) {
 
 ```dart
 void main() {
-  setUp(() {
-    AppInjector.inject.reset();
+  tearDown(() async {
+    await AppInjector.inject.reset();
   });
 
   test('should load home data', () async {

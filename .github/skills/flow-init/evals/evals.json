@@ -1,0 +1,117 @@
+{
+  "skill_name": "flow-init",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Inicialize os flows deste projeto e gere primeiro o mapa geral da estrutura. O repositório tem alterações locais ainda não commitadas.",
+      "expected_output": "docs/flow/project-structure.md baseado somente em arquivos reais, com frontmatter registrando commit, source_state dirty, datas e status coerente com a autorrevisão.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "creates_project_structure",
+          "description": "Cria docs/flow/project-structure.md com a estrutura real do projeto"
+        },
+        {
+          "id": "records_dirty_source_state",
+          "description": "Registra source_state dirty quando há alterações locais"
+        },
+        {
+          "id": "has_traceability_dates_and_status",
+          "description": "Registra generated_at, verified_at e status no frontmatter"
+        },
+        {
+          "id": "self_reviews_before_current",
+          "description": "Usa status current somente após confrontar referências com o repositório"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Atualize a documentação geral em docs/flow sem perder as observações que nossa equipe adicionou manualmente.",
+      "expected_output": "Atualização que preserva generated_at e seções customizadas, renova os metadados de verificação e usa possibly-stale caso alguma referência não possa ser confirmada.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "preserves_original_generation_date",
+          "description": "Mantém o generated_at original na atualização"
+        },
+        {
+          "id": "preserves_custom_sections",
+          "description": "Preserva observações e seções customizadas existentes"
+        },
+        {
+          "id": "refreshes_verification_metadata",
+          "description": "Atualiza verified_at, source_commit, source_state e status"
+        },
+        {
+          "id": "marks_unverified_content_stale",
+          "description": "Usa possibly-stale e explica a limitação quando não consegue confirmar uma referência"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Inicialize os flows deste projeto para Codex e Claude Code. Ainda não existem AGENTS.md nem CLAUDE.md.",
+      "expected_output": "AGENTS.md como arquivo canônico com as instruções completas e compartilhadas, e CLAUDE.md contendo exatamente @AGENTS.md.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "creates_canonical_agents_md",
+          "description": "Cria AGENTS.md com as instruções completas e compatíveis com ambas as plataformas"
+        },
+        {
+          "id": "creates_claude_import_bridge",
+          "description": "Cria CLAUDE.md contendo exatamente @AGENTS.md"
+        },
+        {
+          "id": "avoids_platform_specific_syntax",
+          "description": "Não inclui sintaxes exclusivas de Claude Code ou Codex nas instruções compartilhadas"
+        },
+        {
+          "id": "avoids_instruction_duplication",
+          "description": "Não duplica em CLAUDE.md o conteúdo mantido em AGENTS.md"
+        },
+        {
+          "id": "agents_md_flow_block",
+          "description": "AGENTS.md inclui o bloco de flows mandando ler os Resumos antes da tarefa, atualizar o flow da feature alterada e invocar a skill flow para feature sem flow"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Inicialize os flows. Já existe um CLAUDE.md com instruções específicas da equipe, mas ele ainda não importa AGENTS.md.",
+      "expected_output": "Não sobrescreve CLAUDE.md silenciosamente; separa instruções compartilháveis das exclusivas do Claude Code e solicita confirmação antes de adicionar @AGENTS.md e reorganizar o conteúdo.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "detects_existing_claude_conflict",
+          "description": "Detecta que CLAUDE.md existente ainda não contém o import @AGENTS.md"
+        },
+        {
+          "id": "preserves_existing_instructions",
+          "description": "Preserva instruções válidas existentes e classifica o que é compartilhado ou exclusivo do Claude Code"
+        },
+        {
+          "id": "asks_before_rewriting_claude",
+          "description": "Solicita confirmação antes de reescrever o CLAUDE.md existente"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Gere todos os flows do projeto; há subagentes disponíveis.",
+      "expected_output": "Um docs/flow/<feature>.md por feature, produzido por subagentes em paralelo, com caminho e status listados após as duas checagens de flow.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "delegates_feature_flows_in_parallel",
+          "description": "Despacha um subagente por feature em paralelo, sem sobreposição de arquivos"
+        },
+        {
+          "id": "lists_path_and_status",
+          "description": "Lista o caminho e o status de cada flow produzido"
+        }
+      ]
+    }
+  ]
+}

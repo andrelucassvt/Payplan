@@ -1,6 +1,11 @@
 ---
 name: implement-firebase-notifications
 description: Implements or audits Firebase Cloud Messaging (FCM) push notifications for Flutter (iOS + Android). Covers NotificationService, APNs token relay, Info.plist, Runner.entitlements, AndroidManifest, background handler, DI registration, permission request, foreground display, topic subscription, and Firebase Console APNs key upload. Use when implementing push notifications, debugging notifications not arriving on iOS/Android, auditing notification setup, or adding FCM topic subscriptions. Activate even when the user says 'notifications are not working', 'push not arriving on iPhone', 'FCM token is null', 'set up Firebase Messaging', 'silent push notifications', 'send a notification to all users', 'notify users when something happens', or 'background notifications' without explicitly mentioning FCM, APNs, or firebase_messaging.
+metadata:
+  version: "1.1.0"
+  last_modified: 2026-09-20
+  min_flutter: "3.35"
+  example_prompt: "Configure FCM com tap da notificação abrindo uma rota GoRouter"
 ---
 
 # Implement Firebase Notifications — Flutter
@@ -208,6 +213,7 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 
 /// Handler de mensagens em background/terminated (deve ser top-level).
 @pragma('vm:entry-point')
@@ -217,9 +223,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class NotificationService {
-  NotificationService(this._messaging);
+  NotificationService(this._messaging, this._router);
 
   final FirebaseMessaging _messaging;
+  final GoRouter _router;
+
+  static const _allowedRoutePrefixes = {
+    '/home',
+    '/products',
+    '/profile',
+  };
 
   Future<void> initialize() async {
     // Registra o handler de background
@@ -256,7 +269,7 @@ class NotificationService {
         'NotificationService: opened from notification: '
         '${message.messageId}',
       );
-      // TODO: navegar para tela específica se necessário
+      _handleNotificationTap(message);
     });
 
     // App aberto a partir de notificação (terminated → foreground)
@@ -266,7 +279,7 @@ class NotificationService {
         'NotificationService: launched from notification: '
         '${initialMessage.messageId}',
       );
-      // TODO: navegar para tela específica se necessário
+      _handleNotificationTap(initialMessage);
     }
 
     // Log do token em debug
@@ -274,6 +287,22 @@ class NotificationService {
       final token = await getToken();
       log('NotificationService: FCM token: $token');
     }
+  }
+
+  void _handleNotificationTap(RemoteMessage message) {
+    final route = message.data['route'];
+    if (route is! String) {
+      log('NotificationService: rejected notification route');
+      return;
+    }
+    final isAllowed = _allowedRoutePrefixes.any(
+      (prefix) => route == prefix || route.startsWith('$prefix/'),
+    );
+    if (!isAllowed) {
+      log('NotificationService: rejected notification route');
+      return;
+    }
+    _router.go(route);
   }
 
   /// Retorna o token FCM do dispositivo.
@@ -318,7 +347,7 @@ inject.registerLazySingleton<FirebaseMessaging>(
 
 // NotificationService
 inject.registerLazySingleton<NotificationService>(
-  () => NotificationService(inject()),
+  () => NotificationService(inject(), inject<GoRouter>()),
 );
 ```
 
@@ -333,17 +362,42 @@ await AppInjector.inject.get<NotificationService>().initialize();
 
 ```yaml
 dependencies:
-  firebase_core: ^3.x.x
-  firebase_messaging: ^16.x.x
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
 ```
 
 ---
 
 ## Passo 4 — Testes e validação
 
-### 4.1 — Testes locais
+### 4.1 — Testes automatizados e o que o usuário deve testar
 
-1. **Rodar o app em debug** → verificar no console:
+O Service deve aceitar `FirebaseMessaging` e `GoRouter` pelo construtor para ser testável. Exemplo unitário:
+
+```dart
+class MockFirebaseMessaging extends Mock implements FirebaseMessaging {}
+
+test('token nulo não é enviado ao backend', () async {
+  final messaging = MockFirebaseMessaging();
+  when(() => messaging.getToken()).thenAnswer((_) async => null);
+
+  final router = GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const SizedBox.shrink()),
+    ],
+  );
+  final service = NotificationService(messaging, router);
+
+  final token = await service.getToken();
+
+  expect(token, isNull);
+  verify(() => messaging.getToken()).called(1);
+});
+```
+
+O usuário deve executar manualmente em device físico:
+
+1. **Build debug/release** → verificar no console:
    - `NotificationService: permission status: authorized` (iOS) ou `authorized` (Android)
    - `NotificationService: FCM token: <token>` — se for `null`, há problema na configuração
 
@@ -351,8 +405,10 @@ dependencies:
    - Colar o FCM token e enviar
    - Verificar se a notificação chega:
      - App em background → notificação no sistema
-     - App em foreground → log no console
-     - App terminated → notificação no sistema
+   - App em foreground → log no console/notificação local, conforme o produto
+   - App terminated → notificação no sistema
+   - Tap com `data.route` permitida → rota correta no GoRouter
+   - Tap com rota ausente ou não permitida → nenhuma navegação arbitrária
 
 ### 4.2 — Diagnóstico quando NÃO funciona
 
@@ -414,5 +470,3 @@ dependencies:
    - Solução: testar sempre em device físico (ou via TestFlight)
 
 ---
-
-**Última atualização**: 28 de março de 2026
