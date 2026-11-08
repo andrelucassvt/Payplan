@@ -6,8 +6,6 @@ import 'package:notes_app/src/util/entity/divida_entity.dart';
 import 'package:notes_app/src/util/strings/app_strings.dart';
 import 'package:uuid/uuid.dart';
 
-const _kAccent = Color(0xFF5C5FEF);
-
 class NovaDividaView extends StatefulWidget {
   const NovaDividaView({
     required this.homeCubit,
@@ -29,6 +27,7 @@ class _NovaDividaViewState extends State<NovaDividaView> {
   int _quantidadeParcelas = 1;
   double _valorParcela = 0.0;
   final _faturaTextController = MoneyMaskedTextController(initialValue: 0.0);
+  final _nomeController = TextEditingController();
 
   final List<Color> _listColors = const [
     Color(0xFFEF4444),
@@ -63,14 +62,37 @@ class _NovaDividaViewState extends State<NovaDividaView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.dividaEntity != null) {
-        setState(() {
-          _nomeDivida = widget.dividaEntity!.nome;
-          _corSelecionada = widget.dividaEntity!.cor;
-        });
-      }
-    });
+    final divida = widget.dividaEntity;
+    if (divida != null) {
+      _nomeDivida = divida.nome;
+      _corSelecionada = divida.cor;
+      _nomeController.text = divida.nome;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _faturaTextController.dispose();
+    super.dispose();
+  }
+
+  String get _tipoLabel {
+    final divida = widget.dividaEntity;
+    if (divida != null) {
+      return divida.mensal ? AppStrings.mensal : '${divida.faturas.length}x';
+    }
+    return _isMensal ? AppStrings.mensal : '${_quantidadeParcelas}x';
+  }
+
+  double? get _valorParcelaPreview {
+    final divida = widget.dividaEntity;
+    if (divida != null) {
+      return divida.mensal || divida.faturas.isEmpty
+          ? null
+          : divida.faturas.first.valor;
+    }
+    return _isMensal ? null : _valorParcela;
   }
 
   void _salvar() {
@@ -120,28 +142,19 @@ class _NovaDividaViewState extends State<NovaDividaView> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isEditing = widget.dividaEntity != null;
 
     return Scaffold(
-      backgroundColor: cs.surfaceContainerLowest,
       appBar: AppBar(
-        centerTitle: true,
         title: Text(
           isEditing ? AppStrings.atualizarDivida : AppStrings.novaDivida,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 17,
-            color: cs.onSurface,
-          ),
         ),
-        backgroundColor: cs.surface,
-        foregroundColor: cs.onSurface,
-        elevation: 0,
-        scrolledUnderElevation: 1,
         actions: [
           if (isEditing)
-            TextButton.icon(
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: cs.error),
               onPressed: () {
                 widget.homeCubit
                     .removerDivida(widget.dividaEntity!)
@@ -149,247 +162,122 @@ class _NovaDividaViewState extends State<NovaDividaView> {
                   if (context.mounted) Navigator.of(context).pop();
                 });
               },
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                size: 18,
-                color: Color(0xFFEF4444),
-              ),
-              label: Text(
-                AppStrings.deletar,
-                style: const TextStyle(color: Color(0xFFEF4444)),
-              ),
+              child: Text(AppStrings.deletar),
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _salvar,
-        backgroundColor: _kAccent,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.check_rounded),
-        label: Text(
-          AppStrings.salvar,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Preview ──
-              NovaDividaPreviewCard(cor: _corSelecionada, nome: _nomeDivida),
-              const SizedBox(height: 20),
-
-              // ── Nome ──
-              NovaDividaSectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    NovaDividaSectionLabel(label: AppStrings.nomeDaDivida),
-                    const SizedBox(height: 12),
-                    TextField(
-                      style: TextStyle(
-                        color: cs.onSurface,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: AppStrings.digiteONomeDivida,
-                        hintStyle: TextStyle(
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20,
-                        ),
-                        filled: true,
-                        fillColor:
-                            cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: cs.outlineVariant,
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(
-                            color: _kAccent,
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                      onChanged: (v) => setState(() => _nomeDivida = v),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                children: [
+                  NovaDividaCardPreview(
+                    cor: _corSelecionada,
+                    nome: _nomeDivida,
+                    tipo: _tipoLabel,
+                    valorParcela: _valorParcelaPreview,
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _nomeController,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.nomeDaDivida,
+                      hintText: AppStrings.digiteONomeDivida,
+                      border: const OutlineInputBorder(),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // ── Cor ──
-              NovaDividaSectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    NovaDividaSectionLabel(label: AppStrings.corDaDivida),
-                    const SizedBox(height: 14),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: _listColors.map((cor) {
-                        final selected = _corSelecionada == cor;
-                        return GestureDetector(
-                          onTap: () => setState(() => _corSelecionada = cor),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: cor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: selected
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                width: 2.5,
-                              ),
-                              boxShadow: selected
-                                  ? [
-                                      BoxShadow(
-                                        color: cor.withValues(alpha: 0.5),
-                                        blurRadius: 10,
-                                        spreadRadius: 1,
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            child: selected
-                                ? const Icon(
-                                    Icons.check_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  )
-                                : null,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-
-              if (!isEditing) ...[
-                const SizedBox(height: 16),
-
-                // ── Warning ──
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
+                    onChanged: (v) => setState(() => _nomeDivida = v),
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(14),
+                  const SizedBox(height: 28),
+                  NovaDividaSectionTitle(label: AppStrings.corDaDivida),
+                  NovaDividaColorPicker(
+                    colors: _listColors,
+                    selected: _corSelecionada,
+                    onChanged: (cor) => setState(() => _corSelecionada = cor),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline_rounded,
-                        color: Color(0xFFD97706),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          AppStrings.naoPodeModificar,
-                          style: const TextStyle(
-                            color: Color(0xFFD97706),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                  if (!isEditing) ...[
+                    const SizedBox(height: 28),
+                    NovaDividaSectionTitle(label: AppStrings.tipoDivida),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<bool>(
+                        segments: [
+                          ButtonSegment(
+                            value: true,
+                            label: Text(AppStrings.mensal),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Tipo + valor ──
-                NovaDividaSectionCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      NovaDividaSectionLabel(label: AppStrings.parcelada),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          NovaDividaTypeChip(
-                            label: AppStrings.mensal,
-                            icon: Icons.repeat_rounded,
-                            selected: _isMensal,
-                            onTap: () => setState(() => _isMensal = true),
+                          ButtonSegment(
+                            value: false,
+                            label: Text(AppStrings.parcelada),
                           ),
-                          const SizedBox(width: 10),
-                          NovaDividaTypeChip(
-                            label: AppStrings.parcelada,
-                            icon: Icons.view_week_outlined,
-                            selected: !_isMensal,
-                            onTap: () => setState(() => _isMensal = false),
-                          ),
-                          if (!_isMensal) ...[
-                            const Spacer(),
-                            NovaDividaParcelaSelector(
-                              value: _quantidadeParcelas,
-                              onChanged: (v) =>
-                                  setState(() => _quantidadeParcelas = v),
-                            ),
-                          ],
                         ],
+                        selected: {_isMensal},
+                        onSelectionChanged: (s) =>
+                            setState(() => _isMensal = s.first),
                       ),
-                      if (!_isMensal) ...[
-                        const SizedBox(height: 20),
-                        const Divider(height: 1),
-                        const SizedBox(height: 16),
-                        NovaDividaSectionLabel(
-                          label: AppStrings.valorParcela,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppStrings.naoPodeModificar,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    if (!_isMensal) ...[
+                      const SizedBox(height: 20),
+                      DropdownButtonFormField<int>(
+                        initialValue: _quantidadeParcelas,
+                        menuMaxHeight: 300,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.quantidadeParcelas,
+                          border: const OutlineInputBorder(),
                         ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _faturaTextController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(
-                            color: cs.onSurface,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
+                        items: List.generate(
+                          48,
+                          (i) => DropdownMenuItem(
+                            value: i + 1,
+                            child: Text('${i + 1}x'),
                           ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                            prefixText: 'R\$ ',
-                            prefixStyle: TextStyle(
-                              color: cs.onSurfaceVariant,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          onChanged: (_) {
-                            setState(() {
-                              _valorParcela = _faturaTextController.numberValue;
-                            });
-                          },
                         ),
-                      ],
+                        onChanged: (v) {
+                          if (v != null) {
+                            setState(() => _quantidadeParcelas = v);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _faturaTextController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.valorParcela,
+                          prefixText: 'R\$ ',
+                          border: const OutlineInputBorder(),
+                        ),
+                        onChanged: (_) {
+                          setState(() {
+                            _valorParcela = _faturaTextController.numberValue;
+                          });
+                        },
+                      ),
                     ],
-                  ),
+                  ],
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: FilledButton(
+                onPressed: _salvar,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
                 ),
-              ],
-            ],
-          ),
+                child: Text(AppStrings.salvar),
+              ),
+            ),
+          ],
         ),
       ),
     );

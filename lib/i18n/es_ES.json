@@ -7,7 +7,7 @@
     "nova-divida": "Nueva deuda",
     "add-novo-cartao": "No tienes tarjetas registradas",
     "nome-cartao": "Nombre de la tarjeta:",
-    "nome-divida": "Nombre de la deuda:",
+    "nome-divida": "Nombre de la deuda",
     "salvar": "Guardar",
     "cancelar": "Cancelar",
     "permitirNotificacoes": "Permitir notificaciones",
@@ -15,7 +15,7 @@
     "dividas": "Deudas",
     "devedores": "Deudores",
     "valor-parcela": "Valor de la cuota",
-    "nao-pode-modificar": "*No se puede modificar más tarde",
+    "nao-pode-modificar": "El tipo y las cuotas no se pueden cambiar después.",
     "quantidade-parcelas": "Cantidad de cuotas",
     "parcela-numero": "Cuota %s de %s",
     "digite-o-nome-carto": "Ingrese el nombre de la tarjeta...",
@@ -123,5 +123,6 @@
     "inicio": "Inicio",
     "nenhuma-divida": "Ninguna deuda registrada",
     "adicione-uma-divida": "Toca + para agregar tu\nprimera deuda",
-    "captura-falhou": "No se pudo generar la imagen."
+    "captura-falhou": "No se pudo generar la imagen.",
+    "tipo-divida": "Tipo de deuda"
 }

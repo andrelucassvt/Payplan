@@ -7,7 +7,7 @@
     "nova-divida": "Nova dívida",
     "add-novo-cartao": "Você não tem cartão cadastrados",
     "nome-cartao": "Nome do cartão:",
-    "nome-divida": "Nome da dívida:",
+    "nome-divida": "Nome da dívida",
     "salvar": "Salvar",
     "cancelar": "Cancelar",
     "permitirNotificacoes": "Permitir notificações",
@@ -17,7 +17,7 @@
     "digite-o-nome-divida": "Digite o nome da dívida...",
     "digite-o-valor-fatura": "Digite o valor da fatura",
     "valor-parcela": "Valor da parcela",
-    "nao-pode-modificar": "*Não pode ser modificado depois",
+    "nao-pode-modificar": "O tipo e as parcelas não podem ser alterados depois.",
     "digite-o-valor-do-saldo": "Digite o valor do saldo",
     "limpar-tudo": "Limpar tudo",
     "cor-do-cartao": "Cor do cartão",
@@ -123,5 +123,6 @@
     "inicio": "Início",
     "nenhuma-divida": "Nenhuma dívida cadastrada",
     "adicione-uma-divida": "Toque no + para adicionar sua\nprimeira dívida",
-    "captura-falhou": "Não foi possível gerar a imagem."
+    "captura-falhou": "Não foi possível gerar a imagem.",
+    "tipo-divida": "Tipo de dívida"
 }

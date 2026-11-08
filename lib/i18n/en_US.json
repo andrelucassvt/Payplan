@@ -7,7 +7,7 @@
     "nova-divida": "New debt",
     "add-novo-cartao": "You don't have any registered cards",
     "nome-cartao": "Card name:",
-    "nome-divida": "Debt name:",
+    "nome-divida": "Debt name",
     "parcelada": "Installment",
     "dividas": "Debts",
     "devedores" : "Debtors",
@@ -15,7 +15,7 @@
     "quantidade-parcelas": "Number of installments",
     "parcela-numero": "Installment %s of %s",
     "valor-parcela": "Installment value",
-    "nao-pode-modificar": "*Cannot be modified later",
+    "nao-pode-modificar": "Type and installments can't be changed later.",
     "salvar": "Save",
     "cancelar": "Cancel",
     "digite-o-nome-carto": "Enter the card name...",
@@ -123,5 +123,6 @@
     "inicio": "Home",
     "nenhuma-divida": "No debts added",
     "adicione-uma-divida": "Tap + to add your\nfirst debt",
-    "captura-falhou": "Couldn't generate the image."
+    "captura-falhou": "Couldn't generate the image.",
+    "tipo-divida": "Debt type"
 }

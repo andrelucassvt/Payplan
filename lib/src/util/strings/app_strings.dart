@@ -12,6 +12,7 @@ class AppStrings {
   static var devedores = 'devedores'.i18n();
   static var valorParcela = 'valor-parcela'.i18n();
   static var naoPodeModificar = 'nao-pode-modificar'.i18n();
+  static var tipoDivida = 'tipo-divida'.i18n();
   static var quantidadeParcelas = 'quantidade-parcelas'.i18n();
   static String parcelaNumero(int atual, int total) =>
       'parcela-numero'.i18n([atual.toString(), total.toString()]);
