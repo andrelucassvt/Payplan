@@ -62,21 +62,9 @@ class _HomeBaseState extends State<HomeBase> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.blue,
-            content: InkWell(
-              onTap: () {
-                openAppSettings();
-              },
-              child: Center(
-                child: Text(
-                  AppStrings.permitirNotificacoes,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
+            content: GestureDetector(
+              onTap: openAppSettings,
+              child: Text(AppStrings.permitirNotificacoes),
             ),
           ),
         );
@@ -140,9 +128,6 @@ class _HomeBaseState extends State<HomeBase> {
       floatingActionButton: _buildFab(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) async {
           if (index == 1) _devedoresCubit.buscarDevedores();
@@ -158,7 +143,7 @@ class _HomeBaseState extends State<HomeBase> {
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
-            label: 'Home',
+            label: AppStrings.inicio,
           ),
           NavigationDestination(
             icon: const Icon(Icons.people_outline),
@@ -184,9 +169,6 @@ class _HomeBaseState extends State<HomeBase> {
     if (_selectedIndex == 3) {
       return FloatingActionButton(
         onPressed: () => _shareScreenshots(context),
-        backgroundColor: const Color(0xFF5C5FEF),
-        foregroundColor: Colors.white,
-        elevation: 2,
         child: const Icon(Icons.share),
       );
     }
@@ -218,9 +200,6 @@ class _HomeBaseState extends State<HomeBase> {
           );
         }
       },
-      backgroundColor: const Color(0xFF5C5FEF),
-      foregroundColor: Colors.white,
-      elevation: 2,
       child: const Icon(Icons.add),
     );
   }
@@ -261,10 +240,7 @@ class _HomeBaseState extends State<HomeBase> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Captura de tela falhou.'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(AppStrings.capturaFalhou)),
         );
       }
     }

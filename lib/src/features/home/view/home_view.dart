@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
 import 'package:notes_app/src/features/home/cubit/home_cubit.dart';
 import 'package:notes_app/src/features/home/widgets/home_card_divida.dart';
@@ -27,8 +26,12 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final format = NumberFormat.currency(locale: "pt_BR", symbol: "");
   bool _isCollapsed = false;
+
+  /// Altura do cabeçalho expandido. A lista ocupa a tela inteira e reserva
+  /// esse espaço no topo, para que encolher o cabeçalho não altere a altura
+  /// da área de scroll (o que fazia o scroll "pular" e reexpandir).
+  double _alturaCabecalho = 0;
 
   @override
   void initState() {
@@ -43,16 +46,25 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _onScroll() {
-    final shouldCollapse = widget.scrollController.offset > 60;
-    if (shouldCollapse != _isCollapsed) {
-      setState(() => _isCollapsed = shouldCollapse);
+    final offset = widget.scrollController.offset;
+    if (!_isCollapsed && offset > 60) {
+      setState(() => _isCollapsed = true);
+    } else if (_isCollapsed && offset < 20) {
+      setState(() => _isCollapsed = false);
+    }
+  }
+
+  void _onAlturaCabecalhoChanged(double altura) {
+    if (altura != _alturaCabecalho) {
+      setState(() => _alturaCabecalho = altura);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocConsumer<HomeCubit, HomeState>(
         bloc: widget.cubit,
         listener: (context, state) {
@@ -62,9 +74,6 @@ class _HomeViewState extends State<HomeView> {
               context: context,
               builder: (context) {
                 return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
                   title: Text(AppStrings.atencao),
                   content: Text('novaVersaoDisp'.i18n()),
                   actions: [
@@ -88,55 +97,51 @@ class _HomeViewState extends State<HomeView> {
         builder: (context, state) {
           return SafeArea(
             bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                HomeTotalWidget(
-                  cubit: widget.cubit,
-                  state: state,
-                  isCollapsed: _isCollapsed,
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Text(
-                        AppStrings.novaDivida,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
+                Positioned.fill(
                   child: state.dividas.isEmpty
-                      ? _EmptyState(cubit: widget.cubit)
+                      ? Padding(
+                          padding: EdgeInsets.only(top: _alturaCabecalho),
+                          child: _EmptyState(cubit: widget.cubit),
+                        )
                       : ListView.builder(
-                          itemCount: state.dividas.length,
+                          itemCount: state.dividas.length + 1,
                           controller: widget.scrollController,
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            _alturaCabecalho,
+                            16,
+                            120,
+                          ),
                           itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+                                child: Text(
+                                  AppStrings.dividas,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              );
+                            }
+                            final i = index - 1;
                             return ValueListenableBuilder(
                               valueListenable: UserController.user,
                               builder: (context, user, __) {
                                 return Column(
                                   children: [
                                     HomeCardDivida(
-                                      dividaEntity: state.dividas[index],
+                                      dividaEntity: state.dividas[i],
                                       homeCubit: widget.cubit,
                                     ),
                                     if (!user.isPlus) ...[
-                                      if (index == 0)
+                                      if (i == 0)
                                         AdmobBannerWidget(
                                           adUnitId: AdConfig.homeBanner1,
                                         ),
-                                      if (index == 1)
+                                      if (i == 1)
                                         AdmobBannerWidget(
                                           adUnitId: AdConfig.homeBanner2,
                                         ),
@@ -147,6 +152,20 @@ class _HomeViewState extends State<HomeView> {
                             );
                           },
                         ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ColoredBox(
+                    color: theme.scaffoldBackgroundColor,
+                    child: HomeTotalWidget(
+                      cubit: widget.cubit,
+                      state: state,
+                      isCollapsed: _isCollapsed,
+                      onAlturaExpandidaChanged: _onAlturaCabecalhoChanged,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -164,43 +183,28 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: cs.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
               Icons.receipt_long_outlined,
-              size: 36,
-              color: cs.primary,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Nenhuma dívida cadastrada',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Toque no + para adicionar sua\nprimeira dívida',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
+              size: 40,
               color: cs.onSurfaceVariant,
-              height: 1.5,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(AppStrings.nenhumaDivida, style: tt.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              AppStrings.adicioneUmaDivida,
+              textAlign: TextAlign.center,
+              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ],
+        ),
       ),
     );
   }

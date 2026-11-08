@@ -1,8 +1,8 @@
 ---
 generated_at: 2026-11-07
-source_commit: 93ab5b5
+source_commit: 2978aa2
 source_state: dirty
-verified_at: 2026-11-07
+verified_at: 2026-11-08
 status: current
 ---
 
@@ -35,54 +35,54 @@ Criação, edição de nome/cor e exclusão de dívida acontecem em `NovaDividaV
 5. **Versão remota** — `home_cubit.dart` → `verificarVersao()` (l. 35–69)
    `PackageInfo.fromPlatform()` + `Dio().get(...)` em `https://raw.githubusercontent.com/andrelucassvt/Payplan/refs/heads/main/version-app.json`. Faz `jsonDecode(response.data)`, remove os pontos das duas versões, converte para `int` e, se remota > local, emite `HomeVersaoNova` (mesmos campos do estado atual).
    - `HomeView` (`home_view.dart` l. 58–86, `listener` do `BlocConsumer`) abre `AlertDialog` com `barrierDismissible: false`; o botão `'atualizar'.i18n()` chama `launchUrlString` (Play Store `com.andre.notes_app` no Android, App Store `id6450763738` no iOS) e fecha o dialog.
-6. **Permissão de notificação** — `home_base.dart` → `_verificarPermissaoNotificacao()` (l. 59–85)
-   Chama `NotificationService().verificarPermissaoNotificacao()` (`lib/src/util/service/notification_service.dart` l. 72–76), que retorna `true` quando a permissão está `denied` ou `permanentlyDenied`. Nesse caso mostra um `SnackBar` azul com `AppStrings.permitirNotificacoes`; tocar chama `openAppSettings()`. O pedido de permissão em si acontece antes, em `NotificationService.setup()` chamado no `main.dart`.
+6. **Permissão de notificação** — `home_base.dart` → `_verificarPermissaoNotificacao()` (l. 59–78)
+   Chama `NotificationService().verificarPermissaoNotificacao()` (`lib/src/util/service/notification_service.dart` l. 72–76), que retorna `true` quando a permissão está `denied` ou `permanentlyDenied`. Nesse caso mostra um `SnackBar` (cores do tema) com `AppStrings.permitirNotificacoes`; tocar no texto chama `openAppSettings()`. O pedido de permissão em si acontece antes, em `NotificationService.setup()` chamado no `main.dart`.
 7. **AppOpenAd** — `lib/src/util/service/ads/app_open_ad_service.dart` → `load()`
    Carrega um `AppOpenAd` (`AdConfig.appOpen`) e o guarda em `_appOpenAd`. Ele só é exibido depois, no card (passo 17).
 
 ### Navegação e FAB
 
-8. **Troca de aba** — `home_base.dart` → `NavigationBar.onDestinationSelected` (l. 147–156)
+8. **Troca de aba** — `home_base.dart` → `NavigationBar.onDestinationSelected` (l. 132–141)
    Índice 1 → `buscarDevedores()`; 2 → `buscarOrcamentos()`; 3 → recarrega devedores, dívidas e orçamentos; depois `setState(_selectedIndex)`. A aba 3 (`GraficosView`) é montada dentro de três `BlocBuilder` aninhados e recebe `state.dividas`, devedores, orçamentos e o `homeCubit`.
-9. **FAB contextual** — `home_base.dart` → `_buildFab()` (l. 183–226)
+9. **FAB contextual** — `home_base.dart` → `_buildFab()` (l. 168–205)
    - Aba 0: `Navigator.push` → `NovaDividaView(homeCubit: _homeCubit)` (ver flow de nova dívida).
    - Aba 1: `showNovoDevedorModal(...)` de `lib/src/util/helpers/devedores_helper.dart`.
    - Aba 2: `Navigator.push` → `NovoOrcamentoView(orcamentoCubit: _orcamentoCubit)`.
-   - Aba 3: ícone de share → `_shareScreenshots()` (l. 228–271): captura só as seções que têm dados (`_homeCubit.temDividas()`, `temDevedores()`, `temOrcamentos()`), grava `image.png`/`image2.png`/`image3.png` em `getApplicationDocumentsDirectory()` e chama `Share.shareXFiles(..., text: AppStrings.baixePayplan)`. Exceção → `SnackBar` vermelho `'Captura de tela falhou.'`.
+   - Aba 3: ícone de share → `_shareScreenshots()` (l. 207–248): captura só as seções que têm dados (`_homeCubit.temDividas()`, `temDevedores()`, `temOrcamentos()`), grava `image.png`/`image2.png`/`image3.png` em `getApplicationDocumentsDirectory()` e chama `Share.shareXFiles(..., text: AppStrings.baixePayplan)`. Exceção → `SnackBar` com `AppStrings.capturaFalhou`.
 
 ### Aba Home: cabeçalho, mês/ano e salário
 
-10. **View** — `lib/src/features/home/view/home_view.dart` → `_HomeViewState.build()` (l. 52–157)
-    `SafeArea(bottom: false)` com `HomeTotalWidget` + lista. Um listener no `scrollController` colapsa o cabeçalho quando `offset > 60` (`_onScroll`, l. 45–50). Com `state.dividas` vazia mostra `_EmptyState` (l. 160–207); senão um `ListView.builder` de `HomeCardDivida`, intercalando `AdmobBannerWidget(AdConfig.homeBanner1)` após o índice 0 e `homeBanner2` após o índice 1 quando `!user.isPlus`.
-11. **Cabeçalho** — `lib/src/features/home/widgets/home_total_widget.dart` → `_HomeTotalWidgetState` / `_TopRow` (l. 522–689)
+10. **View** — `lib/src/features/home/view/home_view.dart` → `_HomeViewState.build()` (l. 64–176)
+    `SafeArea(bottom: false)` com um `Stack`: a lista ocupa a área inteira (`Positioned.fill`) e o `HomeTotalWidget` fica sobreposto no topo, com fundo `scaffoldBackgroundColor`. A lista reserva no `padding.top` a altura do cabeçalho **expandido** (`_alturaCabecalho`, reportada por `onAlturaExpandidaChanged`), então encolher o cabeçalho não muda a altura do viewport nem o `maxScrollExtent`, o que evita o scroll "pular" e o cabeçalho reexpandir sozinho. Um listener no `scrollController` (`_onScroll`, l. 48–55) colapsa com `offset > 60` e só expande de novo com `offset < 20` (histerese). Com `state.dividas` vazia mostra `_EmptyState` (l. 179–211); senão um `ListView.builder` cujo item 0 é o rótulo `AppStrings.dividas` e os demais são `HomeCardDivida`, intercalando `AdmobBannerWidget(AdConfig.homeBanner1)` após a 1ª dívida e `homeBanner2` após a 2ª quando `!user.isPlus`.
+11. **Cabeçalho** — `lib/src/features/home/widgets/home_total_widget.dart` → `_HomeTotalWidgetState` / `_TopRow` (l. 377–459) / `_PeriodoSelector` (l. 461–496)
     - **Ano:** `_showYearPicker()` abre `CupertinoPicker` com anos 2024–2123; cada `onSelectedItemChanged` chama `cubit.mudarAnoAtual(2024 + index)`.
-    - **Mês:** `PopupMenuButton<MesesEnum>` (l. 611) → `cubit.mudarMesAtual(e)`.
-    - **Sem anúncio:** visível só se `!user.isPlus`; abre `showModalBottomSheet` com `const PlusView()` (l. 566–577), limitado a 80% da altura.
+    - **Mês:** `PopupMenuButton<MesesEnum>` (l. 415) → `cubit.mudarMesAtual(e)`.
+    - **Sem anúncio:** visível só se `!user.isPlus`; abre `showModalBottomSheet` com `const PlusView()` (l. 398–408), limitado a 80% da altura.
     - **Tema:** `ThemeController.toggle(context)`.
-    - **Total:** `state.totalGastos.real` (extensão em `lib/src/util/extension/real_format_extension.dart`), com animação de fonte/alinhamento ao colapsar (`didUpdateWidget`).
+    - **Total:** `state.totalGastos.real` (extensão em `lib/src/util/extension/real_format_extension.dart`), com animação de fonte/alinhamento ao colapsar (`didUpdateWidget`). Sempre que a animação está em repouso expandida (`_controller.isDismissed`), mede a própria altura num post-frame e chama `onAlturaExpandidaChanged` se ela mudou (`_reportarAlturaExpandida`).
 12. **Troca de período** — `home_cubit.dart` → `mudarMesAtual()` (l. 198–210) / `mudarAnoAtual()` (l. 212–224)
     Emite `HomeMudarMesAtual` com o novo mês/ano e chama `buscarDividas()`, que recalcula `totalGastos` para o novo período. Os cards leem `homeCubit.state` diretamente e recalculam a fatura do período no rebuild.
-13. **Salário fixo** — `home_total_widget.dart` → `_showModalDesconto(state.totalGastos)` (l. 259–480)
-    Bottom sheet com `MoneyMaskedTextController` iniciado em `salarioFixo` e prévia ao vivo (salário, `- totalDividas`, saldo verde/vermelho). "Salvar salário" → `HomeCubit.salvarSalario(valorDigitado)`; "Remover salário" (só se `salarioFixo > 0`) → `salvarSalario(0.0)`.
+13. **Salário fixo** — `home_total_widget.dart` → `_showModalDesconto(state.totalGastos)` (l. 229–333)
+    Bottom sheet (drag handle nativo do M3) com `MoneyMaskedTextController` iniciado em `salarioFixo` e prévia ao vivo (salário, `- totalDividas`, saldo; negativo em `colorScheme.error`). "Salvar salário" → `HomeCubit.salvarSalario(valorDigitado)`; "Remover salário" (só se `salarioFixo > 0`) → `salvarSalario(0.0)`.
     - `home_cubit.dart` → `salvarSalario()` (l. 271–284): `prefs.setDouble('salario_fixo', valor)` e emite `HomeDividasSucesso` com o novo `salarioFixo` (sem recarregar dívidas).
 
 ### Aba Home: card de dívida
 
-14. **Fatura do período** — `lib/src/features/home/widgets/home_card_divida.dart` → getter `faturaAtual` (l. 36–61)
+14. **Fatura do período** — `lib/src/features/home/widgets/home_card_divida.dart` → getter `faturaAtual` (l. 33–58)
     Busca em `dividaEntity.faturas` a fatura com `ano == anoAtual && mes == mesAtual.id`.
-    - Parcelada (`mensal == false`) sem fatura no mês → `null` → o card some (`SizedBox.shrink()`, l. 92).
+    - Parcelada (`mensal == false`) sem fatura no mês → `null` → o card some (`SizedBox.shrink()`, l. 89).
     - Mensal sem fatura no mês → devolve uma `FaturaMensalEntity` sintética (`valor: 0`, `pago: false`) que **não** está na lista.
     - Encontrada → guarda `valorFatura` e retorna a fatura.
-    `_numeroParcela` (l. 63–76) ordena as faturas por ano/mês e mostra "parcela N de total" (`AppStrings.parcelaNumero`) para parceladas.
-15. **Valor exibido** — `home_card_divida.dart` → `build()` (l. 91–107)
-    `totalDoMes = faturaAtual.valor + dividaEntity.totalSubDividasDoMes(ano, mes)`; se paga, o valor fica riscado e o badge mostra `AppStrings.paga`. As sub-dívidas do mês (`SubDividaEntity.aplicavelNoMes`) aparecem como `_SubDividaRow`, com "Ver mais (n)" acima de 3.
-16. **Marcar como paga** — `home_card_divida.dart` → `Switch.onChanged` (l. 280–296)
+    `_numeroParcela` (l. 60–73) ordena as faturas por ano/mês e mostra "parcela N de total" (`AppStrings.parcelaNumero`) para parceladas.
+15. **Valor exibido** — `home_card_divida.dart` → `build()` (l. 88–287)
+    Card com fundo sólido na cor da dívida (sem gradiente nem sombra). A cor do texto, dos botões e do switch é escolhida por contraste (`ThemeData.estimateBrightnessForColor`): branco em cores escuras, `black87` em cores claras. `totalDoMes = faturaAtual.valor + dividaEntity.totalSubDividasDoMes(ano, mes)`, formatado com `.real`; se paga, o valor fica riscado e o rótulo de status mostra `AppStrings.paga`. As sub-dívidas do mês (`SubDividaEntity.aplicavelNoMes`) aparecem como `_SubDividaRow`, com `AppStrings.verMais(n)` / `verMenos` acima de 3.
+16. **Marcar como paga** — `home_card_divida.dart` → `Switch.onChanged` (l. 188–202)
     Mapeia `faturas` trocando a do período por `faturaAtual.copyWith(pago: value)` e chama `homeCubit.atualizarDivida(dividaEntity.copyWith(faturas: updated))`.
-17. **Editar fatura** — `home_card_divida.dart` → `_editarFaturaBottomSheet(user.isPlus)` (l. 776–918)
-    Se `!isPlus`, chama `AppOpenAdService.instance.show()` antes de abrir o sheet. O `TextFormField` atualiza `valorModificado` no `onChanged` (l. 842–849). Em "Salvar": substitui a fatura do período na lista ou, se ela não existir (caso mensal sintético), **anexa** `faturaAtual.copyWith(valor: valorModificado)`; depois `atualizarDivida(...)` e fecha o sheet.
-18. **Sub-dívidas** — `home_card_divida.dart` → `_gerenciarSubDividasBottomSheet()` (l. 411–680) e `_editarSubDividaDialog()` (l. 682–774)
-    Lista as sub-dívidas com editar/excluir e um formulário de adicionar (nome, valor, switch "recorrente"). Não-recorrente grava `mes`/`ano` do período atual; recorrente grava `null` e passa a valer em todos os meses. Chamadas: `HomeCubit.adicionarSubDivida` (l. 648, `id: Uuid().v4()`), `removerSubDivida` (l. 528), `atualizarSubDivida` (l. 755). As três (`home_cubit.dart` l. 234–269) só montam a nova lista via `copyWith(subDividas: ...)` e delegam para `atualizarDivida`.
-19. **Editar/deletar dívida** — `home_card_divida.dart` → chip com ícone `edit_outlined` (l. 385–399)
+17. **Editar fatura** — `home_card_divida.dart` → `_editarFaturaBottomSheet(user.isPlus)` (l. 506–599)
+    Se `!isPlus`, chama `AppOpenAdService.instance.show()` antes de abrir o sheet. O `TextFormField` atualiza `valorModificado` no `onChanged` (l. 535–541). Em "Salvar": substitui a fatura do período na lista ou, se ela não existir (caso mensal sintético), **anexa** `faturaAtual.copyWith(valor: valorModificado)`; depois `atualizarDivida(...)` e fecha o sheet.
+18. **Sub-dívidas** — `home_card_divida.dart` → `_gerenciarSubDividasBottomSheet()` (l. 290–445) e `_editarSubDividaDialog()` (l. 447–504)
+    Lista as sub-dívidas com editar/excluir e um formulário de adicionar (nome, valor, `SwitchListTile` "recorrente"). Não-recorrente grava `mes`/`ano` do período atual; recorrente grava `null` e passa a valer em todos os meses. Chamadas: `HomeCubit.adicionarSubDivida` (l. 421, `id: Uuid().v4()`), `removerSubDivida` (l. 367), `atualizarSubDivida` (l. 491). As três (`home_cubit.dart` l. 234–269) só montam a nova lista via `copyWith(subDividas: ...)` e delegam para `atualizarDivida`.
+19. **Editar/deletar dívida** — `home_card_divida.dart` → `IconButton` `edit_outlined` na barra de ações (l. 264–279)
     `Navigator.push` → `NovaDividaView(homeCubit, dividaEntity)`. Nessa tela, salvar chama `HomeCubit.atualizarDivida` (só nome e cor) e o botão "Deletar" do AppBar chama `HomeCubit.removerDivida(...).whenComplete(pop)` (`lib/src/features/nova_divida/view/nova_divida_view.dart` l. 90–96 e 143–150).
 
 ### Persistência das mutações
@@ -94,13 +94,13 @@ Criação, edição de nome/cor e exclusão de dívida acontecem em `NovaDividaV
 
 ### Caminhos alternativos
 
-- **Sem dívidas cadastradas:** `HomeView` mostra `_EmptyState` com textos fixos em português.
+- **Sem dívidas cadastradas:** `HomeView` mostra `_EmptyState` com `AppStrings.nenhumaDivida` / `adicioneUmaDivida`.
 - **Versão remota não é maior:** nenhum estado é emitido; nada acontece na UI.
 - **Falha na checagem de versão (offline, JSON inválido):** o `catch` de `verificarVersao()` faz `rethrow`; como o `initState` não aguarda o `Future`, o erro vira exceção assíncrona não tratada (sem impacto na UI).
 - **AppOpenAd não carregado:** `AppOpenAdService.show()` só loga `'ad not ready'` e o sheet de editar fatura abre normalmente.
 - **Permissão de notificação concedida:** nenhum snackbar.
 - **Validação de sub-dívida:** nome vazio ou valor `0.0` → `onPressed` retorna sem salvar (adicionar e editar).
-- **Falha no share dos gráficos:** `SnackBar` vermelho em `_shareScreenshots`.
+- **Falha no share dos gráficos:** `SnackBar` com `AppStrings.capturaFalhou` em `_shareScreenshots`.
 
 ## Arquivos Envolvidos
 
@@ -124,9 +124,9 @@ Criação, edição de nome/cor e exclusão de dívida acontecem em `NovaDividaV
 ## Regras de Negócio Relevantes
 
 - **Total do mês = só o que não foi pago** — `divida_entity.dart` → `totalNaoPagoDoMes`: fatura paga conta 0 (inclusive suas sub-dívidas); parcelada sem fatura no mês conta 0; mensal sem fatura conta só as sub-dívidas aplicáveis. O card, por outro lado, mostra fatura + sub-dívidas mesmo se paga (valor riscado).
-- **Saldo restante só com salário configurado** — `home_total_widget.dart`: linha "saldo restante" aparece apenas com `salarioFixo > 0`; verde se `salário − total ≥ 0`, vermelho caso contrário. Salvar `0.0` equivale a remover o salário.
+- **Saldo restante só com salário configurado** — `home_total_widget.dart`: linha "saldo restante" aparece apenas com `salarioFixo > 0`; valor em `colorScheme.error` quando `salário − total < 0`, cor de texto normal caso contrário. Salvar `0.0` equivale a remover o salário.
 - **Dívida parcelada só aparece nos meses com parcela** — `home_card_divida.dart` → `faturaAtual`; dívida mensal aparece em todos os meses.
-- **Sub-dívida recorrente vale para todos os meses; a não recorrente só para o mês/ano em que foi criada** — `divida_entity.dart` → `SubDividaEntity.aplicavelNoMes`; gravação em `home_card_divida.dart` l. 648–658.
+- **Sub-dívida recorrente vale para todos os meses; a não recorrente só para o mês/ano em que foi criada** — `divida_entity.dart` → `SubDividaEntity.aplicavelNoMes`; gravação em `home_card_divida.dart` l. 421–431.
 - **Monetização na Home** — `home_view.dart` / `home_card_divida.dart` / `home_total_widget.dart`: usuários não-Plus veem 2 banners (após o 1º e o 2º card), um AppOpenAd ao abrir "Editar fatura" e o botão "sem anúncio" que abre o `PlusView`; para Plus, tudo isso some.
 - **Atualização obrigatória "soft"** — `home_cubit.dart` + `home_view.dart`: versão remota maior abre dialog não dispensável por toque fora, mas o botão só abre a loja e fecha o dialog; o app continua utilizável.
 - **Seletor de ano limitado a 2024–2123** — `home_total_widget.dart` → `_showYearPicker`.
@@ -143,13 +143,13 @@ Criação, edição de nome/cor e exclusão de dívida acontecem em `NovaDividaV
 ## Observações
 
 - **Excluir a última dívida não limpa a lista em memória:** `buscarDividas()` emite `dividas: dividas.isEmpty ? state.dividas : dividas` (`home_cubit.dart` l. 178). Com a lista persistida vazia, o card excluído continua na tela (e no `GraficosView`) até reiniciar o app, embora `totalGastos` vá a 0.
-- **Switch "paga" não funciona em dívida mensal sem fatura no mês:** a fatura sintética de `faturaAtual` não está em `faturas`, e o `onChanged` (l. 284–295) só mapeia a lista existente, sem anexar. Nada muda até o usuário usar "Editar fatura", que anexa a fatura.
-- **"Editar fatura" salva 0 se o campo não for tocado:** `valorModificado` começa em `0` (l. 780) e só muda no `onChanged`, então "Salvar" sem digitar zera o valor da fatura.
+- **Switch "paga" não funciona em dívida mensal sem fatura no mês:** a fatura sintética de `faturaAtual` não está em `faturas`, e o `onChanged` (l. 188–202) só mapeia a lista existente, sem anexar. Nada muda até o usuário usar "Editar fatura", que anexa a fatura.
+- **"Editar fatura" salva 0 se o campo não for tocado:** `valorModificado` começa em `0` (l. 510) e só muda no `onChanged`, então "Salvar" sem digitar zera o valor da fatura.
 - **AppOpenAd é carregado uma única vez por sessão:** `load()` só é chamado no `initState` do shell e `show()` zera `_appOpenAd`, então só o primeiro "Editar fatura" de cada sessão mostra anúncio. O ad também é carregado para usuários Plus (só o `show` é condicionado).
 - **Comparação de versão frágil:** remover os pontos e comparar como inteiro dá resultado errado entre versões com dígitos diferentes (ex.: `3.0.10` → 3010 > `3.1.0` → 310). `jsonDecode(response.data)` também depende de o GitHub raw responder `text/plain`; se o Dio receber JSON já decodificado, a chamada lança exceção.
-- **`faturaAtual` chama `setState()` dentro do getter** (l. 57–58), usado várias vezes durante o `build()`: efeito colateral no build.
+- **`faturaAtual` chama `setState()` dentro do getter** (l. 54–55), usado várias vezes durante o `build()`: efeito colateral no build.
 - **Escritas sem `await`:** `prefs.setStringList(...)` em `salvar/atualizar/removerDivida` não é aguardado antes de `buscarDividas()`. Funciona porque o `SharedPreferences` atualiza o cache em memória de forma síncrona.
 - **Código morto:** `mudarListagem()`, o campo `isDividas` e `HomeMudarListagem` não têm uso fora do Cubit. `mudarListagem()` ainda emite `HomeMudarMesAtual` em vez de `HomeMudarListagem`.
 - **Troca para a aba 0 não recarrega dívidas** (só as abas 1–3 recarregam em `onDestinationSelected`).
-- **Strings hardcoded apesar da regra de i18n:** label `'Home'` e `'Captura de tela falhou.'` (`home_base.dart`), `'Nenhuma dívida cadastrada'` / `'Toque no + ...'` (`home_view.dart`), `'Ver mais'`/`'Ver menos'` (`home_card_divida.dart`). O valor do card usa prefixo `R$` e as sub-dívidas usam `$`, ambos com `NumberFormat` `pt_BR` fixo.
+- **Visual da Home usa só o `ColorScheme`/`TextTheme` do tema:** sem cores fixas, sombras ou gradientes nos widgets da feature; a única cor por item é o fundo sólido do card (`dividaEntity.cor`), com texto em contraste automático. Valores monetários usam `.real` (prefixo `$`, `NumberFormat` `pt_BR` fixo).
 - **Testes:** nenhum teste cobre este fluxo. O único teste do projeto é `test/util/entity/orcamento_entity_test.dart`.

@@ -119,5 +119,9 @@
     "valor-total": "Total value",
     "fluxo-orcamento": "Budget",
     "concluido": "Completed",
-    "pendente": "Pending"
+    "pendente": "Pending",
+    "inicio": "Home",
+    "nenhuma-divida": "No debts added",
+    "adicione-uma-divida": "Tap + to add your\nfirst debt",
+    "captura-falhou": "Couldn't generate the image."
 }

@@ -119,5 +119,9 @@
     "valor-total": "Valor total",
     "fluxo-orcamento": "Presupuesto",
     "concluido": "Completado",
-    "pendente": "Pendiente"
+    "pendente": "Pendiente",
+    "inicio": "Inicio",
+    "nenhuma-divida": "Ninguna deuda registrada",
+    "adicione-uma-divida": "Toca + para agregar tu\nprimera deuda",
+    "captura-falhou": "No se pudo generar la imagen."
 }

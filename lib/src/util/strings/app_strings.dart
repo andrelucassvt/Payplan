@@ -110,6 +110,10 @@ class AppStrings {
   static var valorDoOrcamento = 'valor-do-orcamento'.i18n();
   static var totalOrcamentos = 'total-orcamentos'.i18n();
   static var nenhumOrcamento = 'nenhum-orcamento'.i18n();
+  static var nenhumaDivida = 'nenhuma-divida'.i18n();
+  static var adicioneUmaDivida = 'adicione-uma-divida'.i18n();
+  static var capturaFalhou = 'captura-falhou'.i18n();
+  static var inicio = 'inicio'.i18n();
   static var adicioneUmOrcamento = 'adicione-um-orcamento'.i18n();
   static var orcamentoSeraRemovido = 'orcamento-sera-removido'.i18n();
   static var editarOrcamento = 'editar-orcamento'.i18n();
